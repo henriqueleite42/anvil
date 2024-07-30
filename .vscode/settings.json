@@ -1,0 +1,16 @@
+{
+	"files.associations": {
+    "*.hpt": "yaml",
+  },
+	"cSpell.words": [
+		"anuntech",
+		"hephaestus",
+		"hephaestusconfig",
+		"proto",
+		"Protofile",
+		"Protofiles",
+		"Timestampz",
+		"Usecase",
+		"Usecases"
+	]
+}
