@@ -29,7 +29,7 @@ func getEntityIndexes(key string, data any) ([]*types.Entity_Index, error) {
 		if val, ok := vMap["Unique"]; ok {
 			valBool, ok := val.(bool)
 			if !ok {
-				return nil, errors.New("fail to parse Entities." + strconv.Itoa(k) + ".ColumnsCase")
+				return nil, errors.New("fail to parse Entities." + strconv.Itoa(k) + ".Unique")
 			}
 			unique = valBool
 		}
@@ -41,6 +41,73 @@ func getEntityIndexes(key string, data any) ([]*types.Entity_Index, error) {
 	}
 
 	return indexes, nil
+}
+
+func getEntityForeignKeys(key string, data any) ([]*types.Entity_ForeignKey, error) {
+	valSlice := data.([]any)
+
+	foreignKeys := []*types.Entity_ForeignKey{}
+	for k, v := range valSlice {
+		vMap, ok := v.(map[string]any)
+		if !ok {
+			return nil, errors.New("fail to parse Entities." + key + ".ForeignKeys." + strconv.Itoa(k))
+		}
+
+		var column string
+		if val, ok := vMap["Column"]; ok {
+			valString, ok := val.(string)
+			if !ok {
+				return nil, errors.New("fail to parse Entities." + strconv.Itoa(k) + ".Column")
+			}
+			column = valString
+		}
+
+		var refTable string
+		if val, ok := vMap["RefTable"]; ok {
+			valString, ok := val.(string)
+			if !ok {
+				return nil, errors.New("fail to parse Entities." + strconv.Itoa(k) + ".Column")
+			}
+			refTable = valString
+		}
+
+		var refColumn string
+		if val, ok := vMap["RefColumn"]; ok {
+			valString, ok := val.(string)
+			if !ok {
+				return nil, errors.New("fail to parse Entities." + strconv.Itoa(k) + ".Column")
+			}
+			refColumn = valString
+		}
+
+		var onDelete *string = nil
+		if val, ok := vMap["OnDelete"]; ok {
+			valString, ok := val.(string)
+			if !ok {
+				return nil, errors.New("fail to parse Entities." + strconv.Itoa(k) + ".Column")
+			}
+			onDelete = &valString
+		}
+
+		var onUpdate *string = nil
+		if val, ok := vMap["OnUpdate"]; ok {
+			valString, ok := val.(string)
+			if !ok {
+				return nil, errors.New("fail to parse Entities." + strconv.Itoa(k) + ".Column")
+			}
+			onUpdate = &valString
+		}
+
+		foreignKeys = append(foreignKeys, &types.Entity_ForeignKey{
+			Column:    column,
+			RefTable:  refTable,
+			RefColumn: refColumn,
+			OnDelete:  onDelete,
+			OnUpdate:  onUpdate,
+		})
+	}
+
+	return foreignKeys, nil
 }
 
 func Entities(s *types.Schema, yaml map[string]any) error {
@@ -99,6 +166,15 @@ func Entities(s *types.Schema, yaml map[string]any) error {
 			indexes = localIndexes
 		}
 
+		var foreignKeys []*types.Entity_ForeignKey
+		if val, ok := vMap["ForeignKeys"]; ok {
+			localForeignKeys, err := getEntityForeignKeys(k, val)
+			if err != nil {
+				return errors.New("fail to parse Entities." + k + ".ForeignKeys")
+			}
+			foreignKeys = localForeignKeys
+		}
+
 		primaryKeys := []string{}
 		if val, ok := vMap["PrimaryKeys"]; ok {
 			valSlice := val.([]any)
@@ -112,6 +188,7 @@ func Entities(s *types.Schema, yaml map[string]any) error {
 			PrimaryKeys: primaryKeys,
 			Columns:     columns,
 			Indexes:     indexes,
+			ForeignKeys: foreignKeys,
 		}
 
 	}

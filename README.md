@@ -1,6 +1,6 @@
 # Hephaestus
 
-Hephaestus is a CLI tool and Schema standard to facilitate the creation and maintainability of micro-services. It's goal is to allow the creation and maintenance of **Event-Oriented, Domain-Driven, Decoupled MicroServices, with a Delivery-Usecase-Repository architecture**. We can extend it's usability as long as it keeps it's original purpose and maintain the schema as simple as possible.
+Hephaestus is a CLI tool and Schema standard to facilitate the creation and maintainability of micro-services. It's goal is to allow the creation and maintenance of **Event-Oriented, Domain-Driven, Decoupled MicroServices, with a Delivery-Usecase-Repository architecture and SQL Databases**. We can extend it's usability as long as it keeps it's original purpose and maintain the schema as simple as possible.
 
 ## Why use Hephaestus
 
@@ -46,7 +46,15 @@ We created some plugins that can be used by anyone independent of the project pa
 
 ### Is Hephaestus a silver bullet for every project?
 
-No. We are very clear that Hephaestus is focused on **Event-Oriented, Domain-Driven, Decoupled MicroServices, with a Delivery-Usecase-Repository architecture**. It may be used in other cases, but we don't give support for these other cases.
+No. We are very clear that Hephaestus is focused on **Event-Oriented, Domain-Driven, Decoupled MicroServices, with a Delivery-Usecase-Repository architecture and SQL Databases**. It may be used in other cases, but we don't give support for these other cases.
+
+### Can Hephaestus be used for monoliths?
+
+Sure, it probably will work great with monoliths too, since they kinda are "big micro-services", we don't guarantee that it will be perfect, but for sure it will help.
+
+### Can Hephaestus be used with NoSql databases?
+
+You kinda can if you have the right plugin, but the schema is not and will not be designed for the specific needs that a NoSql database have. If you want to use a NoSql database as a SQL database, Hephaestus will probably fit your needs.
 
 ## Meaning
 
