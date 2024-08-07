@@ -95,7 +95,9 @@ func resolveField(s *schema.Schema, v map[string]any) (map[string]*schema.Field,
 			}
 		}
 		var properties map[string]*schema.Field = nil
-		if fieldType == schema.FieldType_Map || fieldType == schema.FieldType_ListMap {
+		if fieldType == schema.FieldType_Map ||
+			fieldType == schema.FieldType_ListMap ||
+			fieldType == schema.FieldType_MapStringMap {
 			if val, ok := vvMap["Properties"]; ok {
 				valMap := val.(map[string]any)
 				property, err := resolveField(s, valMap)
@@ -104,7 +106,7 @@ func resolveField(s *schema.Schema, v map[string]any) (map[string]*schema.Field,
 				}
 				properties = property
 			} else {
-				return nil, errors.New(kk + " (Map | List[Map]) needs Properties")
+				return nil, errors.New(kk + " (Map | List[Map] | Map[String]Map) needs Properties")
 			}
 		}
 		var values map[string]string = nil

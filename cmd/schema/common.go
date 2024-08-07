@@ -27,6 +27,7 @@ const (
 	FieldType_Timestamp     FieldType = "Timestamp"
 	FieldType_Enum          FieldType = "Enum"
 	FieldType_Map           FieldType = "Map"
+	FieldType_MapStringMap  FieldType = "Map[String]Map"
 	FieldType_ListString    FieldType = "List[String]"
 	FieldType_ListInt       FieldType = "List[Int]"
 	FieldType_ListTimestamp FieldType = "List[Timestamp]"

@@ -1,7 +1,14 @@
 package schema
 
+type MethodDeliveryGrpc_Example struct {
+	StatusCode int `yaml:"StatusCode"`
+	Message    any `yaml:"Message,omitempty"`
+	Returns    any `yaml:"Returns,omitempty"`
+}
+
 type MethodDeliveryGrpc struct {
-	Client *bool `yaml:"Client,omitempty"`
+	Client   *bool                                  `yaml:"Client,omitempty"`
+	Examples map[string]*MethodDeliveryGrpc_Example `yaml:"Examples,omitempty"`
 }
 
 type MethodDeliveryQueue struct {

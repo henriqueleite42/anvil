@@ -63,16 +63,44 @@ func usecase(s *schema.Schema, yaml map[string]any) error {
 			delivery = &schema.MethodDelivery{}
 			if grpcAny, ok := deliveryMap["Grpc"]; ok {
 				var client *bool = nil
+				examples := map[string]*schema.MethodDeliveryGrpc_Example{}
 
 				if grpcMap, ok := grpcAny.(map[string]any); ok {
 					if clientAny, ok := grpcMap["Client"]; ok {
 						clientBool := clientAny.(bool)
 						client = &clientBool
 					}
+
+					if examplesAny, ok := grpcMap["Examples"]; ok {
+						examplesMap := examplesAny.(map[string]any)
+						for k, v := range examplesMap {
+							vMap := v.(map[string]any)
+
+							var statusCode int
+							if val, ok := vMap["StatusCode"]; ok {
+								statusCode = val.(int)
+							}
+							var message any
+							if val, ok := vMap["Message"]; ok {
+								message = val
+							}
+							var returns any
+							if val, ok := vMap["Returns"]; ok {
+								returns = val
+							}
+
+							examples[k] = &schema.MethodDeliveryGrpc_Example{
+								StatusCode: statusCode,
+								Message:    message,
+								Returns:    returns,
+							}
+						}
+					}
 				}
 
 				delivery.Grpc = &schema.MethodDeliveryGrpc{
-					Client: client,
+					Client:   client,
+					Examples: examples,
 				}
 			}
 

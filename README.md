@@ -1,17 +1,25 @@
 # Hephaestus
 
-Hephaestus is OpenAPI for microservices, but instead of only documenting your http routes, it helps you to manage all your microservices ecosystem.
+Hephaestus is like OpenAPI schemas for microservices, but instead of only documenting your http routes, it helps you to manage most of the aspects of all your microservices at a global scale. It's created to medium~big companies and suffer on delivering things with velocity and consistency.
 
-It follows an _schema-first_ approach, of instead of writing your code first, you write an schema, and it generates most of the code for you.
+It follows an _schema-first_ approach, of instead of writing your code first, you write an schema, and it generates most of the code for you, all that parts that are repetitive and doesn't influence in the performance, while letting you have 100% control of the part that matters: the business logic.
 
-The schema is designed for **Event-Oriented, Domain-Driven, Decoupled MicroServices, with a Delivery-Usecase-Repository architecture and SQL Databases**, it still can be used for monoliths and other types of architectures, but we don't maintain the schema to be extremely flexible and a silver bullet for all the projects. Or goal here **IS NOT** to allow creativity, is to have a way to create scalable, secure and maintainable applications.
+The schema is designed for **Event-Oriented, Domain-Driven, Decoupled MicroServices, with a Delivery-Usecase-Repository architecture and SQL Databases**. It still can be used for monoliths and other types of architectures, but we don't maintain the schema to be extremely flexible and a silver bullet for all the projects. Or goal here **IS NOT** to allow creativity, is to have a way to create scalable, secure and maintainable applications.
+
+## What INS'T Hephaestus
+
+- Something to control/create/update your infrastructure like CloudFormation, Terraform or Serverless Framework
+- A framework to magically implement things under the hood, hide complexity and make you dependent on it
+- Something to guide exactly how you should implement your code, your architecture, your folder structure, and so on
+- A message bus to help you send and receive events
 
 ## Why use Hephaestus
 
-In large organizations, we usually have hundreds of micro-services, teams, events, packages, new team members and it's very hard and demanding to maintain everything. Besides that, keeping the things as they are is the basic, we also need to create new things.
+In large organizations, we usually have hundreds or even thousands of micro-services, teams, events, packages and team members changing teams in a daily basis. It's very hard and demanding to maintain everything, to share these knowledge of the best practices, to ensure that all developers not only know how to implement certain patterns but know the way that the company implements certain patterns.
 
-In these extremely big environments, it's hard to keep everyone in the same page, to know when you need to update something, to coordinate teams and get the best outcome from your developers.
+Hephaestus is created for these kind of ecosystems. It allows you to have one centralized small team of extremely capable developers that say how the things will work, define rules, best practices, standard libraries, and everything else that you need or want to defined, and all the other teams and members of your organization will follow these rules and patterns.
 
+**TL;DR**
 Hephaestus will help you to:
 - Need less developers to accomplish the same (probably even best) results
 - Decrease the amount of time that it takes to create new products and features, without having to compromise the quality and security of the software
@@ -28,36 +36,16 @@ Hephaestus will help you to:
 - Generate database migrations and automatically handle them, begin able to easily see the current state of your database by looking at the schema file
 - Generate standardized clients for your APIs, with automatically generate `CHANGELOG.md`s that follows [SemVer](https://semver.org)
 - Allows for external plugins that allow for integration with other tools like Jira, Linear, Slack or your own custom system
-
-## How Hephaestus work
-
-Hephaestus has 4 main parts, each one responsible for a specific complementary role.
-
-### `*.hpt` files
-
-The schema definition is a `.hpt` file that describes a domain of your service. Each project (micro-service) can have multiple domains in it, and they can be related or not (ideally, they should be).
-
-Think about the `.hpt` files like a `schema.prisma` or an OpenApi spec, and from this we generate an infinity of things.
-
-### `.hephaestusconfig`
-
-`.hephaestusconfig` is the configuration file for Hephaestus, where you put informations like the plugins that you are using, the things that you want to generate, and any other configuration that Hephaestus CLI or the plugins may need.
-
-It is written in [TOML](https://toml.io/en/).
-
-### CLI
-
-The CLI is the way that you interact with all Hephaestus things. You can use it to validate your files, generate things, install plugins, run your migrations, and much more.
-
-It's designed to work with CI/CD too 🙌
-
-### Plugins
-
-Plugins allows you to customize Hephaestus as you want. We create the standard, you customize it to attend your needs.
-
-We created some plugins that can be used by anyone independent of the project pattern that they are using, and some specific plugins that fit our needs, but that you can use too.
+- Easy to change things at a global scale: Do not get stuck into a language or architecture anymore, if you want to change one day, it's 100x times easier and faster.
+- You are not stuck to Hephaestus. It's not a framework, it generates code that you have 100% control of. If you don't want to use Hephaestus anymore, it will have no impact on your systems.
 
 ## F.A.Q.
+
+### Is Hephaestus ready to use right out the box?
+
+If you are whiling to adopt one of the architectures proposed by one of ht existing generators, including the ones that we maintain, **yes!**
+
+If you want to implement your own architecture, with your own code patterns, so you will have to write your own generator, what is veeeery complex and time consuming compared to write a single micro-service, but pays off on the long run if you plan to have more than a dozen of micro-services.
 
 ### Is Hephaestus a silver bullet for every project?
 
@@ -70,6 +58,51 @@ Sure, it probably will work great with monoliths too, since they kinda are "big 
 ### Can Hephaestus be used with NoSql databases?
 
 You kinda can if you have the right plugin, but the schema is not and will not be designed for the specific needs that a NoSql database have. If you want to use a NoSql database as a SQL database, Hephaestus will probably fit your needs.
+
+### Why does Hephaestus hates creativity and free thinking?
+
+We don't hate it, but the main goal of any company is to serve their clients well, and all things that doesn't reach of this goal is a waste of time and money.
+
+For a while, companies had the philosophy of "let every team work on it's own way", because it was impossible to make everyone work as a single unit, but it leads to a mountain of technical debit, knowledge lost, malpractices and 1001 reinventions of the wheel.
+
+It forces companies to have multiple developers, that spend most of their time doing things to keep the plates spinning, and don't generate any value for the clients.
+
+We all are here to work, to get a job done, and not to play games and do hobby projects. With Hephaestus, you can centralize and unify how your teams work. All your services will have the same patterns. Want to change anything? Don't do it one by one, do it all at once, this way you know that all of them are secure and reliable.
+
+### Why is Hephaestus written in Golang?
+
+Because [Henrique Leite](https://www.linkedin.com/in/henriqueleite42/), the initial main contributor, didn't knew how to effectively write Rust at the time, but we do want to migrate it to Rust someday.
+
+## How Hephaestus work
+
+Hephaestus has 4 main parts, each one responsible for a specific complementary role.
+
+### `*.hpt` files
+
+The schema definition is a `.hpt` file that describes a domain of your service. Each project (micro-service) can have multiple domains in it, and they can be related or not (ideally, if they are in the same project, they should be).
+
+Think about the `.hpt` files like a `schema.prisma` or an OpenApi spec, and from this we generate an infinity of things.
+
+### `.hephaestusconfig`
+
+`.hephaestusconfig` is the configuration file for Hephaestus, where you put information like the plugins that you are using, the things that you want to generate, and any other configuration that Hephaestus CLI or the plugins may need.
+
+It is written in [TOML](https://toml.io/en/).
+
+### CLI
+
+The CLI is the way that you interact with all Hephaestus things. You can use it to validate your files, generate things, install plugins, run your migrations, and much more.
+
+It's designed to work with CI/CD too 🙌
+
+### Generators
+
+Generators allows you to generate code based on a `.hpt` config. They come in various shapes and sizes, and can be used for practically anything:
+- Generate an microservice with a specific code pattern, that uses a specific set of libraries
+- Generate e2e tests
+- Generate changelogs
+
+Generator are were the magic oh Hephaestus happens.
 
 ## Meaning
 
