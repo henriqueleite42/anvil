@@ -3,10 +3,10 @@ package parse
 import (
 	"errors"
 
-	"github.com/anuntech/hephaestus/cmd/types"
+	"github.com/anuntech/hephaestus/cmd/schema"
 )
 
-func Events(s *types.Schema, yaml map[string]any) error {
+func events(s *schema.Schema, yaml map[string]any) error {
 	eventsYaml, ok := yaml["Events"]
 	if !ok {
 		return nil
@@ -17,7 +17,7 @@ func Events(s *types.Schema, yaml map[string]any) error {
 		return errors.New("fail to parse Events")
 	}
 
-	schemaEvents := types.Events{}
+	schemaEvents := schema.Events{}
 	for k, v := range yamlInterface {
 		vMap := v.(map[string]any)
 
@@ -34,7 +34,7 @@ func Events(s *types.Schema, yaml map[string]any) error {
 			return err
 		}
 
-		schemaEvents[k] = &types.Event{
+		schemaEvents[k] = &schema.Event{
 			Formats: formats,
 			Fields:  fields,
 		}

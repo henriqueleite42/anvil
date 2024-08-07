@@ -3,10 +3,10 @@ package parse
 import (
 	"errors"
 
-	"github.com/anuntech/hephaestus/cmd/types"
+	"github.com/anuntech/hephaestus/cmd/schema"
 )
 
-func Enums(s *types.Schema, yaml map[string]any) error {
+func enums(s *schema.Schema, yaml map[string]any) error {
 	enums, ok := yaml["Enums"]
 	if !ok {
 		return nil
@@ -17,7 +17,7 @@ func Enums(s *types.Schema, yaml map[string]any) error {
 		return errors.New("fail to parse Enums")
 	}
 
-	schemaEnums := types.Enums{}
+	schemaEnums := schema.Enums{}
 	for k, v := range yamlInterface {
 		enum := map[string]string{}
 

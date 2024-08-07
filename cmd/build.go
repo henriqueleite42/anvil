@@ -1,18 +1,21 @@
 package cmd
 
 import (
+	"github.com/anuntech/hephaestus/cmd/build"
 	"github.com/anuntech/hephaestus/cmd/parse"
 	"github.com/spf13/cobra"
 )
 
-func addParseCommand(rootCmd *cobra.Command) {
+func addBuildCommand(rootCmd *cobra.Command) {
 	parseCmd := &cobra.Command{
-		Use:   "parse",
-		Short: "Parse the file to check for errors",
+		Use:   "build",
+		Short: "Build the file to check for errors",
 		Run: func(cmd *cobra.Command, args []string) {
 			schemaFile := cmd.Flag("schema").Value.String()
 
-			parse.Parse(schemaFile)
+			schema := parse.Parse(schemaFile)
+
+			build.Build(schemaFile, schema)
 		},
 	}
 

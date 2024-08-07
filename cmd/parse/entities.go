@@ -4,13 +4,13 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/anuntech/hephaestus/cmd/types"
+	"github.com/anuntech/hephaestus/cmd/schema"
 )
 
-func getEntityIndexes(key string, data any) ([]*types.Entity_Index, error) {
+func getEntityIndexes(key string, data any) ([]*schema.Entity_Index, error) {
 	valSlice := data.([]any)
 
-	indexes := []*types.Entity_Index{}
+	indexes := []*schema.Entity_Index{}
 	for k, v := range valSlice {
 		vMap, ok := v.(map[string]any)
 		if !ok {
@@ -34,7 +34,7 @@ func getEntityIndexes(key string, data any) ([]*types.Entity_Index, error) {
 			unique = valBool
 		}
 
-		indexes = append(indexes, &types.Entity_Index{
+		indexes = append(indexes, &schema.Entity_Index{
 			Columns: columns,
 			Unique:  unique,
 		})
@@ -43,10 +43,10 @@ func getEntityIndexes(key string, data any) ([]*types.Entity_Index, error) {
 	return indexes, nil
 }
 
-func getEntityForeignKeys(key string, data any) ([]*types.Entity_ForeignKey, error) {
+func getEntityForeignKeys(key string, data any) ([]*schema.Entity_ForeignKey, error) {
 	valSlice := data.([]any)
 
-	foreignKeys := []*types.Entity_ForeignKey{}
+	foreignKeys := []*schema.Entity_ForeignKey{}
 	for k, v := range valSlice {
 		vMap, ok := v.(map[string]any)
 		if !ok {
@@ -98,7 +98,7 @@ func getEntityForeignKeys(key string, data any) ([]*types.Entity_ForeignKey, err
 			onUpdate = &valString
 		}
 
-		foreignKeys = append(foreignKeys, &types.Entity_ForeignKey{
+		foreignKeys = append(foreignKeys, &schema.Entity_ForeignKey{
 			Column:    column,
 			RefTable:  refTable,
 			RefColumn: refColumn,
@@ -110,7 +110,7 @@ func getEntityForeignKeys(key string, data any) ([]*types.Entity_ForeignKey, err
 	return foreignKeys, nil
 }
 
-func Entities(s *types.Schema, yaml map[string]any) error {
+func entities(s *schema.Schema, yaml map[string]any) error {
 	entities, ok := yaml["Entities"]
 	if !ok {
 		return nil
@@ -118,22 +118,22 @@ func Entities(s *types.Schema, yaml map[string]any) error {
 
 	entitiesAny := entities.(map[string]any)
 
-	var schema *string = nil
+	var dbSchema *string = nil
 	if val, ok := entitiesAny["Schema"]; ok {
 		valString := val.(string)
-		schema = &valString
+		dbSchema = &valString
 	}
 
 	var columnsCase *string = nil
 	if val, ok := entitiesAny["ColumnsCase"]; ok {
-		valString, ok := val.(types.TextCase)
+		valString, ok := val.(schema.TextCase)
 		if !ok {
 			return errors.New("fail to parse Entities.ColumnsCase")
 		}
 		columnsCase = &valString
 	}
 
-	tables := map[string]*types.Entity{}
+	tables := map[string]*schema.Entity{}
 	tablesMap := entitiesAny["Tables"].(map[string]any)
 
 	for k, v := range tablesMap {
@@ -145,7 +145,7 @@ func Entities(s *types.Schema, yaml map[string]any) error {
 			name = &valString
 		}
 
-		var columns map[string]*types.Field
+		var columns map[string]*schema.Field
 		if val, ok := vMap["Columns"]; ok {
 			valMap := val.(map[string]any)
 			localColumns, err := resolveField(s, valMap)
@@ -157,7 +157,7 @@ func Entities(s *types.Schema, yaml map[string]any) error {
 			return errors.New("fail to parse Entities." + k + ".Columns")
 		}
 
-		var indexes []*types.Entity_Index
+		var indexes []*schema.Entity_Index
 		if val, ok := vMap["Indexes"]; ok {
 			localIndexes, err := getEntityIndexes(k, val)
 			if err != nil {
@@ -166,7 +166,7 @@ func Entities(s *types.Schema, yaml map[string]any) error {
 			indexes = localIndexes
 		}
 
-		var foreignKeys []*types.Entity_ForeignKey
+		var foreignKeys []*schema.Entity_ForeignKey
 		if val, ok := vMap["ForeignKeys"]; ok {
 			localForeignKeys, err := getEntityForeignKeys(k, val)
 			if err != nil {
@@ -183,7 +183,7 @@ func Entities(s *types.Schema, yaml map[string]any) error {
 			}
 		}
 
-		tables[k] = &types.Entity{
+		tables[k] = &schema.Entity{
 			Name:        name,
 			PrimaryKeys: primaryKeys,
 			Columns:     columns,
@@ -193,8 +193,8 @@ func Entities(s *types.Schema, yaml map[string]any) error {
 
 	}
 
-	s.Entities = &types.Entities{
-		Schema:      schema,
+	s.Entities = &schema.Entities{
+		Schema:      dbSchema,
 		ColumnsCase: columnsCase,
 		Tables:      tables,
 	}

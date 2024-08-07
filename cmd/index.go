@@ -33,6 +33,7 @@ func init() {
 
 	addVersionCommand(rootCmd)
 	addParseCommand(rootCmd)
+	addBuildCommand(rootCmd)
 }
 
 func initConfig() {

@@ -3,10 +3,10 @@ package parse
 import (
 	"errors"
 
-	"github.com/anuntech/hephaestus/cmd/types"
+	"github.com/anuntech/hephaestus/cmd/schema"
 )
 
-func Types(s *types.Schema, yaml map[string]any) error {
+func types(s *schema.Schema, yaml map[string]any) error {
 	typesYaml, ok := yaml["Types"]
 	if !ok {
 		return nil
@@ -17,7 +17,7 @@ func Types(s *types.Schema, yaml map[string]any) error {
 		return errors.New("fail to parse Types")
 	}
 
-	schemaTypes := types.Types{}
+	schemaTypes := schema.Types{}
 	for k, v := range yamlInterface {
 		if k == "$ref" {
 			return errors.New("cannot use $ref in Types")

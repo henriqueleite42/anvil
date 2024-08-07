@@ -4,10 +4,10 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/anuntech/hephaestus/cmd/types"
+	"github.com/anuntech/hephaestus/cmd/schema"
 )
 
-func resolveField(schema *types.Schema, v map[string]any) (map[string]*types.Field, error) {
+func resolveField(s *schema.Schema, v map[string]any) (map[string]*schema.Field, error) {
 	if ref, ok := v["$ref"]; ok {
 		refString, ok := ref.(string)
 		if !ok {
@@ -23,15 +23,15 @@ func resolveField(schema *types.Schema, v map[string]any) (map[string]*types.Fie
 		secondPart := parts[1]
 
 		if firstPart == "Entities" {
-			entity, ok := schema.Entities.Tables[secondPart]
+			entity, ok := s.Entities.Tables[secondPart]
 			if !ok {
 				return nil, errors.New(refString + ": fail to find entity")
 			}
 
-			fields := map[string]*types.Field{}
+			fields := map[string]*schema.Field{}
 
 			for k, v := range entity.Columns {
-				methodField := types.Field{}
+				methodField := schema.Field{}
 
 				methodField.Type = v.Type
 				methodField.Optional = v.Optional
@@ -44,11 +44,11 @@ func resolveField(schema *types.Schema, v map[string]any) (map[string]*types.Fie
 		}
 
 		if firstPart == "Types" {
-			if schema.Types == nil {
+			if s.Types == nil {
 				return nil, errors.New(refString + ": schema has no Types")
 			}
 
-			types, ok := (*schema.Types)[secondPart]
+			types, ok := (*s.Types)[secondPart]
 			if !ok {
 				return nil, errors.New(refString + ": fail to find entity")
 			}
@@ -59,27 +59,32 @@ func resolveField(schema *types.Schema, v map[string]any) (map[string]*types.Fie
 		return nil, errors.New("fail to parse something")
 	}
 
-	methodField := map[string]*types.Field{}
+	methodField := map[string]*schema.Field{}
 
 	for kk, vv := range v {
 		vvMap := vv.(map[string]any)
 
-		var fieldType types.FieldType
+		var fieldType schema.FieldType
 		if val, ok := vvMap["Type"]; ok {
-			fieldType = val.(types.FieldType)
+			fieldType = val.(schema.FieldType)
 		}
 		var dbType *string = nil
 		if val, ok := vvMap["DbType"]; ok {
 			valString := val.(string)
 			dbType = &valString
 		}
+		var encoded *string = nil
+		if val, ok := vvMap["Encoded"]; ok {
+			valString := val.(string)
+			encoded = &valString
+		}
 		var optional bool
 		if val, ok := vvMap["Optional"]; ok {
 			optional = val.(bool)
 		}
-		var confidentiality types.FieldConfidentiality = "LOW"
+		var confidentiality schema.FieldConfidentiality = "LOW"
 		if val, ok := vvMap["Confidentiality"]; ok {
-			confidentiality = val.(types.FieldConfidentiality)
+			confidentiality = val.(schema.FieldConfidentiality)
 		}
 		var validate []string = nil
 		if val, ok := vvMap["Validate"]; ok {
@@ -89,34 +94,21 @@ func resolveField(schema *types.Schema, v map[string]any) (map[string]*types.Fie
 				validate = append(validate, v.(string))
 			}
 		}
-		var properties map[string]*types.Field = nil
-		if fieldType == types.FieldType_Map {
+		var properties map[string]*schema.Field = nil
+		if fieldType == schema.FieldType_Map || fieldType == schema.FieldType_ListMap {
 			if val, ok := vvMap["Properties"]; ok {
 				valMap := val.(map[string]any)
-				property, err := resolveField(schema, valMap)
+				property, err := resolveField(s, valMap)
 				if err != nil {
 					return nil, err
 				}
 				properties = property
 			} else {
-				return nil, errors.New(kk + " (Map) needs Properties")
-			}
-		}
-		var items map[string]*types.Field = nil
-		if fieldType == types.FieldType_List {
-			if val, ok := vvMap["Items"]; ok {
-				valMap := val.(map[string]any)
-				item, err := resolveField(schema, valMap)
-				if err != nil {
-					return nil, err
-				}
-				items = item
-			} else {
-				return nil, errors.New(kk + " (List) needs Properties")
+				return nil, errors.New(kk + " (Map | List[Map]) needs Properties")
 			}
 		}
 		var values map[string]string = nil
-		if fieldType == types.FieldType_Enum || fieldType == types.FieldType_ListEnum {
+		if fieldType == schema.FieldType_Enum || fieldType == schema.FieldType_ListEnum {
 			if val, ok := vvMap["Values"]; ok {
 				valMap := val.(map[string]any)
 
@@ -131,10 +123,10 @@ func resolveField(schema *types.Schema, v map[string]any) (map[string]*types.Fie
 
 					secondPart := parts[1]
 
-					if schema.Enums == nil {
+					if s.Enums == nil {
 						return nil, errors.New(refString + ": schema has no Enums")
 					}
-					enumVals, ok := (*schema.Enums)[secondPart]
+					enumVals, ok := (*s.Enums)[secondPart]
 					if !ok {
 						return nil, errors.New(refString + ": fail to find entity")
 					}
@@ -152,14 +144,14 @@ func resolveField(schema *types.Schema, v map[string]any) (map[string]*types.Fie
 			}
 		}
 
-		methodField[kk] = &types.Field{
+		methodField[kk] = &schema.Field{
 			Type:            fieldType,
 			DbType:          dbType,
+			Encoded:         encoded,
 			Optional:        optional,
 			Confidentiality: confidentiality,
 			Validate:        validate,
 			Properties:      properties,
-			Items:           items,
 			Values:          values,
 		}
 	}
@@ -167,8 +159,8 @@ func resolveField(schema *types.Schema, v map[string]any) (map[string]*types.Fie
 	return methodField, nil
 }
 
-func parseDependency(v map[string]any) (*types.Dependency, error) {
-	depImport := types.Dependency_Import{}
+func parseDependency(v map[string]any) (*schema.Dependency, error) {
+	depImport := schema.Dependency_Import{}
 	depImportAny, ok := v["Import"]
 	if ok {
 		depImportMap := depImportAny.(map[string]any)
@@ -185,7 +177,7 @@ func parseDependency(v map[string]any) (*types.Dependency, error) {
 			path = valString
 		}
 
-		depImport = types.Dependency_Import{
+		depImport = schema.Dependency_Import{
 			Alias: alias,
 			Path:  path,
 		}
@@ -197,7 +189,7 @@ func parseDependency(v map[string]any) (*types.Dependency, error) {
 		depType = valString
 	}
 
-	return &types.Dependency{
+	return &schema.Dependency{
 		Type:   depType,
 		Import: &depImport,
 	}, nil

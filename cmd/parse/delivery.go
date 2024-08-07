@@ -3,10 +3,10 @@ package parse
 import (
 	"errors"
 
-	"github.com/anuntech/hephaestus/cmd/types"
+	"github.com/anuntech/hephaestus/cmd/schema"
 )
 
-func Delivery(s *types.Schema, yaml map[string]any) error {
+func delivery(s *schema.Schema, yaml map[string]any) error {
 	deliveryYaml, ok := yaml["Delivery"]
 	if !ok {
 		return nil
@@ -17,10 +17,10 @@ func Delivery(s *types.Schema, yaml map[string]any) error {
 		return errors.New("fail to parse Delivery")
 	}
 
-	var dependencies map[string]*types.Dependency = nil
+	var dependencies map[string]*schema.Dependency = nil
 	dependenciesMap, ok := yamlInterface["Dependencies"].(map[string]any)
 	if ok {
-		dependencies = map[string]*types.Dependency{}
+		dependencies = map[string]*schema.Dependency{}
 		for k, v := range dependenciesMap {
 			vMap := v.(map[string]any)
 			dependency, err := parseDependency(vMap)
@@ -32,7 +32,7 @@ func Delivery(s *types.Schema, yaml map[string]any) error {
 		}
 	}
 
-	var grpc *types.DeliveryGrpc = nil
+	var grpc *schema.DeliveryGrpc = nil
 	grpcMap, ok := yamlInterface["Grpc"].(map[string]any)
 	if ok {
 		var genClient *bool = nil
@@ -66,7 +66,7 @@ func Delivery(s *types.Schema, yaml map[string]any) error {
 			serverPath = &valString
 		}
 
-		grpc = &types.DeliveryGrpc{
+		grpc = &schema.DeliveryGrpc{
 			GenClient:     genClient,
 			ClientPath:    clientPath,
 			GenProto:      genProto,
@@ -76,7 +76,7 @@ func Delivery(s *types.Schema, yaml map[string]any) error {
 		}
 	}
 
-	s.Delivery = &types.Delivery{
+	s.Delivery = &schema.Delivery{
 		Dependencies: dependencies,
 		Grpc:         grpc,
 	}

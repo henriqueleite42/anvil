@@ -3,13 +3,13 @@ package parse
 import (
 	"errors"
 
-	"github.com/anuntech/hephaestus/cmd/types"
+	"github.com/anuntech/hephaestus/cmd/schema"
 )
 
-func Domain(s *types.Schema, yaml map[string]any) error {
+func domain(s *schema.Schema, yaml map[string]any) error {
 	domain, ok := yaml["Domain"]
 	if !ok {
-		return errors.New("Domain must be specified")
+		return errors.New("\"Domain\" must be specified")
 	}
 	s.Domain = domain.(string)
 

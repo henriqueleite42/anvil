@@ -3,10 +3,10 @@ package parse
 import (
 	"errors"
 
-	"github.com/anuntech/hephaestus/cmd/types"
+	"github.com/anuntech/hephaestus/cmd/schema"
 )
 
-func Usecase(s *types.Schema, yaml map[string]any) error {
+func usecase(s *schema.Schema, yaml map[string]any) error {
 	usecaseYaml, ok := yaml["Usecase"]
 	if !ok {
 		return nil
@@ -17,7 +17,7 @@ func Usecase(s *types.Schema, yaml map[string]any) error {
 		return errors.New("fail to parse Usecase")
 	}
 
-	dependencies := map[string]*types.Dependency{}
+	dependencies := map[string]*schema.Dependency{}
 	dependenciesMap, ok := yamlInterface["Dependencies"].(map[string]any)
 	if ok {
 		for k, v := range dependenciesMap {
@@ -31,12 +31,12 @@ func Usecase(s *types.Schema, yaml map[string]any) error {
 		}
 	}
 
-	methods := map[string]*types.Method{}
+	methods := map[string]*schema.Method{}
 	methodsMap, _ := yamlInterface["Methods"].(map[string]any)
 	for k, v := range methodsMap {
 		vMap := v.(map[string]any)
 
-		var inputs map[string]*types.Field = nil
+		var inputs map[string]*schema.Field = nil
 		if _, ok := vMap["Input"]; ok {
 			inputsMap := vMap["Input"].(map[string]any)
 			fields, err := resolveField(s, inputsMap)
@@ -46,7 +46,7 @@ func Usecase(s *types.Schema, yaml map[string]any) error {
 			inputs = fields
 		}
 
-		var outputs map[string]*types.Field = nil
+		var outputs map[string]*schema.Field = nil
 		if _, ok := vMap["Output"]; ok {
 			outputsMap := vMap["Output"].(map[string]any)
 			fields, err := resolveField(s, outputsMap)
@@ -56,11 +56,11 @@ func Usecase(s *types.Schema, yaml map[string]any) error {
 			outputs = fields
 		}
 
-		var delivery *types.MethodDelivery = nil
+		var delivery *schema.MethodDelivery = nil
 		if _, ok := vMap["Delivery"]; ok {
 			deliveryMap := vMap["Delivery"].(map[string]any)
 
-			delivery = &types.MethodDelivery{}
+			delivery = &schema.MethodDelivery{}
 			if grpcAny, ok := deliveryMap["Grpc"]; ok {
 				var client *bool = nil
 
@@ -71,20 +71,42 @@ func Usecase(s *types.Schema, yaml map[string]any) error {
 					}
 				}
 
-				delivery.Grpc = &types.MethodDeliveryGrpc{
+				delivery.Grpc = &schema.MethodDeliveryGrpc{
 					Client: client,
+				}
+			}
+
+			if queueAny, ok := deliveryMap["Queue"]; ok {
+				var id string
+				var relatedTo string
+
+				if queueMap, ok := queueAny.(map[string]any); ok {
+					if idAny, ok := queueMap["Id"]; ok {
+						idString := idAny.(string)
+						id = idString
+					}
+
+					if relatedToAny, ok := queueMap["RelatedTo"]; ok {
+						relatedToString := relatedToAny.(string)
+						relatedTo = relatedToString
+					}
+				}
+
+				delivery.Queue = &schema.MethodDeliveryQueue{
+					Id:        id,
+					RelatedTo: relatedTo,
 				}
 			}
 		}
 
-		methods[k] = &types.Method{
+		methods[k] = &schema.Method{
 			Input:    inputs,
 			Output:   outputs,
 			Delivery: delivery,
 		}
 	}
 
-	s.Usecase = &types.Usecase{
+	s.Usecase = &schema.Usecase{
 		Dependencies: dependencies,
 		Methods:      methods,
 	}

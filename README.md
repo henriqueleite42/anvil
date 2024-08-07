@@ -1,11 +1,26 @@
 # Hephaestus
 
-Hephaestus is a CLI tool and Schema standard to facilitate the creation and maintainability of micro-services. It's goal is to allow the creation and maintenance of **Event-Oriented, Domain-Driven, Decoupled MicroServices, with a Delivery-Usecase-Repository architecture and SQL Databases**. We can extend it's usability as long as it keeps it's original purpose and maintain the schema as simple as possible.
+Hephaestus is OpenAPI for microservices, but instead of only documenting your http routes, it helps you to manage all your microservices ecosystem.
+
+It follows an _schema-first_ approach, of instead of writing your code first, you write an schema, and it generates most of the code for you.
+
+The schema is designed for **Event-Oriented, Domain-Driven, Decoupled MicroServices, with a Delivery-Usecase-Repository architecture and SQL Databases**, it still can be used for monoliths and other types of architectures, but we don't maintain the schema to be extremely flexible and a silver bullet for all the projects. Or goal here **IS NOT** to allow creativity, is to have a way to create scalable, secure and maintainable applications.
 
 ## Why use Hephaestus
 
-- Has LSP integration and is well documented, easy to understand and get things rolling
-- Instead of trying to reinvent the wheel, you can follow a standardized architecture that is scalable, clean, flexible and allows the work to be divided in multiple steps that can be executed in parallel
+In large organizations, we usually have hundreds of micro-services, teams, events, packages, new team members and it's very hard and demanding to maintain everything. Besides that, keeping the things as they are is the basic, we also need to create new things.
+
+In these extremely big environments, it's hard to keep everyone in the same page, to know when you need to update something, to coordinate teams and get the best outcome from your developers.
+
+Hephaestus will help you to:
+- Need less developers to accomplish the same (probably even best) results
+- Decrease the amount of time that it takes to create new products and features, without having to compromise the quality and security of the software
+- Better divide the responsibilities of your team, to get the best that they can offer and not needing so many experienced developers to create amazing products
+
+## How Hephaestus does these things?
+
+- _Schema-first_ approaches help you to visualize the current state of your system in a very easy and fast way: Instead of having to understand code, the project pattern, searching in a bunch of files, go directly to the ONE file definition anf figure it out right away.
+- Instead of trying to reinvent the wheel, you can follow a standardized architecture that is scalable, clean, flexible, follows the best practices and allows the work to be divided in multiple steps that can be executed in parallel
 - Standardize all you micro-services to follow the exact same patterns for EVERYTHING, decreasing a lot the learning curve and the effort necessary to maintain them
 - Allows tracking and usage of confidential and private data, like user's emails, to complain with regulations
 - Automatically generates e2e tests, the most important tests, extremely useful for early stage startups that can't afford a QA or have enough time to implement more complex tests
@@ -18,7 +33,7 @@ Hephaestus is a CLI tool and Schema standard to facilitate the creation and main
 
 Hephaestus has 4 main parts, each one responsible for a specific complementary role.
 
-### `.hpt` files
+### `*.hpt` files
 
 The schema definition is a `.hpt` file that describes a domain of your service. Each project (micro-service) can have multiple domains in it, and they can be related or not (ideally, they should be).
 
@@ -59,7 +74,8 @@ You kinda can if you have the right plugin, but the schema is not and will not b
 ## Meaning
 
 - Domain: Name of the domain being documented
-- Types: Generic types to be used as Input ou Output for `Repository` and `Usecase` methods
+- Relationships: The relationships that your domain have with other domains and micro-services
+- Types: Generic types to be used as Input or Output for `Repository` and `Usecase` methods
 - Enums: Enums to be used as types for `Entity`, `Events` and `Repository` and `Usecase` methods
 - Entities: Tables on your database
 - Repository: The way that you communicate with the tables on your database
@@ -67,11 +83,7 @@ You kinda can if you have the right plugin, but the schema is not and will not b
 - Usecase: Where all the business logic stays, has the methods to be used by the consumers through delivery methods
 - Delivery: General config for delivery methods
 
-## Rules
-
-- The `Schema` isn't a reflection of the config files, it's the **resolved** version of the config files, so all the functions (like `$ref`) aren't present in the Schema, only the true value of that reference
-
-## Confidentiality Levels
+## Recommended Confidentiality Levels
 
 - Low: Can be accessed by anyone with access to the service, can be logged and send in events
 - Medium: Can only be accessed by services with special permission, cannot be logged or send in events

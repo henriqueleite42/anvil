@@ -1,46 +1,51 @@
 package parse
 
-import "github.com/anuntech/hephaestus/cmd/types"
+import "github.com/anuntech/hephaestus/cmd/schema"
 
-func File(data map[string]any) (*types.Schema, error) {
-	schema := types.Schema{}
+func file(data map[string]any) (*schema.Schema, error) {
+	schema := schema.Schema{}
 
-	err := Domain(&schema, data)
+	err := domain(&schema, data)
 	if err != nil {
 		return nil, err
 	}
 
-	err = Types(&schema, data)
+	err = relationships(&schema, data)
 	if err != nil {
 		return nil, err
 	}
 
-	err = Enums(&schema, data)
+	err = types(&schema, data)
 	if err != nil {
 		return nil, err
 	}
 
-	err = Entities(&schema, data)
+	err = enums(&schema, data)
 	if err != nil {
 		return nil, err
 	}
 
-	err = Events(&schema, data)
+	err = entities(&schema, data)
 	if err != nil {
 		return nil, err
 	}
 
-	err = Repository(&schema, data)
+	err = events(&schema, data)
 	if err != nil {
 		return nil, err
 	}
 
-	err = Usecase(&schema, data)
+	err = repository(&schema, data)
 	if err != nil {
 		return nil, err
 	}
 
-	err = Delivery(&schema, data)
+	err = usecase(&schema, data)
+	if err != nil {
+		return nil, err
+	}
+
+	err = delivery(&schema, data)
 	if err != nil {
 		return nil, err
 	}

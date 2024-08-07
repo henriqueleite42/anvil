@@ -3,10 +3,10 @@ package parse
 import (
 	"errors"
 
-	"github.com/anuntech/hephaestus/cmd/types"
+	"github.com/anuntech/hephaestus/cmd/schema"
 )
 
-func Repository(s *types.Schema, yaml map[string]any) error {
+func repository(s *schema.Schema, yaml map[string]any) error {
 	repositoryYaml, ok := yaml["Repository"]
 	if !ok {
 		return nil
@@ -17,10 +17,10 @@ func Repository(s *types.Schema, yaml map[string]any) error {
 		return errors.New("fail to parse Repository")
 	}
 
-	var dependencies map[string]*types.Dependency = nil
+	var dependencies map[string]*schema.Dependency = nil
 	dependenciesMap, ok := yamlInterface["Dependencies"].(map[string]any)
 	if ok {
-		dependencies = map[string]*types.Dependency{}
+		dependencies = map[string]*schema.Dependency{}
 		for k, v := range dependenciesMap {
 			vMap := v.(map[string]any)
 			dependency, err := parseDependency(vMap)
@@ -32,10 +32,10 @@ func Repository(s *types.Schema, yaml map[string]any) error {
 		}
 	}
 
-	var inputs map[string]*types.Dependency = nil
+	var inputs map[string]*schema.Dependency = nil
 	inputsMap, ok := yamlInterface["Inputs"].(map[string]any)
 	if ok {
-		inputs = map[string]*types.Dependency{}
+		inputs = map[string]*schema.Dependency{}
 		for k, v := range inputsMap {
 			vMap := v.(map[string]any)
 			dependency, err := parseDependency(vMap)
@@ -47,12 +47,12 @@ func Repository(s *types.Schema, yaml map[string]any) error {
 		}
 	}
 
-	methods := map[string]*types.RepositoryMethod{}
+	methods := map[string]*schema.RepositoryMethod{}
 	methodsMap, _ := yamlInterface["Methods"].(map[string]any)
 	for k, v := range methodsMap {
 		vMap := v.(map[string]any)
 
-		var inputs map[string]*types.Field = nil
+		var inputs map[string]*schema.Field = nil
 		if _, ok := vMap["Input"]; ok {
 			inputsMap := vMap["Input"].(map[string]any)
 			fields, err := resolveField(s, inputsMap)
@@ -62,7 +62,7 @@ func Repository(s *types.Schema, yaml map[string]any) error {
 			inputs = fields
 		}
 
-		var outputs map[string]*types.Field = nil
+		var outputs map[string]*schema.Field = nil
 		if _, ok := vMap["Output"]; ok {
 			outputsMap := vMap["Output"].(map[string]any)
 			fields, err := resolveField(s, outputsMap)
@@ -72,13 +72,13 @@ func Repository(s *types.Schema, yaml map[string]any) error {
 			outputs = fields
 		}
 
-		methods[k] = &types.RepositoryMethod{
+		methods[k] = &schema.RepositoryMethod{
 			Input:  inputs,
 			Output: outputs,
 		}
 	}
 
-	s.Repository = &types.Repository{
+	s.Repository = &schema.Repository{
 		Dependencies: dependencies,
 		Inputs:       inputs,
 		Methods:      methods,
