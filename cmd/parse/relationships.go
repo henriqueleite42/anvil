@@ -19,11 +19,17 @@ func relationships(s *schema.Schema, yaml map[string]any) error {
 
 	schemaRelationships := schema.Relationships{}
 	for k, v := range yamlInterface {
-		relationshipVal, ok := v.(string)
-		if !ok {
-			return errors.New("fail to parse Relationships." + k)
+		vMap := v.(map[string]any)
+
+		var uri string
+		if val, ok := vMap["Uri"]; ok {
+			valString := val.(string)
+			uri = valString
 		}
-		schemaRelationships[k] = relationshipVal
+
+		schemaRelationships[k] = &schema.Relationship{
+			Uri: uri,
+		}
 	}
 
 	s.Relationships = &schemaRelationships

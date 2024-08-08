@@ -1,3 +1,7 @@
 package schema
 
-type Relationships map[string]string
+type Relationship struct {
+	Uri string `yaml:"Uri"`
+}
+
+type Relationships map[string]*Relationship

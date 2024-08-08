@@ -14,9 +14,8 @@ type Dependency_Import struct {
 }
 
 type Dependency struct {
-	Import  *Dependency_Import `yaml:"Import,omitempty"`
-	Type    string             `yaml:"Type"`
-	Private bool               `yaml:"Private"`
+	Import *Dependency_Import `yaml:"Import,omitempty"`
+	Type   string             `yaml:"Type"`
 }
 
 type FieldType = string

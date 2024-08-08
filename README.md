@@ -59,9 +59,11 @@ Sure, it probably will work great with monoliths too, since they kinda are "big 
 
 You kinda can if you have the right plugin, but the schema is not and will not be designed for the specific needs that a NoSql database have. If you want to use a NoSql database as a SQL database, Hephaestus will probably fit your needs.
 
-### Why does Hephaestus hates creativity and free thinking?
+### Why does Hephaestus hates creativity, free thinking and innovation?
 
 We don't hate it, but the main goal of any company is to serve their clients well, and all things that doesn't reach of this goal is a waste of time and money.
+
+Innovation mainly, should not be part of the crucial systems of your company. Have a business is already risk and challenging enough already, you should keep things safe as much as you can, and not try to be different and try to innovate on the authentication service of your system. It's a crucial service, it MUST work 24/7 without bugs.
 
 For a while, companies had the philosophy of "let every team work on it's own way", because it was impossible to make everyone work as a single unit, but it leads to a mountain of technical debit, knowledge lost, malpractices and 1001 reinventions of the wheel.
 
