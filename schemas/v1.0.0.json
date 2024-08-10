@@ -1,510 +1,552 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/anvlet/anvlet/blob/master/schemas/v1.0.0.json",
-  "title": "Anvlet",
-  "description": "God of API Creation",
-  "type": "object",
-  "additionalProperties": false,
-  "$defs": {
-    "Field": {
-      "type": "object",
-      "properties": {
-        "Type": {
-          "type": "string",
-          "description": "The field type, mostly used by the programming language, but can be used by the database and in proto files too.",
-          "enum": [
-            "String",
-            "Int",
-            "Timestamp",
-            "Enum",
-            "Map",
-            "Map[String]Map",
-            "List[String]",
-            "List[Int]",
-            "List[Timestamp]",
-            "List[Enum]",
-            "List[Map]"
-          ]
-        },
-        "Confidentiality": {
-          "type": "string",
-          "description": "Confidentiality is used to know how confientialy we should treat a field, mostly to complain with legal regulations. If the value is not specified, the default value is \"LOW\"",
-          "enum": ["LOW", "MEDIUM", "HIGH"]
-        },
-        "Optional": {
-          "type": "boolean",
-          "descruption": "If the field is optional or not. By default, every field is required."
-        },
-        "Encoded": {
-          "type": "string",
-          "description": "If the values is encoded in any way, like a string json object, or a base64 image."
-        },
-        "DbType": {
-          "type": "string",
-          "description": "The raw database type, used when generating migrations."
-        },
-        "Validate": {
-          "type": "array",
-          "description": "Array of validations to be executed in the field. When the validation will be executed depends on the generator, but we advise to run them on the Delivery only. They can be in any format that your generator accepts.",
-          "items": {
-            "type": "string"
-          }
-        },
-        "Properties": {
-          "anyOf": [
-            {
-              "type": "object",
-              "description": "Used for Map, Map[String]Map and List[Map]. The definition of the map.",
-              "patternProperties": {
-                "^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-                  "$ref": "#/$defs/Field"
-                }
-              }
-            },
-            {
-              "type": "object",
-              "description": "Reference of a Type or Entity",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "$ref": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          ]
-        },
-        "Values": {
-          "anyOf": [
-            {
-              "type": "object",
-              "description": "Used for Enum and List[Enum]. The valuyes of the enum.",
-              "items": {
-                "type": "object",
-                "patternProperties": {
-                  "^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-                    "type": "string"
-                  }
-                }
-              }
-            },
-            {
-              "type": "object",
-              "description": "Reference of an Enum",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "$ref": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          ]
-        }
-      },
-      "required": ["Type"]
-    },
-    "Dependency": {
-      "type": "object",
-      "description": "",
-      "properties": {
-        "Import": {
-          "type": "object",
-          "description": "Information about how to import the dependency.",
-          "properties": {
-            "Alias": {
-              "type": "string",
-              "description": "Alias/name for the import, if nor specified will use default."
-            },
-            "Path": {
-              "type": "string",
-              "description": "Path to import the dependency"
-            }
-          },
-          "required": ["Path"]
-        },
-        "Type": {
-          "type": "string",
-          "description": "The type to be used in the import/value."
-        }
-      },
-      "required": ["Import", "Type"]
-    }
-  },
-  "properties": {
-    "Domain": {
-      "type": "string",
-      "description": "The name of the domain beign defined. A single project can have multiple domains. Example: You have the \"Post\" project, it can have the \"Post\" and \"PostComment\" domains, because both are related to Posts."
-    },
-    "Relationships": {
-      "type": "object",
-      "description": "The relationships that the project has with other projects. Useful to know which version of another project it uses and track updates.",
-      "patternProperties": {
-        "^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-          "type": "object",
-          "properties": {
-            "Uri": {
-              "type": "string",
-              "description": "Uri to relationship. If it's a local file, must start with `file://` (you can use relative paths, like `file://./example.yaml`, but we recommend to use it only for testing purposes), if it's a url can start with `http://` or `https://`.",
-              "format": "uri-reference"
-            }
-          },
-          "required": ["Uri"]
-        }
-      }
-    },
-    "Types": {
-      "type": "object",
-      "description": "Reusable maps (/objects) to be used in Input and Output of the Repository and Usecase.",
-      "patternProperties": {
-        "^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-          "type": "object",
-          "patternProperties": {
-            "^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-              "$ref": "#/$defs/Field"
-            }
-          }
-        }
-      }
-    },
-    "Enums": {
-      "type": "object",
-      "description": "Description of string or integer types with fixed values.",
-      "patternProperties": {
-        "^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-          "type": "object",
-          "properties": {
-            "Type": {
-              "type": "string",
-              "description": "The type of the enum values",
-              "enum": ["String", "Int"]
-            },
-            "Values": {
-              "type": "array",
-              "description": "The key value pair of the enum, with aditional config if necessary",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "Name": {
-                    "type": "string",
-                    "description": "The name of the enum value. Usually used by the generators to create values in the database and code."
-                  },
-                  "Value": {
-                    "type": "string",
-                    "description": "The value of the enum. Usually used by the generators to create values in the database and code."
-                  }
-                }
-              }
-            },
-            "required": ["Type", "Values"]
-          }
-        }
-      }
-    },
-    "Events": {
-      "type": "object",
-      "description": "Events emmited by your service. Can be used to track subscriptions and as a documentation for other teams to subscribe.",
-      "patternProperties": {
-        "^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-          "type": "object",
-          "properties": {
-            "Formats": {
-              "type": "array",
-              "description": "Formats that the event is emmited",
-              "items": {
-                "type": "string"
-              }
-            },
-            "Fields": {
-              "type": "object",
-              "description": "Description of the emmited event",
-              "patternProperties": {
-                "^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-                  "$ref": "#/$defs/Field"
-                }
-              }
-            }
-          },
-          "required": ["Formats", "Fields"]
-        }
-      }
-    },
-    "Entities": {
-      "type": "object",
-      "description": "A map to your database tables. Can be used by generators to handle migrations or generate language-specific types.",
-      "properties": {
-        "Schema": {
-          "type": "string",
-          "description": "The database schema, used when you don't want to use the public schema."
-        },
-        "ColumnsCase": {
-          "type": "string",
-          "description": "The case to format the columns when generating migrations or database-related things."
-        },
-        "Tables": {
-          "type": "object",
-          "description": "The tables of your database",
-          "patternProperties": {
-            "^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-              "type": "object",
-              "properties": {
-                "Name": {
-                  "type": "string",
-                  "description": "The name of your table as should be specified in the database. This values isn't modified in any way, it's passed directly to the database."
-                },
-                "Columns": {
-                  "type": "object",
-                  "description": "Database columns",
-                  "patternProperties": {
-                    "^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-                      "$ref": "#/$defs/Field"
-                    }
-                  }
-                },
-                "PrimaryKeys": {
-                  "type": "array",
-                  "description": "A list of all the primary keys of your table",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "Indexes": {
-                  "type": "array",
-                  "description": "The indexes of your table, including unique indexes",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "Columns": {
-                        "type": "array",
-                        "description": "The columns that compose the index",
-                        "items": {
-                          "type": "string"
-                        }
-                      },
-                      "Unique": {
-                        "type": "boolean",
-                        "description": "If it's a unique index or not"
-                      }
-                    },
-                    "required": ["Columns"]
-                  }
-                },
-                "ForeignKeys": {
-                  "type": "array",
-                  "description": "The foreign keys of your table.",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "Columns": {
-                        "type": "array",
-                        "description": "Columns on the current entity to be referenced. The name MUST be written as in the SCHEMA, and not as it appears on the database",
-                        "items": {
-                          "type": "string"
-                        }
-                      },
-                      "RefTable": {
-                        "type": "string",
-                        "description": "Target table to reference. The name MUST be written as in the DATABASE, and not as it appears on the schema"
-                      },
-                      "RefColumns": {
-                        "type": "array",
-                        "description": "Columns on the target entity to be referenced. The name MUST be written as in the DATABASE, and not as it appears on the schema",
-                        "items": {
-                          "type": "string"
-                        }
-                      },
-                      "OnDelete": {
-                        "type": "string",
-                        "description": "ON DELETE behaviour. This value is not formatted, will be written in the migration as it appears here."
-                      },
-                      "OnUpdate": {
-                        "type": "string",
-                        "description": "ON UPDATE behaviour. This value is not formatted, will be written in the migration as it appears here."
-                      }
-                    },
-                    "required": ["Columns", "RefTable", "RefColumns"]
-                  }
-                }
-              },
-              "required": ["Columns", "PrimaryKeys"]
-            }
-          }
-        }
-      },
-      "required": ["Tables"]
-    },
-    "Repository": {
-      "type": "object",
-      "description": "The way that you will interact with your database.",
-      "properties": {
-        "Dependencies": {
-          "type": "object",
-          "description": "Default dependencies received in the class/centralizer of the methods.",
-          "patternProperties": {
-            "^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-              "$ref": "#/$defs/Dependecy"
-            }
-          }
-        },
-        "Inputs": {
-          "type": "object",
-          "description": "Default inputs received in the methods.",
-          "patternProperties": {
-            "^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-              "$ref": "#/$defs/Dependecy"
-            }
-          }
-        },
-        "Methods": {
-          "type": "object",
-          "description": "Methods of the repository to execute actions in the database.",
-          "patternProperties": {
-            "^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-              "type": "object",
-              "properties": {
-                "Input": {
-                  "type": "object",
-                  "patternProperties": {
-                    "^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-                      "$ref": "#/$defs/Field"
-                    }
-                  }
-                },
-                "Output": {
-                  "type": "object",
-                  "patternProperties": {
-                    "^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-                      "$ref": "#/$defs/Field"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "required": ["Methods"]
-    },
-    "Usecase": {
-      "type": "object",
-      "description": "Were the bussiness logic is at.",
-      "properties": {
-        "Dependencies": {
-          "type": "object",
-          "description": "Default dependencies received in the class/centralizer of the methods.",
-          "patternProperties": {
-            "^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-              "$ref": "#/$defs/Dependecy"
-            }
-          }
-        },
-        "Inputs": {
-          "type": "object",
-          "description": "Default inputs received in the methods.",
-          "patternProperties": {
-            "^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-              "$ref": "#/$defs/Dependecy"
-            }
-          }
-        },
-        "Methods": {
-          "type": "object",
-          "description": "Methods of the repository to execute actions in the database.",
-          "patternProperties": {
-            "^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-              "type": "object",
-              "properties": {
-                "Input": {
-                  "type": "object",
-                  "patternProperties": {
-                    "^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-                      "$ref": "#/$defs/Field"
-                    }
-                  }
-                },
-                "Output": {
-                  "type": "object",
-                  "patternProperties": {
-                    "^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-                      "$ref": "#/$defs/Field"
-                    }
-                  }
-                },
-                "Delivery": {
-                  "type": "object",
-                  "description": "Configuration about how the users/clients/things will access this usecase",
-                  "properties": {
-                    "Grpc": {
-                      "type": "object",
-                      "description": "gRPC delivery configuration. By just including an empty `Grpc` on the delivery, the route will already be created.",
-                      "properties": {
-                        "Examples": {
-                          "type": "object",
-                          "description": "Examples of requests. This can be used as documentation or by generators to create e2e tests.",
-                          "patternProperties": {
-                            "^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-                              "type": "object",
-                              "description": "A name for the example. Example: `Success`, `DuplicatedUser`, `PostNotFound`",
-                              "properties": {
-                                "StatusCode": {
-                                  "type": "int",
-                                  "description": "Expected status code returned"
-                                },
-                                "Message": {
-                                  "type": "object",
-                                  "description": "The message to be sent in the request"
-                                },
-                                "Returns": {
-                                  "type": "object",
-                                  "description": "The expected response"
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    },
-                    "Queue": {
-                      "type": "object",
-                      "description": "Queue delivery configuration",
-                      "properties": {
-                        "Id": {
-                          "type": "string",
-                          "description": "Queue ID. This is not the true value to listen the queue (like the sqs url when using sqs), it's only a identifier to be formatted by the generator. Example: If you put the id `foo-bar` and the generator uses queue listeners as env vars, so the generator can format the queue id to `QUEUE_ID_FOO_BAR`. The final value of this depends on the generator."
-                        },
-                        "RelatedTo": {
-                          "type": "string",
-                          "description": "Link to an event from this project or a related project. Examples: `RelatedTo: Events.Foo` (for events in the same project, you skip the `Domain`), `RelatedTo: ProjectInRelationships.Events.Bar` (for external projects, you need to include the `Domain` and specify the relationship in the `Relationships`)."
-                        }
-                      },
-                      "required": ["Id", "RelatedTo"]
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "required": ["Methods"]
-    },
-    "Delivery": {
-      "type": "object",
-      "description": "Spefic configuration of how the users/things can interact with your Usecase, like using http APIs or gRPC clients.",
-      "properties": {
-        "Dependencies": {
-          "type": "object",
-          "description": "Default dependencies received in the class/centralizer of the routes.",
-          "patternProperties": {
-            "^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-              "$ref": "#/$defs/Dependecy"
-            }
-          }
-        }
-      }
-    }
-  },
-  "required": ["Domain"]
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://github.com/anvlet/anvlet/blob/master/schemas/v1.0.0.json",
+	"title": "Anvlet",
+	"description": "God of API Creation",
+	"type": "object",
+	"additionalProperties": false,
+	"$defs": {
+		"Field": {
+			"type": "object",
+			"properties": {
+				"Type": {
+					"type": "string",
+					"description": "The field type, mostly used by the programming language, but can be used by the database and in proto files too.",
+					"enum": [
+						"String",
+						"Int",
+						"Timestamp",
+						"Enum",
+						"Map",
+						"Map[String]Map",
+						"List[String]",
+						"List[Int]",
+						"List[Timestamp]",
+						"List[Enum]",
+						"List[Map]"
+					]
+				},
+				"Confidentiality": {
+					"type": "string",
+					"description": "Confidentiality is used to know how confientialy we should treat a field, mostly to complain with legal regulations. If the value is not specified, the default value is \"LOW\"",
+					"enum": [
+						"LOW",
+						"MEDIUM",
+						"HIGH"
+					]
+				},
+				"Optional": {
+					"type": "boolean",
+					"descruption": "If the field is optional or not. By default, every field is required."
+				},
+				"Encoded": {
+					"type": "string",
+					"description": "If the values is encoded in any way, like a string json object, or a base64 image."
+				},
+				"DbType": {
+					"type": "string",
+					"description": "The raw database type, used when generating migrations."
+				},
+				"Validate": {
+					"type": "array",
+					"description": "Array of validations to be executed in the field. When the validation will be executed depends on the generator, but we advise to run them on the Delivery only. They can be in any format that your generator accepts.",
+					"items": {
+						"type": "string"
+					}
+				},
+				"Properties": {
+					"anyOf": [
+						{
+							"type": "object",
+							"description": "Used for Map, Map[String]Map and List[Map]. The definition of the map.",
+							"patternProperties": {
+								"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+									"$ref": "#/$defs/Field"
+								}
+							}
+						},
+						{
+							"type": "object",
+							"description": "Reference of a Type or Entity",
+							"items": {
+								"type": "object",
+								"properties": {
+									"$ref": {
+										"type": "string"
+									}
+								}
+							}
+						}
+					]
+				},
+				"Values": {
+					"anyOf": [
+						{
+							"type": "object",
+							"description": "Used for Enum and List[Enum]. The valuyes of the enum.",
+							"items": {
+								"type": "object",
+								"patternProperties": {
+									"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+										"type": "string"
+									}
+								}
+							}
+						},
+						{
+							"type": "object",
+							"description": "Reference of an Enum",
+							"items": {
+								"type": "object",
+								"properties": {
+									"$ref": {
+										"type": "string"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			"required": [
+				"Type"
+			]
+		},
+		"Dependency": {
+			"type": "object",
+			"description": "",
+			"properties": {
+				"Import": {
+					"type": "object",
+					"description": "Information about how to import the dependency.",
+					"properties": {
+						"Alias": {
+							"type": "string",
+							"description": "Alias/name for the import, if nor specified will use default."
+						},
+						"Path": {
+							"type": "string",
+							"description": "Path to import the dependency"
+						}
+					},
+					"required": [
+						"Path"
+					]
+				},
+				"Type": {
+					"type": "string",
+					"description": "The type to be used in the import/value."
+				}
+			},
+			"required": [
+				"Import",
+				"Type"
+			]
+		}
+	},
+	"properties": {
+		"Domain": {
+			"type": "string",
+			"description": "The name of the domain beign defined. A single project can have multiple domains. Example: You have the \"Post\" project, it can have the \"Post\" and \"PostComment\" domains, because both are related to Posts."
+		},
+		"Relationships": {
+			"type": "object",
+			"description": "The relationships that the project has with other projects. Useful to know which version of another project it uses and track updates.",
+			"patternProperties": {
+				"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+					"type": "object",
+					"properties": {
+						"Uri": {
+							"type": "string",
+							"description": "Uri to relationship. If it's a local file, must start with `file://` (you can use relative paths, like `file://./example.yaml`, but we recommend to use it only for testing purposes), if it's a url can start with `http://` or `https://`.",
+							"format": "uri-reference"
+						}
+					},
+					"required": [
+						"Uri"
+					]
+				}
+			}
+		},
+		"Types": {
+			"type": "object",
+			"description": "Reusable maps (/objects) to be used in Input and Output of the Repository and Usecase.",
+			"patternProperties": {
+				"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+					"type": "object",
+					"patternProperties": {
+						"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+							"$ref": "#/$defs/Field"
+						}
+					}
+				}
+			}
+		},
+		"Enums": {
+			"type": "object",
+			"description": "Description of string or integer types with fixed values.",
+			"patternProperties": {
+				"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+					"type": "object",
+					"properties": {
+						"Type": {
+							"type": "string",
+							"description": "The type of the enum values",
+							"enum": [
+								"String",
+								"Int"
+							]
+						},
+						"Values": {
+							"type": "array",
+							"description": "The key value pair of the enum, with aditional config if necessary",
+							"items": {
+								"type": "object",
+								"properties": {
+									"Name": {
+										"type": "string",
+										"description": "The name of the enum value. Usually used by the generators to create values in the database and code."
+									},
+									"Value": {
+										"type": "string",
+										"description": "The value of the enum. Usually used by the generators to create values in the database and code."
+									}
+								}
+							}
+						}
+					},
+					"required": [
+						"Type",
+						"Values"
+					]
+				}
+			}
+		},
+		"Events": {
+			"type": "object",
+			"description": "Events emmited by your service. Can be used to track subscriptions and as a documentation for other teams to subscribe.",
+			"patternProperties": {
+				"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+					"type": "object",
+					"properties": {
+						"Formats": {
+							"type": "array",
+							"description": "Formats that the event is emmited",
+							"items": {
+								"type": "string"
+							}
+						},
+						"Fields": {
+							"type": "object",
+							"description": "Description of the emmited event",
+							"patternProperties": {
+								"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+									"$ref": "#/$defs/Field"
+								}
+							}
+						}
+					},
+					"required": [
+						"Formats",
+						"Fields"
+					]
+				}
+			}
+		},
+		"Entities": {
+			"type": "object",
+			"description": "A map to your database tables. Can be used by generators to handle migrations or generate language-specific types.",
+			"properties": {
+				"Schema": {
+					"type": "string",
+					"description": "The database schema, used when you don't want to use the public schema."
+				},
+				"ColumnsCase": {
+					"type": "string",
+					"description": "The case to format the columns when generating migrations or database-related things."
+				},
+				"Tables": {
+					"type": "object",
+					"description": "The tables of your database",
+					"patternProperties": {
+						"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+							"type": "object",
+							"properties": {
+								"Name": {
+									"type": "string",
+									"description": "The name of your table as should be specified in the database. This values isn't modified in any way, it's passed directly to the database."
+								},
+								"Columns": {
+									"type": "object",
+									"description": "Database columns",
+									"patternProperties": {
+										"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+											"$ref": "#/$defs/Field"
+										}
+									}
+								},
+								"PrimaryKeys": {
+									"type": "array",
+									"description": "A list of all the primary keys of your table",
+									"items": {
+										"type": "string"
+									}
+								},
+								"Indexes": {
+									"type": "array",
+									"description": "The indexes of your table, including unique indexes",
+									"items": {
+										"type": "object",
+										"properties": {
+											"Columns": {
+												"type": "array",
+												"description": "The columns that compose the index",
+												"items": {
+													"type": "string"
+												}
+											},
+											"Unique": {
+												"type": "boolean",
+												"description": "If it's a unique index or not"
+											}
+										},
+										"required": [
+											"Columns"
+										]
+									}
+								},
+								"ForeignKeys": {
+									"type": "array",
+									"description": "The foreign keys of your table.",
+									"items": {
+										"type": "object",
+										"properties": {
+											"Columns": {
+												"type": "array",
+												"description": "Columns on the current entity to be referenced. The name MUST be written as in the SCHEMA, and not as it appears on the database",
+												"items": {
+													"type": "string"
+												}
+											},
+											"RefTable": {
+												"type": "string",
+												"description": "Target table to reference. The name MUST be written as in the DATABASE, and not as it appears on the schema"
+											},
+											"RefColumns": {
+												"type": "array",
+												"description": "Columns on the target entity to be referenced. The name MUST be written as in the DATABASE, and not as it appears on the schema",
+												"items": {
+													"type": "string"
+												}
+											},
+											"OnDelete": {
+												"type": "string",
+												"description": "ON DELETE behaviour. This value is not formatted, will be written in the migration as it appears here."
+											},
+											"OnUpdate": {
+												"type": "string",
+												"description": "ON UPDATE behaviour. This value is not formatted, will be written in the migration as it appears here."
+											}
+										},
+										"required": [
+											"Columns",
+											"RefTable",
+											"RefColumns"
+										]
+									}
+								}
+							},
+							"required": [
+								"Columns",
+								"PrimaryKeys"
+							]
+						}
+					}
+				}
+			},
+			"required": [
+				"Tables"
+			]
+		},
+		"Repository": {
+			"type": "object",
+			"description": "The way that you will interact with your database.",
+			"properties": {
+				"Dependencies": {
+					"type": "object",
+					"description": "Default dependencies received in the class/centralizer of the methods.",
+					"patternProperties": {
+						"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+							"$ref": "#/$defs/Dependency"
+						}
+					}
+				},
+				"Inputs": {
+					"type": "object",
+					"description": "Default inputs received in the methods.",
+					"patternProperties": {
+						"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+							"$ref": "#/$defs/Dependency"
+						}
+					}
+				},
+				"Methods": {
+					"type": "object",
+					"description": "Methods of the repository to execute actions in the database.",
+					"patternProperties": {
+						"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+							"type": "object",
+							"properties": {
+								"Input": {
+									"type": "object",
+									"patternProperties": {
+										"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+											"$ref": "#/$defs/Field"
+										}
+									}
+								},
+								"Output": {
+									"type": "object",
+									"patternProperties": {
+										"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+											"$ref": "#/$defs/Field"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"required": [
+				"Methods"
+			]
+		},
+		"Usecase": {
+			"type": "object",
+			"description": "Were the bussiness logic is at.",
+			"properties": {
+				"Dependencies": {
+					"type": "object",
+					"description": "Default dependencies received in the class/centralizer of the methods.",
+					"patternProperties": {
+						"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+							"$ref": "#/$defs/Dependency"
+						}
+					}
+				},
+				"Inputs": {
+					"type": "object",
+					"description": "Default inputs received in the methods.",
+					"patternProperties": {
+						"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+							"$ref": "#/$defs/Dependency"
+						}
+					}
+				},
+				"Methods": {
+					"type": "object",
+					"description": "Methods of the repository to execute actions in the database.",
+					"patternProperties": {
+						"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+							"type": "object",
+							"properties": {
+								"Input": {
+									"type": "object",
+									"patternProperties": {
+										"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+											"$ref": "#/$defs/Field"
+										}
+									}
+								},
+								"Output": {
+									"type": "object",
+									"patternProperties": {
+										"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+											"$ref": "#/$defs/Field"
+										}
+									}
+								},
+								"Delivery": {
+									"type": "object",
+									"description": "Configuration about how the users/clients/things will access this usecase",
+									"properties": {
+										"Grpc": {
+											"type": "object",
+											"description": "gRPC delivery configuration. By just including an empty `Grpc` on the delivery, the route will already be created.",
+											"properties": {
+												"Examples": {
+													"type": "object",
+													"description": "Examples of requests. This can be used as documentation or by generators to create e2e tests.",
+													"patternProperties": {
+														"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+															"type": "object",
+															"description": "A name for the example. Example: `Success`, `DuplicatedUser`, `PostNotFound`",
+															"properties": {
+																"StatusCode": {
+																	"type": "integer",
+																	"description": "Expected status code returned"
+																},
+																"Message": {
+																	"type": "object",
+																	"description": "The message to be sent in the request"
+																},
+																"Returns": {
+																	"type": "object",
+																	"description": "The expected response"
+																}
+															}
+														}
+													}
+												}
+											}
+										},
+										"Queue": {
+											"type": "object",
+											"description": "Queue delivery configuration",
+											"properties": {
+												"Id": {
+													"type": "string",
+													"description": "Queue ID. This is not the true value to listen the queue (like the sqs url when using sqs), it's only a identifier to be formatted by the generator. Example: If you put the id `foo-bar` and the generator uses queue listeners as env vars, so the generator can format the queue id to `QUEUE_ID_FOO_BAR`. The final value of this depends on the generator."
+												},
+												"RelatedTo": {
+													"type": "string",
+													"description": "Link to an event from this project or a related project. Examples: `RelatedTo: Events.Foo` (for events in the same project, you skip the `Domain`), `RelatedTo: ProjectInRelationships.Events.Bar` (for external projects, you need to include the `Domain` and specify the relationship in the `Relationships`)."
+												}
+											},
+											"required": [
+												"Id",
+												"RelatedTo"
+											]
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"required": [
+				"Methods"
+			]
+		},
+		"Delivery": {
+			"type": "object",
+			"description": "Spefic configuration of how the users/things can interact with your Usecase, like using http APIs or gRPC clients.",
+			"properties": {
+				"Dependencies": {
+					"type": "object",
+					"description": "Default dependencies received in the class/centralizer of the routes.",
+					"patternProperties": {
+						"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+							"$ref": "#/$defs/Dependency"
+						}
+					}
+				}
+			}
+		}
+	},
+	"required": [
+		"Domain"
+	]
 }
