@@ -3,7 +3,7 @@ package parse
 import (
 	"errors"
 
-	"github.com/anuntech/hephaestus/cmd/schema"
+	"github.com/anvlet/anvlet/cmd/schema"
 )
 
 func types(s *schema.Schema, yaml map[string]any) error {
@@ -12,7 +12,7 @@ func types(s *schema.Schema, yaml map[string]any) error {
 		return nil
 	}
 
-	yamlInterface, ok := typesYaml.(map[string]interface{})
+	yamlInterface, ok := typesYaml.(map[string]any)
 	if !ok {
 		return errors.New("fail to parse Types")
 	}
@@ -23,7 +23,7 @@ func types(s *schema.Schema, yaml map[string]any) error {
 			return errors.New("cannot use $ref in Types")
 		}
 
-		fieldInterface, ok := v.(map[string]interface{})
+		fieldInterface, ok := v.(map[string]any)
 		if !ok {
 			return errors.New("fail to parse Types." + k)
 		}

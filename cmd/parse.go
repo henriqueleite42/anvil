@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/anuntech/hephaestus/cmd/parse"
+	"github.com/anvlet/anvlet/cmd/parse"
 	"github.com/spf13/cobra"
 )
 

@@ -3,7 +3,7 @@ package parse
 import (
 	"errors"
 
-	"github.com/anuntech/hephaestus/cmd/schema"
+	"github.com/anvlet/anvlet/cmd/schema"
 )
 
 func relationships(s *schema.Schema, yaml map[string]any) error {

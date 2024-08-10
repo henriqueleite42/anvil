@@ -7,11 +7,11 @@ const (
 )
 
 type Entity_ForeignKey struct {
-	Column    string  `yaml:"Column"`
-	RefTable  string  `yaml:"RefTable"`
-	RefColumn string  `yaml:"RefColumn"`
-	OnDelete  *string `yaml:"OnDelete,omitempty"`
-	OnUpdate  *string `yaml:"OnUpdate,omitempty"`
+	Columns    []string `yaml:"Columns"`
+	RefTable   string   `yaml:"RefTable"`
+	RefColumns []string `yaml:"RefColumn"`
+	OnDelete   *string  `yaml:"OnDelete,omitempty"`
+	OnUpdate   *string  `yaml:"OnUpdate,omitempty"`
 }
 
 type Entity_Index struct {

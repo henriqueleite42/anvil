@@ -85,7 +85,7 @@ A git-like way to save changes on the functions and know what has changed.
 
 ### Generator changelog with SemVer
 
-Generates a CHANGELOG.md with the changes in the `.hpt` files
+Generates a CHANGELOG.md with the changes in the `.anv` files
 
 ### Allows for the cli to read other kinds of files, nopt only YAML
 

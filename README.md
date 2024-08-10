@@ -1,31 +1,31 @@
-# Hephaestus
+# Anvlet
 
-Hephaestus is like OpenAPI schemas for microservices, but instead of only documenting your http routes, it helps you to manage most of the aspects of all your microservices at a global scale. It's created to medium~big companies and suffer on delivering things with velocity and consistency.
+Anvlet is like OpenAPI schemas for microservices, but instead of only documenting your http routes, it helps you to manage most of the aspects of all your microservices at a global scale. It's created to medium~big companies and suffer on delivering things with velocity and consistency.
 
 It follows an _schema-first_ approach, of instead of writing your code first, you write an schema, and it generates most of the code for you, all that parts that are repetitive and doesn't influence in the performance, while letting you have 100% control of the part that matters: the business logic.
 
 The schema is designed for **Event-Oriented, Domain-Driven, Decoupled MicroServices, with a Delivery-Usecase-Repository architecture and SQL Databases**. It still can be used for monoliths and other types of architectures, but we don't maintain the schema to be extremely flexible and a silver bullet for all the projects. Or goal here **IS NOT** to allow creativity, is to have a way to create scalable, secure and maintainable applications.
 
-## What INS'T Hephaestus
+## What INS'T Anvlet
 
 - Something to control/create/update your infrastructure like CloudFormation, Terraform or Serverless Framework
 - A framework to magically implement things under the hood, hide complexity and make you dependent on it
 - Something to guide exactly how you should implement your code, your architecture, your folder structure, and so on
 - A message bus to help you send and receive events
 
-## Why use Hephaestus
+## Why use Anvlet
 
 In large organizations, we usually have hundreds or even thousands of micro-services, teams, events, packages and team members changing teams in a daily basis. It's very hard and demanding to maintain everything, to share these knowledge of the best practices, to ensure that all developers not only know how to implement certain patterns but know the way that the company implements certain patterns.
 
-Hephaestus is created for these kind of ecosystems. It allows you to have one centralized small team of extremely capable developers that say how the things will work, define rules, best practices, standard libraries, and everything else that you need or want to defined, and all the other teams and members of your organization will follow these rules and patterns.
+Anvlet is created for these kind of ecosystems. It allows you to have one centralized small team of extremely capable developers that say how the things will work, define rules, best practices, standard libraries, and everything else that you need or want to defined, and all the other teams and members of your organization will follow these rules and patterns.
 
 **TL;DR**
-Hephaestus will help you to:
+Anvlet will help you to:
 - Need less developers to accomplish the same (probably even best) results
 - Decrease the amount of time that it takes to create new products and features, without having to compromise the quality and security of the software
 - Better divide the responsibilities of your team, to get the best that they can offer and not needing so many experienced developers to create amazing products
 
-## How Hephaestus does these things?
+## How Anvlet does these things?
 
 - _Schema-first_ approaches help you to visualize the current state of your system in a very easy and fast way: Instead of having to understand code, the project pattern, searching in a bunch of files, go directly to the ONE file definition anf figure it out right away.
 - Instead of trying to reinvent the wheel, you can follow a standardized architecture that is scalable, clean, flexible, follows the best practices and allows the work to be divided in multiple steps that can be executed in parallel
@@ -37,29 +37,29 @@ Hephaestus will help you to:
 - Generate standardized clients for your APIs, with automatically generate `CHANGELOG.md`s that follows [SemVer](https://semver.org)
 - Allows for external plugins that allow for integration with other tools like Jira, Linear, Slack or your own custom system
 - Easy to change things at a global scale: Do not get stuck into a language or architecture anymore, if you want to change one day, it's 100x times easier and faster.
-- You are not stuck to Hephaestus. It's not a framework, it generates code that you have 100% control of. If you don't want to use Hephaestus anymore, it will have no impact on your systems.
+- You are not stuck to Anvlet. It's not a framework, it generates code that you have 100% control of. If you don't want to use Anvlet anymore, it will have no impact on your systems.
 
 ## F.A.Q.
 
-### Is Hephaestus ready to use right out the box?
+### Is Anvlet ready to use right out the box?
 
 If you are whiling to adopt one of the architectures proposed by one of ht existing generators, including the ones that we maintain, **yes!**
 
 If you want to implement your own architecture, with your own code patterns, so you will have to write your own generator, what is veeeery complex and time consuming compared to write a single micro-service, but pays off on the long run if you plan to have more than a dozen of micro-services.
 
-### Is Hephaestus a silver bullet for every project?
+### Is Anvlet a silver bullet for every project?
 
-No. We are very clear that Hephaestus is focused on **Event-Oriented, Domain-Driven, Decoupled MicroServices, with a Delivery-Usecase-Repository architecture and SQL Databases**. It may be used in other cases, but we don't give support for these other cases.
+No. We are very clear that Anvlet is focused on **Event-Oriented, Domain-Driven, Decoupled MicroServices, with a Delivery-Usecase-Repository architecture and SQL Databases**. It may be used in other cases, but we don't give support for these other cases.
 
-### Can Hephaestus be used for monoliths?
+### Can Anvlet be used for monoliths?
 
 Sure, it probably will work great with monoliths too, since they kinda are "big micro-services", we don't guarantee that it will be perfect, but for sure it will help.
 
-### Can Hephaestus be used with NoSql databases?
+### Can Anvlet be used with NoSql databases?
 
-You kinda can if you have the right plugin, but the schema is not and will not be designed for the specific needs that a NoSql database have. If you want to use a NoSql database as a SQL database, Hephaestus will probably fit your needs.
+You kinda can if you have the right plugin, but the schema is not and will not be designed for the specific needs that a NoSql database have. If you want to use a NoSql database as a SQL database, Anvlet will probably fit your needs.
 
-### Why does Hephaestus hates creativity, free thinking and innovation?
+### Why does Anvlet hates creativity, free thinking and innovation?
 
 We don't hate it, but the main goal of any company is to serve their clients well, and all things that doesn't reach of this goal is a waste of time and money.
 
@@ -69,42 +69,42 @@ For a while, companies had the philosophy of "let every team work on it's own wa
 
 It forces companies to have multiple developers, that spend most of their time doing things to keep the plates spinning, and don't generate any value for the clients.
 
-We all are here to work, to get a job done, and not to play games and do hobby projects. With Hephaestus, you can centralize and unify how your teams work. All your services will have the same patterns. Want to change anything? Don't do it one by one, do it all at once, this way you know that all of them are secure and reliable.
+We all are here to work, to get a job done, and not to play games and do hobby projects. With Anvlet, you can centralize and unify how your teams work. All your services will have the same patterns. Want to change anything? Don't do it one by one, do it all at once, this way you know that all of them are secure and reliable.
 
-### Why is Hephaestus written in Golang?
+### Why is Anvlet written in Golang?
 
 Because [Henrique Leite](https://www.linkedin.com/in/henriqueleite42/), the initial main contributor, didn't knew how to effectively write Rust at the time, but we do want to migrate it to Rust someday.
 
-## How Hephaestus work
+## How Anvlet work
 
-Hephaestus has 4 main parts, each one responsible for a specific complementary role.
+Anvlet has 4 main parts, each one responsible for a specific complementary role.
 
-### `*.hpt` files
+### `*.anv` files
 
-The schema definition is a `.hpt` file that describes a domain of your service. Each project (micro-service) can have multiple domains in it, and they can be related or not (ideally, if they are in the same project, they should be).
+The schema definition is a `.anv` file that describes a domain of your service. Each project (micro-service) can have multiple domains in it, and they can be related or not (ideally, if they are in the same project, they should be).
 
-Think about the `.hpt` files like a `schema.prisma` or an OpenApi spec, and from this we generate an infinity of things.
+Think about the `.anv` files like a `schema.prisma` or an OpenApi spec, and from this we generate an infinity of things.
 
-### `.hephaestusconfig`
+### `.anvletconfig`
 
-`.hephaestusconfig` is the configuration file for Hephaestus, where you put information like the plugins that you are using, the things that you want to generate, and any other configuration that Hephaestus CLI or the plugins may need.
+`.anvletconfig` is the configuration file for Anvlet, where you put information like the plugins that you are using, the things that you want to generate, and any other configuration that Anvlet CLI or the plugins may need.
 
 It is written in [TOML](https://toml.io/en/).
 
 ### CLI
 
-The CLI is the way that you interact with all Hephaestus things. You can use it to validate your files, generate things, install plugins, run your migrations, and much more.
+The CLI is the way that you interact with all Anvlet things. You can use it to validate your files, generate things, install plugins, run your migrations, and much more.
 
 It's designed to work with CI/CD too 🙌
 
 ### Generators
 
-Generators allows you to generate code based on a `.hpt` config. They come in various shapes and sizes, and can be used for practically anything:
+Generators allows you to generate code based on a `.anv` config. They come in various shapes and sizes, and can be used for practically anything:
 - Generate an microservice with a specific code pattern, that uses a specific set of libraries
 - Generate e2e tests
 - Generate changelogs
 
-Generator are were the magic oh Hephaestus happens.
+Generator are were the magic oh Anvlet happens.
 
 ## Meaning
 

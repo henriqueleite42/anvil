@@ -1,4 +1,4 @@
-module github.com/anuntech/hephaestus
+module github.com/anvlet/anvlet
 
 go 1.22.4
 

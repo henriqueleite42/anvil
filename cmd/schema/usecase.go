@@ -7,7 +7,6 @@ type MethodDeliveryGrpc_Example struct {
 }
 
 type MethodDeliveryGrpc struct {
-	Client   *bool                                  `yaml:"Client,omitempty"`
 	Examples map[string]*MethodDeliveryGrpc_Example `yaml:"Examples,omitempty"`
 }
 
@@ -29,5 +28,6 @@ type Method struct {
 
 type Usecase struct {
 	Dependencies map[string]*Dependency `yaml:"Dependencies,omitempty"`
+	Inputs       map[string]*Dependency `yaml:"Inputs,omitempty"`
 	Methods      map[string]*Method     `yaml:"Methods,omitempty"`
 }

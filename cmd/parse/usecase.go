@@ -3,7 +3,7 @@ package parse
 import (
 	"errors"
 
-	"github.com/anuntech/hephaestus/cmd/schema"
+	"github.com/anvlet/anvlet/cmd/schema"
 )
 
 func usecase(s *schema.Schema, yaml map[string]any) error {
@@ -28,6 +28,21 @@ func usecase(s *schema.Schema, yaml map[string]any) error {
 			}
 
 			dependencies[k] = dependency
+		}
+	}
+
+	var inputs map[string]*schema.Dependency = nil
+	inputsMap, ok := yamlInterface["Inputs"].(map[string]any)
+	if ok {
+		inputs = map[string]*schema.Dependency{}
+		for k, v := range inputsMap {
+			vMap := v.(map[string]any)
+			dependency, err := parseDependency(vMap)
+			if err != nil {
+				return errors.New("fail to parse Repository Input")
+			}
+
+			inputs[k] = dependency
 		}
 	}
 
@@ -62,15 +77,9 @@ func usecase(s *schema.Schema, yaml map[string]any) error {
 
 			delivery = &schema.MethodDelivery{}
 			if grpcAny, ok := deliveryMap["Grpc"]; ok {
-				var client *bool = nil
 				examples := map[string]*schema.MethodDeliveryGrpc_Example{}
 
 				if grpcMap, ok := grpcAny.(map[string]any); ok {
-					if clientAny, ok := grpcMap["Client"]; ok {
-						clientBool := clientAny.(bool)
-						client = &clientBool
-					}
-
 					if examplesAny, ok := grpcMap["Examples"]; ok {
 						examplesMap := examplesAny.(map[string]any)
 						for k, v := range examplesMap {
@@ -99,7 +108,6 @@ func usecase(s *schema.Schema, yaml map[string]any) error {
 				}
 
 				delivery.Grpc = &schema.MethodDeliveryGrpc{
-					Client:   client,
 					Examples: examples,
 				}
 			}
@@ -136,6 +144,7 @@ func usecase(s *schema.Schema, yaml map[string]any) error {
 
 	s.Usecase = &schema.Usecase{
 		Dependencies: dependencies,
+		Inputs:       inputs,
 		Methods:      methods,
 	}
 

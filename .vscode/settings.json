@@ -1,11 +1,10 @@
 {
 	"files.associations": {
-    "*.hpt": "yaml",
+    "*.anv": "yaml",
   },
 	"cSpell.words": [
-		"anuntech",
-		"hephaestus",
-		"hephaestusconfig",
+		"anvlet",
+		"anvletconfig",
 		"proto",
 		"Protofile",
 		"Protofiles",

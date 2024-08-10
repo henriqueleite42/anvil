@@ -1,6 +1,6 @@
 package parse
 
-import "github.com/anuntech/hephaestus/cmd/schema"
+import "github.com/anvlet/anvlet/cmd/schema"
 
 func file(data map[string]any) (*schema.Schema, error) {
 	schema := schema.Schema{}

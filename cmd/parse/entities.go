@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/anuntech/hephaestus/cmd/schema"
+	"github.com/anvlet/anvlet/cmd/schema"
 )
 
 func getEntityIndexes(key string, data any) ([]*schema.Entity_Index, error) {
@@ -53,13 +53,13 @@ func getEntityForeignKeys(key string, data any) ([]*schema.Entity_ForeignKey, er
 			return nil, errors.New("fail to parse Entities." + key + ".ForeignKeys." + strconv.Itoa(k))
 		}
 
-		var column string
-		if val, ok := vMap["Column"]; ok {
-			valString, ok := val.(string)
-			if !ok {
-				return nil, errors.New("fail to parse Entities." + strconv.Itoa(k) + ".Column")
+		var columns []string = nil
+		if val, ok := vMap["Columns"]; ok {
+			columns = []string{}
+			valSlice := val.([]any)
+			for _, v := range valSlice {
+				columns = append(columns, v.(string))
 			}
-			column = valString
 		}
 
 		var refTable string
@@ -71,13 +71,13 @@ func getEntityForeignKeys(key string, data any) ([]*schema.Entity_ForeignKey, er
 			refTable = valString
 		}
 
-		var refColumn string
-		if val, ok := vMap["RefColumn"]; ok {
-			valString, ok := val.(string)
-			if !ok {
-				return nil, errors.New("fail to parse Entities." + strconv.Itoa(k) + ".Column")
+		var refColumns []string = nil
+		if val, ok := vMap["RefColumns"]; ok {
+			refColumns = []string{}
+			valSlice := val.([]any)
+			for _, v := range valSlice {
+				refColumns = append(refColumns, v.(string))
 			}
-			refColumn = valString
 		}
 
 		var onDelete *string = nil
@@ -99,11 +99,11 @@ func getEntityForeignKeys(key string, data any) ([]*schema.Entity_ForeignKey, er
 		}
 
 		foreignKeys = append(foreignKeys, &schema.Entity_ForeignKey{
-			Column:    column,
-			RefTable:  refTable,
-			RefColumn: refColumn,
-			OnDelete:  onDelete,
-			OnUpdate:  onUpdate,
+			Columns:    columns,
+			RefTable:   refTable,
+			RefColumns: refColumns,
+			OnDelete:   onDelete,
+			OnUpdate:   onUpdate,
 		})
 	}
 

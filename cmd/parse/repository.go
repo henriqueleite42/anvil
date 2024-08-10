@@ -3,7 +3,7 @@ package parse
 import (
 	"errors"
 
-	"github.com/anuntech/hephaestus/cmd/schema"
+	"github.com/anvlet/anvlet/cmd/schema"
 )
 
 func repository(s *schema.Schema, yaml map[string]any) error {

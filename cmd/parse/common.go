@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/anuntech/hephaestus/cmd/schema"
+	"github.com/anvlet/anvlet/cmd/schema"
 )
 
 func resolveField(s *schema.Schema, v map[string]any) (map[string]*schema.Field, error) {
@@ -112,6 +112,7 @@ func resolveField(s *schema.Schema, v map[string]any) (map[string]*schema.Field,
 		var values map[string]string = nil
 		if fieldType == schema.FieldType_Enum || fieldType == schema.FieldType_ListEnum {
 			if val, ok := vvMap["Values"]; ok {
+				values = map[string]string{}
 				valMap := val.(map[string]any)
 
 				ref, ok := valMap["$ref"]
@@ -133,13 +134,13 @@ func resolveField(s *schema.Schema, v map[string]any) (map[string]*schema.Field,
 						return nil, errors.New(refString + ": fail to find entity")
 					}
 
-					values = enumVals
-				} else {
-					enumVals := map[string]string{}
-					for kkk, vvv := range valMap {
-						enumVals[kkk] = vvv.(string)
+					for _, vvv := range enumVals.Values {
+						values[vvv.Name] = vvv.Value
 					}
-					values = enumVals
+				} else {
+					for kkk, vvv := range valMap {
+						values[kkk] = vvv.(string)
+					}
 				}
 			} else {
 				return nil, errors.New(kk + " (Enum | List[Enum]) needs Values")

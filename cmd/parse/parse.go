@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/anuntech/hephaestus/cmd/schema"
+	"github.com/anvlet/anvlet/cmd/schema"
 	"gopkg.in/yaml.v3"
 )
 

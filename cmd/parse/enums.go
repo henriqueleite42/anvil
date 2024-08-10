@@ -2,39 +2,68 @@ package parse
 
 import (
 	"errors"
+	"strconv"
 
-	"github.com/anuntech/hephaestus/cmd/schema"
+	"github.com/anvlet/anvlet/cmd/schema"
 )
 
 func enums(s *schema.Schema, yaml map[string]any) error {
-	enums, ok := yaml["Enums"]
+	enumsYaml, ok := yaml["Enums"]
 	if !ok {
 		return nil
 	}
 
-	yamlInterface, ok := enums.(map[string]any)
+	yamlInterface, ok := enumsYaml.(map[string]any)
 	if !ok {
 		return errors.New("fail to parse Enums")
 	}
 
 	schemaEnums := schema.Enums{}
 	for k, v := range yamlInterface {
-		enum := map[string]string{}
+		if k == "$ref" {
+			return errors.New("cannot use $ref in Enums")
+		}
 
-		enumParsed, ok := v.(map[string]any)
+		vMap, ok := v.(map[string]any)
 		if !ok {
 			return errors.New("fail to parse Enums." + k)
 		}
 
-		for kk, vv := range enumParsed {
-			enumVal, ok := vv.(string)
-			if !ok {
-				return errors.New("fail to parse Enums." + k + "." + kk)
-			}
-			enum[kk] = enumVal
+		var fieldType string
+		if val, ok := vMap["Type"]; ok {
+			fieldType = val.(string)
 		}
 
-		schemaEnums[k] = enum
+		var values []*schema.EnumValue = nil
+		if val, ok := vMap["Values"]; ok {
+			valSlice := val.([]any)
+			for kk, vv := range valSlice {
+				vvMap, ok := vv.(map[string]any)
+				if !ok {
+					return errors.New("fail to parse Enums." + k + ".Values." + strconv.Itoa(kk))
+				}
+
+				var name string
+				if val, ok := vvMap["Name"]; ok {
+					name = val.(string)
+				}
+
+				var value string
+				if val, ok := vvMap["Value"]; ok {
+					value = val.(string)
+				}
+
+				values = append(values, &schema.EnumValue{
+					Name:  name,
+					Value: value,
+				})
+			}
+		}
+
+		schemaEnums[k] = &schema.Enum{
+			Type:   fieldType,
+			Values: values,
+		}
 	}
 
 	s.Enums = &schemaEnums

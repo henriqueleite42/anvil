@@ -12,9 +12,9 @@ var (
 	schemaFile string // Used for flags.
 
 	rootCmd = &cobra.Command{
-		Use:   "hephaestus",
+		Use:   "anvlet",
 		Short: "God of micro-services generation",
-		Long:  `hephaestus allows you to generate micro-services from schema definitions, helping you to standardize everything, avoiding human error, decreasing the learning curve and saving lots of time and money.`,
+		Long:  `anvlet allows you to generate micro-services from schema definitions, helping you to standardize everything, avoiding human error, decreasing the learning curve and saving lots of time and money.`,
 	}
 )
 
