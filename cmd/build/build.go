@@ -6,6 +6,7 @@ import (
 
 	"github.com/anvlet/anvlet/cmd/config"
 	"github.com/anvlet/anvlet/cmd/schema"
+	"github.com/anvlet/anvlet/internal/generator_grpc"
 	"gopkg.in/yaml.v3"
 )
 
@@ -43,6 +44,12 @@ func Build(schemaFile string, schema *schema.Schema) {
 	}
 
 	_, err = f.Write(d)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	// Temporary, hardcoded to generate what we need for now, MVP
+	err = generator_grpc.Generate(schema)
 	if err != nil {
 		panic(err.Error())
 	}

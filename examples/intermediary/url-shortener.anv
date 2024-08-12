@@ -1,0 +1,76 @@
+# yaml-language-server: $schema=../../schemas/v1.0.0.json
+
+Domain: UrlShortener
+
+Metadata:
+  Description: |
+    Shorts URLs
+  Servers:
+    Prod:
+      Url: https://example-url-shortener.com
+
+Entities:
+  ColumnsCase: snake
+  Entities:
+    Url:
+      Name: urls
+      Description: |
+        Stores the shortened urls
+      Columns:
+        Id:
+          Type: String
+          DbType: CHAR(16)
+        OriginalUrl:
+          Type: String
+          DbType: VARCHAR(1000)
+        CreatedAt:
+          Type: Timestamp
+          DbType: Timestampz
+      PrimaryKeys:
+        - Id
+
+Repository:
+  Methods:
+    Create:
+      Input:
+        OriginalUrl:
+          Type: String
+          Validate:
+            - url
+      Output:
+        $ref: Entities.Url
+    GetById:
+      Output:
+        $ref: Entities.Url
+
+Usecase:
+  Methods:
+    Create:
+      Input:
+        OriginalUrl:
+          Type: String
+          Validate:
+            - url
+      Output:
+        $ref: Entities.Url
+      Delivery:
+        Http:
+          Method: POST
+          Path: /shorten
+    Redirect:
+      Description: |
+        Redirects based on a Url ID
+      Input:
+        Id:
+          Type: String
+      Output:
+        Location:
+          Type: String
+      Delivery:
+        Http:
+          StatusCode: 303 # Because the `StatusCode` is 303, the `body` of the response will not be returned.
+          Method: GET
+          Path: /r/{Id} # Automatic links to the `Input` instead of getting from the request body.
+          ResHeaders:
+            Location: # Automatically formatted to header style, like `CacheControl -> Cache-Control`
+              $outputRef: Location # Links `Output.Location` to this value

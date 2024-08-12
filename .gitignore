@@ -30,4 +30,5 @@ go.work
 
 # Development
 *.anv
+!/examples/**/*.anv
 /anvlet

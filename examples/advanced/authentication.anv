@@ -1,0 +1,131 @@
+# yaml-language-server: $schema=../../schemas/v1.0.0.json
+
+Domain: Authentication
+
+Metadata:
+  Description: |
+    Handles with user creation and authentication
+  Servers:
+    Prod:
+      Url: https://example-authentication.com
+
+Fields:
+  UserId:
+    Type: Int
+  UserEmail:
+    Type: String
+    Validate:
+      - email
+    Confidentiality: MEDIUM
+  UserPassword:
+    Type: String
+    Confidentiality: HIGH
+  UserPasswordEncrypted:
+    Type: String
+    Encoded: bcrypt
+    Confidentiality: HIGH
+
+Events:
+  UserCreated:
+    Formats:
+      - json
+    Fields:
+      UserId:
+        $ref: Fields.UserId
+
+Entities:
+  ColumnsCase: snake
+  Entities:
+    User:
+      Name: users
+      Description: |
+        User data
+      Columns:
+        Id:
+          $ref: Fields.UserId
+        Email:
+          $ref: Fields.UserEmail
+        Password:
+          $ref: Fields.UserPasswordEncrypted
+        CreatedAt:
+          Type: Timestamp
+          DbType: Timestampz
+      PrimaryKeys:
+        - Id
+
+Repository:
+  Dependencies:
+    Logger:
+      Import:
+        Path: my-super-log-library # This can be a Golag library, NPM library, a local file, your choice! Just check the documentation of your generator to see how it will handle it.
+      Type: logger
+
+  Inputs:
+    Transaction: # This is just an example, for transactions would be better to have a generator that was a way to pass context to your method.
+      Import:
+        Path: database/sql # Golang standard sql library
+      Type: "*sql.Tx" # Golang pointer for a transaction
+
+  Methods:
+    Create:
+      Input:
+        Email:
+          $ref: Fields.UserEmail
+        Password:
+          # Here we receive the original password, because it's responsability of the repository to encrypt it.
+          $ref: Fields.UserPassword
+      Output:
+        $ref: Entities.User
+    GetByEmail:
+      Input:
+        Email:
+          $ref: Fields.UserEmail
+      Output:
+        $ref: Entities.User
+
+Usecase:
+  Dependencies:
+    Logger:
+      Import:
+        Path: my-super-log-library # This can be a Golag library, NPM library, a local file, your choice! Just check the documentation of your generator to see how it will handle it.
+      Type: logger
+
+  Methods:
+    Create:
+      Input:
+        # You could create a shared type between the repository and the usecase, since they receive the same things,
+        # but we do not recommend this kind of use for `Types`. Usecase and Repository should not have the same inputs,
+        # since the usecase can receive extra parameters that you may want to do some kind of formatting.
+        Email:
+          $ref: Fields.UserEmail
+        Password:
+          $ref: Fields.UserPassword
+      Output:
+        Id:
+          $ref: Fields.UserId
+      Events:
+        - UserCreated
+      Delivery:
+        Grpc: {}
+    Login:
+      Input:
+        Email:
+          $ref: Fields.UserEmail
+        Password:
+          $ref: Fields.UserPassword
+      Output:
+        Id:
+          $ref: Fields.UserId
+      Delivery:
+        Grpc: {} # You can have different deliveries for the same usecase. Different methods don't have to have the same deliveries.
+        Http:
+          Status: 204 # Because the status is 204, the body will not be returned. If the status was 201, the body would be returned.
+          Method: POST
+          Path: /login
+          ResHeaders:
+            Authentication:
+              $outputRef: Id
+            # If you want to return a header like `Bearer {something}`,
+            # you must not use references, you must write it like this:
+            # Authentication:
+            #     Type: String

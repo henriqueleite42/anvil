@@ -6,6 +6,26 @@ It follows an _schema-first_ approach, of instead of writing your code first, yo
 
 The schema is designed for **Event-Oriented, Domain-Driven, Decoupled MicroServices, with a Delivery-Usecase-Repository architecture and SQL Databases**. It still can be used for monoliths and other types of architectures, but we don't maintain the schema to be extremely flexible and a silver bullet for all the projects. Or goal here **IS NOT** to allow creativity, is to have a way to create scalable, secure and maintainable applications.
 
+## How Anvlet can help you
+
+- Documentation tool:
+  - Were data is used across your whole system and projects
+  - If data is condidential / has any legal protection
+  - Which services and domains depends on each other
+  - Which events and routes does a service has, so you can subiscrive to them without having to communicate with the owner team, making process faster
+- Code generation tool:
+  - Define your own project pattern and generate projects on your own way
+  - Ensure that developers follow a specific pattern
+  - Keep dependencies updated across all your projects
+  - Ensure that best practicies / your practices are beign followed
+  - Automatic integrate observability tools, logging, anything you want, on your projects, by default
+  - Ensure standards on variable names, event names and patterns, folder structe and project architecture
+- Refactoring tool:
+  - Want to refactor an old project in a new language / pattern? Use the same schema, a different generator, and you only have to copy-paste / do smll adjusts on the business logic. Decrease the refactoring time by an imensurable amount of time.
+  - Test the same project on different languages and architectures, to see which one is the best. Use one schema, different generators, and generate the same API in multiple languages in a fraction of the time that it would took.
+
+Anvlet allows you to write once, document and generate everywere. Once that you have your schema defined, a lot of doors opens to you.
+
 ## What INS'T Anvlet
 
 - Something to control/create/update your infrastructure like CloudFormation, Terraform or Serverless Framework

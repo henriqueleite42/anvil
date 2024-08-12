@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=../../schemas/v1.0.0.json
+
+Domain: Counter
+
+Entities:
+  ColumnsCase: snake
+  Entities:
+    Request:
+      Name: requests
+      Description: |
+        Save when a request is made
+      Columns:
+        Id:
+          Type: Int
+        CreatedAt:
+          Type: Timestamp
+          DbType: Timestampz
+      PrimaryKeys:
+        - Id
+
+Repository:
+  Methods:
+    Create:
+      Description: |
+        Creates a new record of a request is made
+      Output:
+        $ref: Entities.Request
+    GetCount:
+      Description: |
+        Returns the amount of requests made
+      Output:
+        Total:
+          Type: Int
+
+Usecase:
+  Methods:
+    GetCount:
+      Description: |
+        Creates a record of the request and returns the total of requests made
+      Output:
+        Total:
+          Type: Int
+      Delivery:
+        Http:
+          Method: GET
+          Path: /hello-world

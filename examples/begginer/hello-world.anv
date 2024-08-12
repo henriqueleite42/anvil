@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=../../schemas/v1.0.0.json
+
+Domain: HelloWorld
+
+Usecase:
+  Methods:
+    HelloWorld:
+      Description: |
+        Returns a hello world message
+      Output:
+        Message:
+          Type: String
+      Delivery:
+        Http:
+          Method: GET
+          Path: /hello-world
