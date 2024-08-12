@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/anvlet/anvlet/cmd/schema"
+	"github.com/anvil/anvil/cmd/schema"
 )
 
 const protofileTempl = `

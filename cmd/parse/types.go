@@ -3,7 +3,7 @@ package parse
 import (
 	"errors"
 
-	"github.com/anvlet/anvlet/cmd/schema"
+	"github.com/anvil/anvil/cmd/schema"
 )
 
 func types(s *schema.Schema, yaml map[string]any) error {

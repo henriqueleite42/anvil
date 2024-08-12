@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/anvlet/anvlet/cmd/schema"
+	"github.com/anvil/anvil/cmd/schema"
 )
 
 func getEntityIndexes(key string, data any) ([]*schema.Entity_Index, error) {

@@ -3,8 +3,8 @@
     "*.anv": "yaml",
   },
 	"cSpell.words": [
-		"anvlet",
-		"anvletconfig",
+		"anvil",
+		"anvilconfig",
 		"proto",
 		"Protofile",
 		"Protofiles",

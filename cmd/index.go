@@ -12,9 +12,9 @@ var (
 	schemaFile string // Used for flags.
 
 	rootCmd = &cobra.Command{
-		Use:   "anvlet",
+		Use:   "anvil",
 		Short: "God of micro-services generation",
-		Long:  `anvlet allows you to generate micro-services from schema definitions, helping you to standardize everything, avoiding human error, decreasing the learning curve and saving lots of time and money.`,
+		Long:  `anvil allows you to generate micro-services from schema definitions, helping you to standardize everything, avoiding human error, decreasing the learning curve and saving lots of time and money.`,
 	}
 )
 

@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/anvlet/anvlet/cmd/schema"
+	"github.com/anvil/anvil/cmd/schema"
 	"gopkg.in/yaml.v3"
 )
 

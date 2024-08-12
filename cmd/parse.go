@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/anvlet/anvlet/cmd/parse"
+	"github.com/anvil/anvil/cmd/parse"
 	"github.com/spf13/cobra"
 )
 

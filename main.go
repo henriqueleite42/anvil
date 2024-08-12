@@ -1,6 +1,6 @@
 package main
 
-import "github.com/anvlet/anvlet/cmd"
+import "github.com/anvil/anvil/cmd"
 
 func main() {
 	cmd.Execute()

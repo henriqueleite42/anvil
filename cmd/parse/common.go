@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/anvlet/anvlet/cmd/schema"
+	"github.com/anvil/anvil/cmd/schema"
 )
 
 func resolveField(s *schema.Schema, v map[string]any) (map[string]*schema.Field, error) {

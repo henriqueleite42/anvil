@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/anvlet/anvlet/cmd/schema"
+	"github.com/anvil/anvil/cmd/schema"
 )
 
 func enums(s *schema.Schema, yaml map[string]any) error {

@@ -1,4 +1,4 @@
-module github.com/anvlet/anvlet
+module github.com/anvil/anvil
 
 go 1.22.4
 
