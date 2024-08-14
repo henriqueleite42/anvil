@@ -4,6 +4,10 @@
 
 Critical and necessary features that are crucial for the project to be used internally.
 
+## Parser
+
+Parse `.anv` files to `.anvp` files(_anvil processed files_). Theses files will be the resolved value of the `.anv` file, with all the standard rules that we apply to the schema.
+
 ### Generator gRPC
 
 Generates a proto file for your project.
@@ -87,9 +91,15 @@ A git-like way to save changes on the functions and know what has changed.
 
 Generates a CHANGELOG.md with the changes in the `.anv` files
 
-### Allows for the cli to read other kinds of files, nopt only YAML
+### Allows for the cli to read other kinds of files, not only YAML
 
 Allow for config files in JSON and XML
+
+### Add a more robust authentication
+
+Implement all authentication forms supported by [OpenApi](https://learn.openapis.org/specification/security.html) and more, like AWS Credentials / IAM.
+
+Allow the schema to get properties from the authentication, like the UserId.
 
 ### Online platform - v1
 

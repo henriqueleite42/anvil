@@ -73,10 +73,10 @@ func resolveField(s *schema.Schema, v map[string]any) (map[string]*schema.Field,
 			valString := val.(string)
 			dbType = &valString
 		}
-		var encoded *string = nil
-		if val, ok := vvMap["Encoded"]; ok {
+		var format *string = nil
+		if val, ok := vvMap["Format"]; ok {
 			valString := val.(string)
-			encoded = &valString
+			format = &valString
 		}
 		var optional bool
 		if val, ok := vvMap["Optional"]; ok {
@@ -150,7 +150,7 @@ func resolveField(s *schema.Schema, v map[string]any) (map[string]*schema.Field,
 		methodField[kk] = &schema.Field{
 			Type:            fieldType,
 			DbType:          dbType,
-			Encoded:         encoded,
+			Format:          format,
 			Optional:        optional,
 			Confidentiality: confidentiality,
 			Validate:        validate,

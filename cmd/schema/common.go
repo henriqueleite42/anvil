@@ -38,7 +38,7 @@ type Field struct {
 	Type            FieldType            `yaml:"Type"`
 	Confidentiality FieldConfidentiality `yaml:"Confidentiality"`
 	Optional        bool                 `yaml:"Optional"`
-	Encoded         *string              `yaml:"Encoded,omitempty"`
+	Format          *string              `yaml:"Format,omitempty"`
 	DbType          *string              `yaml:"DbType,omitempty"`
 	Validate        []string             `yaml:"Validate,omitempty"`
 	// Used for Map and List[Map]

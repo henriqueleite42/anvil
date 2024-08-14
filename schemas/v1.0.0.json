@@ -38,7 +38,7 @@
 					"type": "boolean",
 					"descruption": "If the field is optional or not. By default, every field is required."
 				},
-				"Encoded": {
+				"Format": {
 					"type": "string",
 					"description": "If the values is encoded/encrypted/formatted/transformed in any way, like a string json object, base64 image, RFC3339 timestamp, bcrypt password."
 				},
@@ -138,6 +138,28 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"HttpExample": {
+			"type": "object",
+			"description": "Specification for the HTTP request/response",
+			"properties": {
+				"Body": {
+					"type": "object",
+					"description": "Body of the request/response"
+				},
+				"Query": {
+					"type": "object",
+					"description": "Query params of the request/response"
+				},
+				"Path": {
+					"type": "object",
+					"description": "Path params of the request/response"
+				},
+				"Headers": {
+					"type": "object",
+					"description": "Headers of the request/response"
+				}
+			}
 		}
 	},
 	"properties": {
@@ -199,6 +221,40 @@
 				}
 			}
 		},
+		"Auth": {
+			"type": "object",
+			"description": "Definition of authentication and authorization",
+			"patternProperties": {
+				"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+					"type": "object",
+					"properties": {
+						"Description": {
+							"type": "string",
+							"description": "Description for the authentication type."
+						},
+						"Scheme": {
+							"type": "string",
+							"description": "The scheme/type of authentication/authorization",
+							"enum": [
+								"Bearer",
+								"Basic"
+							]
+						},
+						"Format": {
+							"type": "string",
+							"description": "Special format for the auth, like JWT for Bearer"
+						},
+						"ApplyToAllRoutes": {
+							"type": "boolean",
+							"description": "If it should be applied to all routes by default. Default value is `false`."
+						}
+					},
+					"required": [
+						"Scheme"
+					]
+				}
+			}
+		},
 		"Enums": {
 			"type": "object",
 			"description": "Description of string or integer types with fixed values.",
@@ -215,9 +271,9 @@
 							]
 						},
 						"Values": {
-							"type": "array",
+							"type": "object",
 							"description": "The key value pair of the enum, with aditional config if necessary",
-							"items": {
+							"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
 								"type": "object",
 								"properties": {
 									"Name": {
@@ -229,6 +285,9 @@
 										"description": "The value of the enum. Usually used by the generators to create values in the database and code."
 									}
 								},
+								"required": [
+									"Values"
+								],
 								"additionalProperties": false
 							}
 						}
@@ -735,6 +794,27 @@
 																	}
 																}
 															]
+														}
+													}
+												},
+												"Auth": {
+													"type": "string",
+													"description": "$ref to Auth. Applies it to this route."
+												},
+												"Examples": {
+													"type": "object",
+													"description": "Examples of requests and their responses",
+													"properties": {
+														"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+															"type": "object",
+															"properties": {
+																"Req": {
+																	"$ref": "#/$defs/HttpExample"
+																},
+																"Res": {
+																	"$ref": "#/$defs/HttpExample"
+																}
+															}
 														}
 													}
 												}

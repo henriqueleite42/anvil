@@ -10,21 +10,21 @@ The schema is designed for **Event-Oriented, Domain-Driven, Decoupled MicroServi
 
 - Documentation tool:
   - Were data is used across your whole system and projects
-  - If data is condidential / has any legal protection
+  - If data is confidential / has any legal protection
   - Which services and domains depends on each other
-  - Which events and routes does a service has, so you can subiscrive to them without having to communicate with the owner team, making process faster
+  - Which events and routes does a service has, so you can subscribe to them without having to communicate with the owner team, making process faster
 - Code generation tool:
   - Define your own project pattern and generate projects on your own way
   - Ensure that developers follow a specific pattern
   - Keep dependencies updated across all your projects
-  - Ensure that best practicies / your practices are beign followed
+  - Ensure that best practices / your practices are begin followed
   - Automatic integrate observability tools, logging, anything you want, on your projects, by default
-  - Ensure standards on variable names, event names and patterns, folder structe and project architecture
+  - Ensure standards on variable names, event names and patterns, folder structure and project architecture
 - Refactoring tool:
-  - Want to refactor an old project in a new language / pattern? Use the same schema, a different generator, and you only have to copy-paste / do smll adjusts on the business logic. Decrease the refactoring time by an imensurable amount of time.
+  - Want to refactor an old project in a new language / pattern? Use the same schema, a different generator, and you only have to copy-paste / do small adjusts on the business logic. Decrease the refactoring time by an immensurable amount of time.
   - Test the same project on different languages and architectures, to see which one is the best. Use one schema, different generators, and generate the same API in multiple languages in a fraction of the time that it would took.
 
-Anvil allows you to write once, document and generate everywere. Once that you have your schema defined, a lot of doors opens to you.
+Anvil allows you to write once, document and generate everywhere. Once that you have your schema defined, a lot of doors opens to you.
 
 ## What INS'T Anvil
 
@@ -35,15 +35,15 @@ Anvil allows you to write once, document and generate everywere. Once that you h
 
 ## Why use Anvil
 
-In large organizations, we usually have hundreds or even thousands of micro-services, teams, events, packages and team members changing teams in a daily basis. It's very hard and demanding to maintain everything, to share these knowledge of the best practices, to ensure that all developers not only know how to implement certain patterns but know the way that the company implements certain patterns.
-
-Anvil is created for these kind of ecosystems. It allows you to have one centralized small team of extremely capable developers that say how the things will work, define rules, best practices, standard libraries, and everything else that you need or want to defined, and all the other teams and members of your organization will follow these rules and patterns.
-
 **TL;DR**
 Anvil will help you to:
 - Need less developers to accomplish the same (probably even best) results
 - Decrease the amount of time that it takes to create new products and features, without having to compromise the quality and security of the software
 - Better divide the responsibilities of your team, to get the best that they can offer and not needing so many experienced developers to create amazing products
+
+In large organizations, we usually have hundreds or even thousands of micro-services, teams, events, packages and team members changing teams in a daily basis. It's very hard and demanding to maintain everything, to share these knowledge of the best practices, to ensure that all developers not only know how to implement certain patterns but know the way that the company implements certain patterns.
+
+Anvil is created for these kind of ecosystems. It allows you to have one centralized small team of extremely capable developers that say how the things will work, define rules, best practices, standard libraries, and everything else that you need or want to defined, and all the other teams and members of your organization will follow these rules and patterns.
 
 ## How Anvil does these things?
 
@@ -90,10 +90,6 @@ For a while, companies had the philosophy of "let every team work on it's own wa
 It forces companies to have multiple developers, that spend most of their time doing things to keep the plates spinning, and don't generate any value for the clients.
 
 We all are here to work, to get a job done, and not to play games and do hobby projects. With Anvil, you can centralize and unify how your teams work. All your services will have the same patterns. Want to change anything? Don't do it one by one, do it all at once, this way you know that all of them are secure and reliable.
-
-### Why is Anvil written in Golang?
-
-Because [Henrique Leite](https://www.linkedin.com/in/henriqueleite42/), the initial main contributor, didn't knew how to effectively write Rust at the time, but we do want to migrate it to Rust someday.
 
 ## How Anvil work
 

@@ -8,6 +8,17 @@ Metadata:
   Servers:
     Prod:
       Url: https://example-authentication.com
+    Stg:
+      Url: https://staging.example-authentication.com
+
+Enums:
+  UserRole:
+    Type: String
+    Values:
+      Admin:
+        Value: ADMIN
+      Member:
+        Value: MEMBER
 
 Fields:
   UserId:
@@ -22,8 +33,26 @@ Fields:
     Confidentiality: HIGH
   UserPasswordEncrypted:
     Type: String
-    Encoded: bcrypt
+    Format: bcrypt
     Confidentiality: HIGH
+
+Types:
+  AuthOutput:
+    AccessToken:
+      Type: String
+      Format: JWT
+    ExpiresAt:
+      Type: Timestamp
+      Format: RFC3339
+    RefreshToken:
+      Type: String
+
+Auth: # Authentication & Authorization
+  Jwt:
+    Description: JWT Bearer authentication
+    Scheme: Bearer
+    Format: JWT
+    ApplyToAllRoutes: false # Unnecessary, false is already the default value
 
 Events:
   UserCreated:
@@ -47,6 +76,10 @@ Entities:
           $ref: Fields.UserEmail
         Password:
           $ref: Fields.UserPasswordEncrypted
+        Role:
+          Type: Enum
+          Values:
+            $ref: Enums.UserRole
         CreatedAt:
           Type: Timestamp
           DbType: Timestampz
@@ -101,31 +134,66 @@ Usecase:
         Password:
           $ref: Fields.UserPassword
       Output:
-        Id:
-          $ref: Fields.UserId
+        $ref: Types.AuthOutput # You can reference Types here, but not Fields or Enums directly. The same applyes for the Input.
       Events:
         - UserCreated
       Delivery:
         Grpc: {}
     Login:
+      # Here we could create a shared type between the methods `Create` and `Login`, but since their purposes are not the same
+      # (one creates a user and other logins in that user), we should not do it.
+      # We created the "Types.AtuhOutput" because it's purpose will always be the same were it's used: Return the necessary data
+      # for the user to be authenticated
       Input:
         Email:
           $ref: Fields.UserEmail
         Password:
           $ref: Fields.UserPassword
       Output:
-        Id:
-          $ref: Fields.UserId
+        $ref: Types.AuthOutput # You can reference Types here, but not Fields or Enums directly. The same applyes for the Input.
       Delivery:
-        Grpc: {} # You can have different deliveries for the same usecase. Different methods don't have to have the same deliveries.
+        Grpc: # You can have different deliveries for the same usecase. Different methods don't have to have the same deliveries.
+          Examples:
+            Success:
+              Message:
+                Email: foo@bar.com
+                Password: foo123
+              Returns:
+                AccessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+                ExpiresAt: 2024-08-13T13:16:14Z
+                RefreshToken: fkwfnpbqfgaugpshbpejejtmemzgidgw
         Http:
-          Status: 204 # Because the status is 204, the body will not be returned. If the status was 201, the body would be returned.
+          StatusCode: 204 # Because the status is 204, the body will not be returned. If the status was 201, the body would be returned.
           Method: POST
           Path: /login
           ResHeaders:
             Authentication:
-              $outputRef: Id
+              $outputRef: AccessToken # Notice that we access the resolved $ref directly
             # If you want to return a header like `Bearer {something}`,
             # you must not use references, you must write it like this:
             # Authentication:
             #     Type: String
+            SetCookies:
+              Type: String
+          Examples:
+            Success:
+              Req:
+                Body:
+                  Email: foo@bar.com
+                  Password: foo123
+              Res:
+                Headers:
+                  Authentication: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+                  SetCookie: expires_at=2024-08-13T13:16:14Z; refresh_token=fkwfnpbqfgaugpshbpejejtmemzgidgw;
+    GetMyData:
+      Input:
+        UserId:
+          $ref: Fields.UserId
+      Output:
+        Data:
+          $ref: Entities.User # Automatically censors things with `Confidentiality=HIGH`
+      Delivery:
+        Http:
+          Method: GET
+          Path: /accounts/@me
+          Auth: Jwt # Says that the auth will be JWT mode
