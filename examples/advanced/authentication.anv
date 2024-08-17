@@ -11,6 +11,20 @@ Metadata:
     Stg:
       Url: https://staging.example-authentication.com
 
+Imports:
+  Logger: # This can be a Golag library, NPM library, a local file, your choice! Just check the documentation of your generator to see how it will handle it.
+    Import: # Description about how to import it in code
+      Alias: logger
+      Path: path/used/in/code
+    Type: logger.Logger # Type used in code
+
+Auth: # Authentication & Authorization
+  Jwt:
+    Description: JWT Bearer authentication
+    Scheme: Bearer
+    Format: JWT
+    ApplyToAllRoutes: false # Unnecessary, false is already the default value
+
 Enums:
   UserRole:
     Type: String
@@ -47,13 +61,6 @@ Types:
     RefreshToken:
       Type: String
 
-Auth: # Authentication & Authorization
-  Jwt:
-    Description: JWT Bearer authentication
-    Scheme: Bearer
-    Format: JWT
-    ApplyToAllRoutes: false # Unnecessary, false is already the default value
-
 Events:
   UserCreated:
     Formats:
@@ -89,9 +96,11 @@ Entities:
 Repository:
   Dependencies:
     Logger:
+      $ref: Imports.Logger
+    OtherDep:
       Import:
-        Path: my-super-log-library # This can be a Golag library, NPM library, a local file, your choice! Just check the documentation of your generator to see how it will handle it.
-      Type: logger
+        Path: example/path
+      Type: example
 
   Inputs:
     Transaction: # This is just an example, for transactions would be better to have a generator that was a way to pass context to your method.
@@ -119,9 +128,7 @@ Repository:
 Usecase:
   Dependencies:
     Logger:
-      Import:
-        Path: my-super-log-library # This can be a Golag library, NPM library, a local file, your choice! Just check the documentation of your generator to see how it will handle it.
-      Type: logger
+      $ref: Imports.Logger
 
   Methods:
     Create:

@@ -47,49 +47,30 @@ Anvil is created for these kind of ecosystems. It allows you to have one central
 
 ## How Anvil does these things?
 
+Anvil by itself:
 - _Schema-first_ approaches help you to visualize the current state of your system in a very easy and fast way: Instead of having to understand code, the project pattern, searching in a bunch of files, go directly to the ONE file definition anf figure it out right away.
 - Instead of trying to reinvent the wheel, you can follow a standardized architecture that is scalable, clean, flexible, follows the best practices and allows the work to be divided in multiple steps that can be executed in parallel
 - Standardize all you micro-services to follow the exact same patterns for EVERYTHING, decreasing a lot the learning curve and the effort necessary to maintain them
 - Allows tracking and usage of confidential and private data, like user's emails, to complain with regulations
-- Automatically generates e2e tests, the most important tests, extremely useful for early stage startups that can't afford a QA or have enough time to implement more complex tests
-- Automatically generates `.proto` files for gRPC APIs and OpenAPI specs for REST APIs
+
+Anvil generators:
+- Generate e2e tests, useful for early stage startups that can't afford a QA or have enough time to implement more complex tests
+- Generate `.proto` files for gRPC APIs and OpenAPI specs for REST APIs
 - Generate database migrations and automatically handle them, begin able to easily see the current state of your database by looking at the schema file
 - Generate standardized clients for your APIs, with automatically generate `CHANGELOG.md`s that follows [SemVer](https://semver.org)
-- Allows for external plugins that allow for integration with other tools like Jira, Linear, Slack or your own custom system
-- Easy to change things at a global scale: Do not get stuck into a language or architecture anymore, if you want to change one day, it's 100x times easier and faster.
 - You are not stuck to Anvil. It's not a framework, it generates code that you have 100% control of. If you don't want to use Anvil anymore, it will have no impact on your systems.
+
+Anvil plugins:
+- Integration with other tools like Jira, Linear, Slack or your own custom system to send notifications / perform tasks
+- Easy to change things at a global scale: Do not get stuck into a language, framework or architecture anymore, if you want to change it one day, it will be 100x times easier and faster.
 
 ## F.A.Q.
 
-### Is Anvil ready to use right out the box?
+[See the F.A.Q. here.](./FAQ.md)
 
-If you are whiling to adopt one of the architectures proposed by one of ht existing generators, including the ones that we maintain, **yes!**
+## Examples
 
-If you want to implement your own architecture, with your own code patterns, so you will have to write your own generator, what is veeeery complex and time consuming compared to write a single micro-service, but pays off on the long run if you plan to have more than a dozen of micro-services.
-
-### Is Anvil a silver bullet for every project?
-
-No. We are very clear that Anvil is focused on **Event-Oriented, Domain-Driven, Decoupled MicroServices, with a Delivery-Usecase-Repository architecture and SQL Databases**. It may be used in other cases, but we don't give support for these other cases.
-
-### Can Anvil be used for monoliths?
-
-Sure, it probably will work great with monoliths too, since they kinda are "big micro-services", we don't guarantee that it will be perfect, but for sure it will help.
-
-### Can Anvil be used with NoSql databases?
-
-You kinda can if you have the right plugin, but the schema is not and will not be designed for the specific needs that a NoSql database have. If you want to use a NoSql database as a SQL database, Anvil will probably fit your needs.
-
-### Why does Anvil hates creativity, free thinking and innovation?
-
-We don't hate it, but the main goal of any company is to serve their clients well, and all things that doesn't reach of this goal is a waste of time and money.
-
-Innovation mainly, should not be part of the crucial systems of your company. Have a business is already risk and challenging enough already, you should keep things safe as much as you can, and not try to be different and try to innovate on the authentication service of your system. It's a crucial service, it MUST work 24/7 without bugs.
-
-For a while, companies had the philosophy of "let every team work on it's own way", because it was impossible to make everyone work as a single unit, but it leads to a mountain of technical debit, knowledge lost, malpractices and 1001 reinventions of the wheel.
-
-It forces companies to have multiple developers, that spend most of their time doing things to keep the plates spinning, and don't generate any value for the clients.
-
-We all are here to work, to get a job done, and not to play games and do hobby projects. With Anvil, you can centralize and unify how your teams work. All your services will have the same patterns. Want to change anything? Don't do it one by one, do it all at once, this way you know that all of them are secure and reliable.
+[See the examples here.](./examples.md)
 
 ## How Anvil work
 

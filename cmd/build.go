@@ -1,9 +1,12 @@
 package cmd
 
 import (
-	"github.com/anvil/anvil/cmd/build"
-	"github.com/anvil/anvil/cmd/parse"
+	"log"
+	"os"
+
+	"github.com/anvil/anvil/internal/parser"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 )
 
 func addBuildCommand(rootCmd *cobra.Command) {
@@ -13,9 +16,23 @@ func addBuildCommand(rootCmd *cobra.Command) {
 		Run: func(cmd *cobra.Command, args []string) {
 			schemaFile := cmd.Flag("schema").Value.String()
 
-			schema := parse.Parse(schemaFile)
+			schemaParser := parser.NewParser()
 
-			build.Build(schemaFile, schema)
+			fileData, err := os.ReadFile(schemaFile)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			data := make(map[string]any)
+			err = yaml.Unmarshal(fileData, &data)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			err = schemaParser.Parse(data)
+			if err != nil {
+				log.Fatal(err)
+			}
 		},
 	}
 
