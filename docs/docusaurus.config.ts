@@ -5,7 +5,7 @@ import type * as Preset from "@docusaurus/preset-classic";
 const config: Config = {
   title: "Anvil",
   tagline: "Easily create & maintain APIs",
-  favicon: "img/favicon.ico",
+  favicon: "img/logo.webp",
 
   // Set the production url of your site here
   url: "https://henriqueleite42.github.io",
@@ -53,14 +53,14 @@ const config: Config = {
       title: "Anvil",
       logo: {
         alt: "Anvil logo",
-        src: "img/logo.svg",
+        src: "img/logo.webp",
       },
       items: [
         {
           type: "docSidebar",
           sidebarId: "tutorialSidebar",
           position: "left",
-          label: "Tutorial",
+          label: "Docs",
         },
         {
           href: "https://github.com/henriqueleite42/anvil",
@@ -76,7 +76,7 @@ const config: Config = {
           title: "Docs",
           items: [
             {
-              label: "Tutorial",
+              label: "Docs",
               to: "/docs/intro",
             },
           ],
