@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="./static/img/logo.webp" alt="anvil" width="500" height="500">
+<div>
+
 # Anvil
 
 Anvil is like OpenAPI schemas for microservices, but instead of only documenting your http routes, it helps you to manage most of the aspects of all your microservices at a global scale. It's created to medium~big companies and suffer on delivering things with velocity and consistency.
@@ -74,7 +78,7 @@ Anvil plugins:
 
 ## How Anvil work
 
-Anvil has 4 main parts, each one responsible for a specific complementary role.
+Anvil has 5 main parts, each one responsible for a specific complementary role.
 
 ### `*.anv` files
 
@@ -103,20 +107,10 @@ Generators allows you to generate code based on a `.anv` config. They come in va
 
 Generator are were the magic oh Anvil happens.
 
-## Meaning
+### Plugins
 
-- Domain: Name of the domain being documented
-- Relationships: The relationships that your domain have with other domains and micro-services
-- Types: Generic types to be used as Input or Output for `Repository` and `Usecase` methods
-- Enums: Enums to be used as types for `Entity`, `Events` and `Repository` and `Usecase` methods
-- Entities: Tables on your database
-- Repository: The way that you communicate with the tables on your database
-- Events: Events emitted by this domain
-- Usecase: Where all the business logic stays, has the methods to be used by the consumers through delivery methods
-- Delivery: General config for delivery methods
+Plugins do side-effects with Anvil, like:
+- Create tasks in Jira based on the changes of the schema.
+- Notify breaking changes to dependent projects
 
-## Recommended Confidentiality Levels
-
-- Low: Can be accessed by anyone with access to the service, can be logged and send in events
-- Medium: Can only be accessed by services with special permission, cannot be logged or send in events
-- High: Can only be accessed inside the domain, cannot be accessed by other services, logged or send in events
+Very useful for Agile environments.
