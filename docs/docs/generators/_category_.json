@@ -1,8 +1,8 @@
 {
-  "label": "Generators",
-  "position": 4,
-  "link": {
-    "type": "generated-index",
-    "description": "How to develop generators"
-  }
+	"label": "Generators",
+	"position": 60,
+	"link": {
+		"type": "generated-index",
+		"description": "How to develop generators"
+	}
 }

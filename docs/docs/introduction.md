@@ -1,7 +1,8 @@
 ---
 sidebar_position: 1
 ---
-# Anvil
+
+# Introduction
 
 Anvil is like OpenAPI schemas for microservices, but instead of only documenting your http routes, it helps you to manage most of the aspects of all your microservices at a global scale. It's created to medium~big companies and suffer on delivering things with velocity and consistency.
 

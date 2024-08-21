@@ -1,3 +1,7 @@
+---
+sidebar_position: 2
+---
+
 # F.A.Q.
 
 ## Is Anvil ready to use right out the box?

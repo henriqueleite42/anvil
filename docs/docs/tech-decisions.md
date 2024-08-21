@@ -1,4 +1,10 @@
-# Our Technical Decisions and how we took them
+---
+sidebar_position: 49
+---
+
+# Technical Decisions
+
+See our technical decisions and why we took them.
 
 ### Why is Anvil written in Golang?
 

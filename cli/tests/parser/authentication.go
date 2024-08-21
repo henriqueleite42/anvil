@@ -11,7 +11,7 @@ import (
 )
 
 func Authentication() {
-	fileData, err := os.ReadFile("./examples/advanced/authentication.anv")
+	fileData, err := os.ReadFile("../examples/advanced/authentication.anv")
 	if err != nil {
 		log.Fatal(err)
 	}

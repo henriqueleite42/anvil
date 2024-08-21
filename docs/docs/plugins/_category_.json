@@ -1,8 +1,8 @@
 {
-  "label": "Plugins",
-  "position": 3,
-  "link": {
-    "type": "generated-index",
-    "description": "How to develop plugins"
-  }
+	"label": "Plugins",
+	"position": 70,
+	"link": {
+		"type": "generated-index",
+		"description": "How to develop plugins"
+	}
 }
