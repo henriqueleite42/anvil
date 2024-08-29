@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../schemas/v1.0.0.json
+# yaml-language-server: $schema=../../schemas/json/v1.0.0.json
 
 Domain: HelloWorld
 
@@ -8,7 +8,9 @@ Usecase:
       Description: |
         Returns a hello world message
       Output:
-        Message:
-          Type: String
+        Type: Map
+        Properties:
+          Message:
+            Type: String
       Delivery:
         Grpc: {}

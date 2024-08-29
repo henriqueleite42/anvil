@@ -1,22 +1,23 @@
 package parser
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/anvil/anvil/internal/hashing"
 	"github.com/anvil/anvil/internal/schema"
 )
 
-func (self *Parser) auth(file map[string]any) error {
+func (self *anvToAnvpParser) auth(file map[string]any) error {
 	authSchema, ok := file["Auth"]
 	if !ok {
 		return nil
 	}
 
+	fullPath := self.getPath("Auth")
+
 	authMap, ok := authSchema.(map[string]any)
 	if !ok {
-		return errors.New("fail to parse \"Auth\" to `map[string]any`")
+		return fmt.Errorf("fail to parse \"%s\" to `map[string]any`", fullPath)
 	}
 
 	if self.schema.Auths == nil {
@@ -29,7 +30,7 @@ func (self *Parser) auth(file map[string]any) error {
 	for k, v := range authMap {
 		vMap, ok := v.(map[string]any)
 		if !ok {
-			return fmt.Errorf("fail to parse \"Auth.%s\" to `map[string]any`", k)
+			return fmt.Errorf("fail to parse \"%s.%s\" to `map[string]any`", fullPath, k)
 		}
 
 		var description *string = nil
@@ -37,7 +38,7 @@ func (self *Parser) auth(file map[string]any) error {
 		if ok {
 			descriptionString, ok := descriptionAny.(string)
 			if !ok {
-				return fmt.Errorf("fail to parse \"Auth.%s.Description\" to `string`", k)
+				return fmt.Errorf("fail to parse \"%s.%s.Description\" to `string`", fullPath, k)
 			}
 			description = &descriptionString
 		}
@@ -47,7 +48,7 @@ func (self *Parser) auth(file map[string]any) error {
 		if ok {
 			schemeString, ok := schemeAny.(string)
 			if !ok {
-				return fmt.Errorf("fail to parse \"Auth.%s.Scheme\" to `string`", k)
+				return fmt.Errorf("fail to parse \"%s.%s.Scheme\" to `string`", fullPath, k)
 			}
 			scheme = schemeString
 		}
@@ -57,7 +58,7 @@ func (self *Parser) auth(file map[string]any) error {
 		if ok {
 			formatString, ok := formatAny.(string)
 			if !ok {
-				return fmt.Errorf("fail to parse \"Auth.%s.Format\" to `string`", k)
+				return fmt.Errorf("fail to parse \"%s.%s.Format\" to `string`", fullPath, k)
 			}
 			format = &formatString
 		}
@@ -67,15 +68,15 @@ func (self *Parser) auth(file map[string]any) error {
 		if ok {
 			applyToallRoutesString, ok := applyToallRoutesAny.(bool)
 			if !ok {
-				return fmt.Errorf("fail to parse \"Auth.%s.ApplyToAllRoutes\" to `string`", k)
+				return fmt.Errorf("fail to parse \"%s.%s.ApplyToAllRoutes\" to `string`", fullPath, k)
 			}
 			applyToallRoutes = applyToallRoutesString
 		}
 
-		originalPath := "Auth" + "." + k
+		originalPath := fullPath + "." + k
 		originalPathHash := hashing.String(originalPath)
 
-		rootNode, err := getRootNode("Auth")
+		rootNode, err := getRootNode(fullPath)
 		if err != nil {
 			return err
 		}

@@ -95,10 +95,6 @@ A git-like way to save changes on the functions and know what has changed.
 
 Generates a CHANGELOG.md with the changes in the `.anv` files
 
-### Allows for the cli to read other kinds of files, not only YAML
-
-Allow for config files in JSON and XML
-
 ### Add a more robust authentication
 
 Implement all authentication forms supported by [OpenApi](https://learn.openapis.org/specification/security.html) and more, like AWS Credentials / IAM.
@@ -111,3 +107,13 @@ Allow the schema to get properties from the authentication, like the UserId.
 - Has a list of all your projects
 - You can see which project depends on each other
 - If we already have CHANGELOGs implemented, see which version of the project it's using
+
+### Three Shaking
+
+Remove unused things from relationships.
+
+Currently, If something has a relationship, we import THE WHOLE FILE and not only the used things. We must find a way to three shake it and generate a smaller file.
+
+### CLI Warnings
+
+- Add warning like "Type Foo is unused, maybe you should remove it."

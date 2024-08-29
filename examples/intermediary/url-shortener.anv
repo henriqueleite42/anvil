@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../schemas/v1.0.0.json
+# yaml-language-server: $schema=../../schemas/json/v1.0.0.json
 
 Domain: UrlShortener
 
@@ -33,26 +33,36 @@ Repository:
   Methods:
     Create:
       Input:
-        OriginalUrl:
-          Type: String
-          Validate:
-            - url
+        Type: Map
+        Properties:
+          OriginalUrl:
+            Type: String
+            Validate:
+              - url
       Output:
-        $ref: Entities.Url
+        Type: Map
+        Properties:
+          $ref: Entities.Url
     GetById:
       Output:
-        $ref: Entities.Url
+        Type: Map
+        Properties:
+          $ref: Entities.Url
 
 Usecase:
   Methods:
     Create:
       Input:
-        OriginalUrl:
-          Type: String
-          Validate:
-            - url
+        Type: Map
+        Properties:
+          OriginalUrl:
+            Type: String
+            Validate:
+              - url
       Output:
-        $ref: Entities.Url
+        Type: Map
+        Properties:
+          $ref: Entities.Url
       Delivery:
         Http:
           Method: POST
@@ -61,11 +71,15 @@ Usecase:
       Description: |
         Redirects based on a Url ID
       Input:
-        Id:
-          Type: String
+        Type: Map
+        Properties:
+          Id:
+            Type: String
       Output:
-        Location:
-          Type: String
+        Type: Map
+        Properties:
+          Location:
+            Type: String
       Delivery:
         Http:
           StatusCode: 303 # Because the `StatusCode` is 303, the `body` of the response will not be returned.

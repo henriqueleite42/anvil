@@ -4,11 +4,14 @@ import (
 	"github.com/anvil/anvil/internal/schema"
 )
 
-type Parser struct {
+type anvToAnvpParser struct {
 	schema *schema.Schema
+
+	basePath string
+	filePath string
 }
 
-func (self *Parser) Parse(file map[string]any) error {
+func (self *anvToAnvpParser) parse(file map[string]any) error {
 	err := self.domain(file)
 	if err != nil {
 		return err
@@ -19,7 +22,27 @@ func (self *Parser) Parse(file map[string]any) error {
 		return err
 	}
 
+	err = self.relationships(file)
+	if err != nil {
+		return err
+	}
+
+	err = self.imports(file)
+	if err != nil {
+		return err
+	}
+
+	err = self.auth(file)
+	if err != nil {
+		return err
+	}
+
 	err = self.enums(file)
+	if err != nil {
+		return err
+	}
+
+	err = self.types(file)
 	if err != nil {
 		return err
 	}
@@ -27,12 +50,21 @@ func (self *Parser) Parse(file map[string]any) error {
 	return nil
 }
 
-func (self *Parser) GetSchema() *schema.Schema {
-	return self.schema
-}
-
-func NewParser() *Parser {
-	return &Parser{
-		schema: &schema.Schema{},
+func ParseAnvToAnvp(uri string) (*schema.Schema, error) {
+	parser := &anvToAnvpParser{
+		schema:   &schema.Schema{},
+		filePath: uri,
 	}
+
+	file, err := parser.readAnvFile(uri)
+	if err != nil {
+		return nil, err
+	}
+
+	err = parser.parse(file)
+	if err != nil {
+		return nil, err
+	}
+
+	return parser.schema, nil
 }

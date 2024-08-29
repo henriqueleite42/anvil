@@ -30,5 +30,6 @@ go.work
 
 # Development
 *.anv
+*.anvp
 !/examples/**/*.anv
 /anvil

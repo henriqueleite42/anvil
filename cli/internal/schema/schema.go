@@ -1,46 +1,80 @@
 package schema
 
+import "slices"
+
 // Common
 
-type FieldType string
+type TypeType string
 
 const (
-	FieldType_String        FieldType = "String"
-	FieldType_Int           FieldType = "Int"
-	FieldType_Timestamp     FieldType = "Timestamp"
-	FieldType_Enum          FieldType = "Enum"
-	FieldType_Map           FieldType = "Map"
-	FieldType_MapStringMap  FieldType = "Map[String]Map"
-	FieldType_ListString    FieldType = "List[String]"
-	FieldType_ListInt       FieldType = "List[Int]"
-	FieldType_ListTimestamp FieldType = "List[Timestamp]"
-	FieldType_ListEnum      FieldType = "List[Enum]"
-	FieldType_ListMap       FieldType = "List[Map]"
+	TypeType_String        TypeType = "String"
+	TypeType_Int           TypeType = "Int"
+	TypeType_Timestamp     TypeType = "Timestamp"
+	TypeType_Enum          TypeType = "Enum"
+	TypeType_Map           TypeType = "Map"
+	TypeType_MapStringMap  TypeType = "Map[String]Map"
+	TypeType_ListString    TypeType = "List[String]"
+	TypeType_ListInt       TypeType = "List[Int]"
+	TypeType_ListTimestamp TypeType = "List[Timestamp]"
+	TypeType_ListEnum      TypeType = "List[Enum]"
+	TypeType_ListMap       TypeType = "List[Map]"
 )
 
-type FieldConfidentiality string
+var TypeTypeArr = []TypeType{
+	TypeType_String,
+	TypeType_Int,
+	TypeType_Timestamp,
+	TypeType_Enum,
+	TypeType_Map,
+	TypeType_MapStringMap,
+	TypeType_ListString,
+	TypeType_ListInt,
+	TypeType_ListTimestamp,
+	TypeType_ListEnum,
+	TypeType_ListMap,
+}
+
+func ToTypeType(i string) (TypeType, bool) {
+	ft := TypeType(i)
+
+	return ft, slices.Contains(TypeTypeArr, ft)
+}
+
+type TypeConfidentiality string
 
 const (
-	FieldConfidentiality_Low    FieldConfidentiality = "LOW"
-	FieldConfidentiality_Medium FieldConfidentiality = "MEDIUM"
-	FieldConfidentiality_High   FieldConfidentiality = "HIGH"
+	TypeConfidentiality_Low    TypeConfidentiality = "LOW"
+	TypeConfidentiality_Medium TypeConfidentiality = "MEDIUM"
+	TypeConfidentiality_High   TypeConfidentiality = "HIGH"
 )
 
-type Field struct {
-	Name            string               `yaml:"Name"`
-	RootNode        string               `yaml:"RootNode"`
-	OriginalPath    string               `yaml:"OriginalPath"`
-	StateHash       string               `yaml:"StateHash"`
-	Confidentiality FieldConfidentiality `yaml:"Confidentiality"`
-	Optional        bool                 `yaml:"Optional"`
-	Format          *string              `yaml:"Format,omitempty"`
-	Validate        []string             `yaml:"Validate,omitempty"`
-	Type            FieldType            `yaml:"Type"`
-	DbType          *string              `yaml:"DbType,omitempty"`
+var TypeConfidentialityArr = []TypeConfidentiality{
+	TypeConfidentiality_Low,
+	TypeConfidentiality_Medium,
+	TypeConfidentiality_High,
+}
+
+func ToTypeConfidentiality(i string) (TypeConfidentiality, bool) {
+	ft := TypeConfidentiality(i)
+
+	return ft, slices.Contains(TypeConfidentialityArr, ft)
+}
+
+type Type struct {
+	Name            string              `yaml:"Name"`
+	RootNode        string              `yaml:"RootNode"`
+	OriginalPath    string              `yaml:"OriginalPath"`
+	StateHash       string              `yaml:"StateHash"`
+	Confidentiality TypeConfidentiality `yaml:"Confidentiality"`
+	Optional        bool                `yaml:"Optional"`
+	Format          *string             `yaml:"Format,omitempty" json:"Format,omitempty"`
+	Validate        []string            `yaml:"Validate,omitempty" json:"Validate,omitempty"`
+	Type            TypeType            `yaml:"Type"`
+	DbType          *string             `yaml:"DbType,omitempty" json:"DbType,omitempty"`
 	// Used for Map and List[Map]
-	Properties map[string]*Field `yaml:"Properties,omitempty"`
+	ChildTypesHashes []string `yaml:"ChildTypesHashes,omitempty" json:"ChildTypesHashes,omitempty"`
 	// Used for Enum and List[Enum]
-	Values map[string]string `yaml:"Values,omitempty"`
+	EnumHash *string `yaml:"EnumHash,omitempty" json:"EnumHash,omitempty"`
 }
 
 type Dependency struct {
@@ -137,8 +171,8 @@ const (
 )
 
 type EnumValue struct {
-	Name  string
-	Value string
+	Name  *string `yaml:"Name,omitempty" json:"Name,omitempty"`
+	Value string  `yaml:"Value"`
 }
 
 type Enum struct {
@@ -155,22 +189,7 @@ type Enums struct {
 	Enums     map[string]*Enum `yaml:"Enums"`
 }
 
-// Fields
-
-type Fields struct {
-	StateHash string            `yaml:"StateHash"`
-	Fields    map[string]*Field `yaml:"Fields"`
-}
-
 // Types
-
-type Type struct {
-	Name         string   `yaml:"Name"`
-	RootNode     string   `yaml:"RootNode"`
-	OriginalPath string   `yaml:"OriginalPath"`
-	StateHash    string   `yaml:"StateHash"`
-	Fields       []string `yaml:"Fields"`
-}
 
 type Types struct {
 	StateHash string           `yaml:"StateHash"`
@@ -189,7 +208,7 @@ type EntityColumn struct {
 	ColumnName   string `yaml:"ColumnName"`
 	OriginalPath string `yaml:"OriginalPath"`
 	StateHash    string `yaml:"StateHash"`
-	FieldHash    string `yaml:"FieldHash"`
+	TypeHash     string `yaml:"TypeHash"`
 	Type         string `yaml:"Type"`
 }
 
@@ -325,17 +344,16 @@ type Delivery struct {
 // Schema
 
 type Schema struct {
-	Domain        string         `yaml:"Domain"`
-	Version       string         `yaml:"Version"`
-	Metadata      *Metadata      `yaml:"Metadata"`
-	Relationships *Relationships `yaml:"Relationships"`
-	Imports       *Imports       `yaml:"Imports"`
-	Auths         *Auths         `yaml:"Auth"`
-	Enums         *Enums         `yaml:"Enums"`
-	Fields        *Fields        `yaml:"Fields"`
-	Types         *Types         `yaml:"Types"`
-	Entities      *Entities      `yaml:"Entities"`
-	Repository    *Repository    `yaml:"Repository"`
-	Usecase       *Usecase       `yaml:"Usecase"`
-	Delivery      *Delivery      `yaml:"Delivery"`
+	Domain        string         `yaml:"Domain,omitempty" json:"Domain,omitempty"`
+	Version       string         `yaml:"Version,omitempty" json:"Version,omitempty"`
+	Metadata      *Metadata      `yaml:"Metadata,omitempty" json:"Metadata,omitempty"`
+	Relationships *Relationships `yaml:"Relationships,omitempty" json:"Relationships,omitempty"`
+	Imports       *Imports       `yaml:"Imports,omitempty" json:"Imports,omitempty"`
+	Auths         *Auths         `yaml:"Auth,omitempty" json:"Auth,omitempty"`
+	Enums         *Enums         `yaml:"Enums,omitempty" json:"Enums,omitempty"`
+	Types         *Types         `yaml:"Types,omitempty" json:"Types,omitempty"`
+	Entities      *Entities      `yaml:"Entities,omitempty" json:"Entities,omitempty"`
+	Repository    *Repository    `yaml:"Repository,omitempty" json:"Repository,omitempty"`
+	Usecase       *Usecase       `yaml:"Usecase,omitempty" json:"Usecase,omitempty"`
+	Delivery      *Delivery      `yaml:"Delivery,omitempty" json:"Delivery,omitempty"`
 }

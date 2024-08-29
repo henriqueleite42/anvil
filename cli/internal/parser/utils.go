@@ -12,10 +12,10 @@ import (
 //
 // We do it separately instead of doing it in the parsers because
 // They may get modified by other parsers. Example:
-// Usecase and Repository may (and probably will) alter Fields
+// Usecase and Repository may (and probably will) alter Types
 //
 // Doing it at the end ensures that we do it only once
-func (self *Parser) stateHashes() error {
+func (self *anvToAnvpParser) stateHashes() error {
 	stateHash, err := hashing.Struct(self.schema.Relationships)
 	if err != nil {
 		return errors.New("fail to get \"Relationships\" state hash")
@@ -34,11 +34,11 @@ func (self *Parser) stateHashes() error {
 	}
 	self.schema.Enums.StateHash = stateHash
 
-	stateHash, err = hashing.Struct(self.schema.Fields)
+	stateHash, err = hashing.Struct(self.schema.Types)
 	if err != nil {
-		return errors.New("fail to get \"Fields\" state hash")
+		return errors.New("fail to get \"Types\" state hash")
 	}
-	self.schema.Fields.StateHash = stateHash
+	self.schema.Types.StateHash = stateHash
 
 	stateHash, err = hashing.Struct(self.schema.Types)
 	if err != nil {
@@ -71,6 +71,14 @@ func (self *Parser) stateHashes() error {
 	self.schema.Delivery.StateHash = stateHash
 
 	return nil
+}
+
+func (self *anvToAnvpParser) getPath(path string) string {
+	if self.basePath == "" {
+		return path
+	}
+
+	return self.basePath + "." + path
 }
 
 func getRootNode(path string) (string, error) {

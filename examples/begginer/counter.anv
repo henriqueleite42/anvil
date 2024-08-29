@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../schemas/v1.0.0.json
+# yaml-language-server: $schema=../../schemas/json/v1.0.0.json
 
 Domain: Counter
 
@@ -24,13 +24,17 @@ Repository:
       Description: |
         Creates a new record of a request is made
       Output:
-        $ref: Entities.Request
+        Type: Map
+        Properties:
+          $ref: Entities.Request
     GetCount:
       Description: |
         Returns the amount of requests made
       Output:
-        Total:
-          Type: Int
+        Type: Map
+        Properties:
+          Total:
+            Type: Int
 
 Usecase:
   Methods:
@@ -38,8 +42,10 @@ Usecase:
       Description: |
         Creates a record of the request and returns the total of requests made
       Output:
-        Total:
-          Type: Int
+        Type: Map
+        Properties:
+          Total:
+            Type: Int
       Delivery:
         Http:
           Method: GET

@@ -1,17 +1,37 @@
 package parser
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/anvil/anvil/internal/hashing"
 	"github.com/anvil/anvil/internal/schema"
 )
 
-func (self *Parser) resolveEnum(path string, k string, v any) (string, error) {
+func (self *anvToAnvpParser) resolveEnum(path string, k string, v any) (string, error) {
+	if self.schema.Enums == nil {
+		self.schema.Enums = &schema.Enums{}
+	}
+	if self.schema.Enums.Enums == nil {
+		self.schema.Enums.Enums = map[string]*schema.Enum{}
+	}
+
+	originalPath := path + "." + k
+	originalPathHash := hashing.String(originalPath)
+
+	_, ok := self.schema.Enums.Enums[originalPathHash]
+	if ok {
+		return originalPathHash, nil
+	}
+
 	vMap, ok := v.(map[string]any)
 	if !ok {
 		return "", fmt.Errorf("fail to parse \"%s.%s\" to `map[string]any`", path, k)
+	}
+
+	// TODO
+	_, ok = vMap["$ref"]
+	if ok {
+		return "", nil
 	}
 
 	typeAny, ok := vMap["Type"]
@@ -39,17 +59,14 @@ func (self *Parser) resolveEnum(path string, k string, v any) (string, error) {
 			return "", fmt.Errorf("fail to parse \"%s.%s.Values.%s\" to `map[string]any`", path, k, valuesK)
 		}
 
-		var nameString string
+		var nameString *string = nil
 		nameAny, ok := valuesVMap["Name"]
 		if ok {
 			localNameString, ok := nameAny.(string)
 			if !ok {
 				return "", fmt.Errorf("fail to parse \"%s.%s.Values.%s.Name\" to `string`", path, k, valuesK)
 			}
-			nameString = localNameString
-		}
-		if nameString == "" {
-			nameString = k
+			nameString = &localNameString
 		}
 
 		valueString, ok := valuesVMap["Value"].(string)
@@ -62,9 +79,6 @@ func (self *Parser) resolveEnum(path string, k string, v any) (string, error) {
 			Value: valueString,
 		})
 	}
-
-	originalPath := path + "." + k
-	originalPathHash := hashing.String(originalPath)
 
 	rootNode, err := getRootNode(path)
 	if err != nil {
@@ -84,32 +98,27 @@ func (self *Parser) resolveEnum(path string, k string, v any) (string, error) {
 		return "", fmt.Errorf("fail to get enum \"%s\" state hash", originalPath)
 	}
 
-	if self.schema.Enums == nil {
-		self.schema.Enums = &schema.Enums{}
-	}
-	if self.schema.Enums.Enums == nil {
-		self.schema.Enums.Enums = map[string]*schema.Enum{}
-	}
-
 	enum.StateHash = stateHash
 	self.schema.Enums.Enums[originalPathHash] = enum
 
 	return originalPathHash, nil
 }
 
-func (self *Parser) enums(file map[string]any) error {
+func (self *anvToAnvpParser) enums(file map[string]any) error {
 	enumsSchema, ok := file["Enums"]
 	if !ok {
 		return nil
 	}
 
+	fullPath := self.getPath("Enums")
+
 	enumsMap, ok := enumsSchema.(map[string]any)
 	if !ok {
-		return errors.New("fail to parse \"Enums\" to `map[string]any`")
+		return fmt.Errorf("fail to parse \"%s\" to `map[string]any`", fullPath)
 	}
 
 	for k, v := range enumsMap {
-		_, err := self.resolveEnum("Enums", k, v)
+		_, err := self.resolveEnum(fullPath, k, v)
 		if err != nil {
 			return err
 		}
