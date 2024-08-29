@@ -66,8 +66,10 @@ Events:
     Formats:
       - json
     Type:
-      UserId:
-        $ref: Types.UserId
+      Type: Map
+      Properties:
+        UserId:
+          $ref: Types.UserId
 
 Entities:
   ColumnsCase: snake

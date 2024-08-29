@@ -327,14 +327,7 @@
 						"Type": {
 							"anyOf": [
 								{
-									"type": "object",
-									"description": "Description of the emitted event",
-									"patternProperties": {
-										"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-											"$ref": "#/$defs/Field"
-										}
-									},
-									"additionalProperties": false
+									"$ref": "#/$defs/Field"
 								},
 								{
 									"type": "object",
@@ -533,10 +526,36 @@
 									"description": "Description of your table."
 								},
 								"Input": {
-									"$ref": "#/$defs/Field"
+									"anyOf": [
+										{
+											"$ref": "#/$defs/Field"
+										},
+										{
+											"type": "object",
+											"description": "Reference of a Type or Entity",
+											"patternProperties": {
+												"^($ref)$": {
+													"type": "string"
+												}
+											}
+										}
+									]
 								},
 								"Output": {
-									"$ref": "#/$defs/Field"
+									"anyOf": [
+										{
+											"$ref": "#/$defs/Field"
+										},
+										{
+											"type": "object",
+											"description": "Reference of a Type or Entity",
+											"patternProperties": {
+												"^($ref)$": {
+													"type": "string"
+												}
+											}
+										}
+									]
 								}
 							}
 						}
@@ -585,10 +604,36 @@
 									"description": "Description of your table."
 								},
 								"Input": {
-									"$ref": "#/$defs/Field"
+									"anyOf": [
+										{
+											"$ref": "#/$defs/Field"
+										},
+										{
+											"type": "object",
+											"description": "Reference of a Type or Entity",
+											"patternProperties": {
+												"^($ref)$": {
+													"type": "string"
+												}
+											}
+										}
+									]
 								},
 								"Output": {
-									"$ref": "#/$defs/Field"
+									"anyOf": [
+										{
+											"$ref": "#/$defs/Field"
+										},
+										{
+											"type": "object",
+											"description": "Reference of a Type or Entity",
+											"patternProperties": {
+												"^($ref)$": {
+													"type": "string"
+												}
+											}
+										}
+									]
 								},
 								"Events": {
 									"type": "array",

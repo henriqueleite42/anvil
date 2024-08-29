@@ -196,6 +196,22 @@ type Types struct {
 	Types     map[string]*Type `yaml:"Types"`
 }
 
+// Events
+
+type Event struct {
+	Name         string   `yaml:"Name"`
+	RootNode     string   `yaml:"RootNode"`
+	OriginalPath string   `yaml:"OriginalPath"`
+	StateHash    string   `yaml:"StateHash"`
+	Formats      []string `yaml:"Formats"`
+	TypeHash     string   `yaml:"TypeHash"`
+}
+
+type Events struct {
+	StateHash string            `yaml:"StateHash"`
+	Events    map[string]*Event `yaml:"Events"`
+}
+
 // Entities
 
 type EntitiesMetatada struct {
@@ -352,6 +368,7 @@ type Schema struct {
 	Auths         *Auths         `yaml:"Auth,omitempty" json:"Auth,omitempty"`
 	Enums         *Enums         `yaml:"Enums,omitempty" json:"Enums,omitempty"`
 	Types         *Types         `yaml:"Types,omitempty" json:"Types,omitempty"`
+	Events        *Events        `yaml:"Events,omitempty" json:"Events,omitempty"`
 	Entities      *Entities      `yaml:"Entities,omitempty" json:"Entities,omitempty"`
 	Repository    *Repository    `yaml:"Repository,omitempty" json:"Repository,omitempty"`
 	Usecase       *Usecase       `yaml:"Usecase,omitempty" json:"Usecase,omitempty"`

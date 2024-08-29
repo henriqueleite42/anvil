@@ -47,6 +47,11 @@ func (self *anvToAnvpParser) parse(file map[string]any) error {
 		return err
 	}
 
+	err = self.events(file)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -62,6 +67,11 @@ func ParseAnvToAnvp(uri string) (*schema.Schema, error) {
 	}
 
 	err = parser.parse(file)
+	if err != nil {
+		return nil, err
+	}
+
+	err = parser.stateHashes()
 	if err != nil {
 		return nil, err
 	}

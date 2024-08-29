@@ -16,59 +16,85 @@ import (
 //
 // Doing it at the end ensures that we do it only once
 func (self *anvToAnvpParser) stateHashes() error {
-	stateHash, err := hashing.Struct(self.schema.Relationships)
-	if err != nil {
-		return errors.New("fail to get \"Relationships\" state hash")
+	if self.schema.Relationships != nil {
+		stateHash, err := hashing.Struct(self.schema.Relationships)
+		if err != nil {
+			return errors.New("fail to get \"Relationships\" state hash")
+		}
+		self.schema.Relationships.StateHash = stateHash
 	}
-	self.schema.Relationships.StateHash = stateHash
 
-	stateHash, err = hashing.Struct(self.schema.Imports)
-	if err != nil {
-		return errors.New("fail to get \"Imports\" state hash")
+	if self.schema.Imports != nil {
+		stateHash, err := hashing.Struct(self.schema.Imports)
+		if err != nil {
+			return errors.New("fail to get \"Imports\" state hash")
+		}
+		self.schema.Imports.StateHash = stateHash
 	}
-	self.schema.Imports.StateHash = stateHash
 
-	stateHash, err = hashing.Struct(self.schema.Enums)
-	if err != nil {
-		return errors.New("fail to get \"Enums\" state hash")
+	if self.schema.Auths != nil {
+		stateHash, err := hashing.Struct(self.schema.Auths)
+		if err != nil {
+			return errors.New("fail to get \"Auths\" state hash")
+		}
+		self.schema.Auths.StateHash = stateHash
 	}
-	self.schema.Enums.StateHash = stateHash
 
-	stateHash, err = hashing.Struct(self.schema.Types)
-	if err != nil {
-		return errors.New("fail to get \"Types\" state hash")
+	if self.schema.Enums != nil {
+		stateHash, err := hashing.Struct(self.schema.Enums)
+		if err != nil {
+			return errors.New("fail to get \"Enums\" state hash")
+		}
+		self.schema.Enums.StateHash = stateHash
 	}
-	self.schema.Types.StateHash = stateHash
 
-	stateHash, err = hashing.Struct(self.schema.Types)
-	if err != nil {
-		return errors.New("fail to get \"Types\" state hash")
+	if self.schema.Types != nil {
+		stateHash, err := hashing.Struct(self.schema.Types)
+		if err != nil {
+			return errors.New("fail to get \"Types\" state hash")
+		}
+		self.schema.Types.StateHash = stateHash
 	}
-	self.schema.Types.StateHash = stateHash
 
-	stateHash, err = hashing.Struct(self.schema.Entities)
-	if err != nil {
-		return errors.New("fail to get \"Entities\" state hash")
+	if self.schema.Events != nil {
+		stateHash, err := hashing.Struct(self.schema.Events)
+		if err != nil {
+			return errors.New("fail to get \"Events\" state hash")
+		}
+		self.schema.Events.StateHash = stateHash
 	}
-	self.schema.Entities.StateHash = stateHash
 
-	stateHash, err = hashing.Struct(self.schema.Repository)
-	if err != nil {
-		return errors.New("fail to get \"Repository\" state hash")
+	if self.schema.Entities != nil {
+		stateHash, err := hashing.Struct(self.schema.Entities)
+		if err != nil {
+			return errors.New("fail to get \"Entities\" state hash")
+		}
+		self.schema.Entities.StateHash = stateHash
 	}
-	self.schema.Repository.StateHash = stateHash
 
-	stateHash, err = hashing.Struct(self.schema.Usecase)
-	if err != nil {
-		return errors.New("fail to get \"Usecase\" state hash")
+	if self.schema.Repository != nil {
+		stateHash, err := hashing.Struct(self.schema.Repository)
+		if err != nil {
+			return errors.New("fail to get \"Repository\" state hash")
+		}
+		self.schema.Repository.StateHash = stateHash
 	}
-	self.schema.Usecase.StateHash = stateHash
 
-	stateHash, err = hashing.Struct(self.schema.Delivery)
-	if err != nil {
-		return errors.New("fail to get \"Delivery\" state hash")
+	if self.schema.Usecase != nil {
+		stateHash, err := hashing.Struct(self.schema.Usecase)
+		if err != nil {
+			return errors.New("fail to get \"Usecase\" state hash")
+		}
+		self.schema.Usecase.StateHash = stateHash
 	}
-	self.schema.Delivery.StateHash = stateHash
+
+	if self.schema.Delivery != nil {
+		stateHash, err := hashing.Struct(self.schema.Delivery)
+		if err != nil {
+			return errors.New("fail to get \"Delivery\" state hash")
+		}
+		self.schema.Delivery.StateHash = stateHash
+	}
 
 	return nil
 }
