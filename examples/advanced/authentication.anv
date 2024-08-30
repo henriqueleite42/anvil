@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../schemas/json/v1.0.0.json
+# yaml-language-server: $schema=../../cli/schemas/json/v1.0.0.json
 
 Domain: Authentication
 
@@ -37,11 +37,13 @@ Enums:
 Types:
   UserId:
     Type: Int
+    DbType: INTEGER
   UserEmail:
     Type: String
     Validate:
       - email
     Confidentiality: MEDIUM
+    DbType: VARCHAR(250)
   UserPassword:
     Type: String
     Confidentiality: HIGH
@@ -49,6 +51,7 @@ Types:
     Type: String
     Format: bcrypt
     Confidentiality: HIGH
+    DbType: VARCHAR(500)
   AuthOutput:
     Type: Map
     Properties:
@@ -89,11 +92,16 @@ Entities:
           Type: Enum
           Values:
             $ref: Enums.UserRole
+          # DbType: // It's not necessary to inform, we will auto generate a db type for this, but you can overwrite it here
         CreatedAt:
           Type: Timestamp
           DbType: Timestampz
       PrimaryKeys:
         - Id
+      Indexes:
+        - Columns:
+            - Email
+          Unique: true
 
 Repository:
   Dependencies:
@@ -192,11 +200,7 @@ Usecase:
           Path: /login
           ResHeaders:
             Authentication:
-              $outputRef: AccessToken # Notice that we access the resolved $ref directly
-            # If you want to return a header like `Bearer {something}`,
-            # you must not use references, you must write it like this:
-            # Authentication:
-            #     Type: String
+              Type: String
             SetCookies:
               Type: String
           Examples:

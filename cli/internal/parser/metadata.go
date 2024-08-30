@@ -3,7 +3,7 @@ package parser
 import (
 	"fmt"
 
-	"github.com/anvil/anvil/internal/schema"
+	"github.com/anvil/anvil/schemas"
 )
 
 func (self *anvToAnvpParser) metadata(file map[string]any) error {
@@ -19,7 +19,7 @@ func (self *anvToAnvpParser) metadata(file map[string]any) error {
 		return fmt.Errorf("fail to parse \"%s\" to `map[string]any`", fullPath)
 	}
 
-	metadata := &schema.Metadata{}
+	metadata := &schemas.Metadata{}
 
 	description, ok := valMap["Description"]
 	if ok {
@@ -37,7 +37,7 @@ func (self *anvToAnvpParser) metadata(file map[string]any) error {
 			return fmt.Errorf("fail to parse \"%s.Servers\" to `map[string]any`", fullPath)
 		}
 
-		servers := map[string]*schema.MetadataServers{}
+		servers := map[string]*schemas.MetadataServers{}
 
 		for k, v := range valMap {
 			vMap, ok := v.(map[string]any)
@@ -54,7 +54,7 @@ func (self *anvToAnvpParser) metadata(file map[string]any) error {
 				return fmt.Errorf("fail to parse \"%s.Servers.%s.Url\" to `string`", fullPath, k)
 			}
 
-			servers[k] = &schema.MetadataServers{
+			servers[k] = &schemas.MetadataServers{
 				Url: urlString,
 			}
 		}

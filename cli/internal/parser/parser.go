@@ -1,14 +1,20 @@
 package parser
 
-import (
-	"github.com/anvil/anvil/internal/schema"
-)
+import "github.com/anvil/anvil/schemas"
 
 type anvToAnvpParser struct {
-	schema *schema.Schema
+	schema *schemas.Schema
 
-	basePath string
+	baseRef string
+
 	filePath string
+}
+
+type resolveInput struct {
+	path string
+	ref  string
+	k    string
+	v    any
 }
 
 func (self *anvToAnvpParser) parse(file map[string]any) error {
@@ -18,6 +24,11 @@ func (self *anvToAnvpParser) parse(file map[string]any) error {
 	}
 
 	err = self.metadata(file)
+	if err != nil {
+		return err
+	}
+
+	err = self.resolveEntitiesMetadata(file)
 	if err != nil {
 		return err
 	}
@@ -52,12 +63,17 @@ func (self *anvToAnvpParser) parse(file map[string]any) error {
 		return err
 	}
 
+	err = self.entities(file)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func ParseAnvToAnvp(uri string) (*schema.Schema, error) {
+func ParseAnvToAnvp(uri string) (*schemas.Schema, error) {
 	parser := &anvToAnvpParser{
-		schema:   &schema.Schema{},
+		schema:   &schemas.Schema{},
 		filePath: uri,
 	}
 

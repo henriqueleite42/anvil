@@ -4,84 +4,93 @@ import (
 	"fmt"
 
 	"github.com/anvil/anvil/internal/hashing"
-	"github.com/anvil/anvil/internal/schema"
+	"github.com/anvil/anvil/schemas"
 )
 
-func (self *anvToAnvpParser) resolveEvent(path string, k string, v any) (string, error) {
+func (self *anvToAnvpParser) resolveEvent(i *resolveInput) (string, error) {
 	if self.schema.Events == nil {
-		self.schema.Events = &schema.Events{}
+		self.schema.Events = &schemas.Events{}
 	}
 	if self.schema.Events.Events == nil {
-		self.schema.Events.Events = map[string]*schema.Event{}
+		self.schema.Events.Events = map[string]*schemas.Event{}
 	}
 
-	originalPath := path + "." + k
-	originalPathHash := hashing.String(originalPath)
+	ref := self.getRef(i.ref, "Events."+i.k)
+	refHash := hashing.String(ref)
 
-	_, ok := self.schema.Events.Events[originalPathHash]
+	_, ok := self.schema.Events.Events[refHash]
 	if ok {
-		return originalPathHash, nil
+		return refHash, nil
 	}
 
-	vMap, ok := v.(map[string]any)
+	vMap, ok := i.v.(map[string]any)
 	if !ok {
-		return "", fmt.Errorf("fail to parse \"%s.%s\" to `map[string]any`", path, k)
+		return "", fmt.Errorf("fail to parse \"%s.%s\" to `map[string]any`", i.path, i.k)
 	}
 
-	// TODO
-	_, ok = vMap["$ref"]
+	refAny, ok := vMap["$ref"]
 	if ok {
-		return "", nil
+		refString, ok := refAny.(string)
+		if !ok {
+			return "", fmt.Errorf("fail to parse \"%s.%s.$ref\" to `string`", i.path, i.k)
+		}
+		return self.getRefHash(refString), nil
 	}
 
 	formatsAny, ok := vMap["Formats"]
 	if !ok {
-		return "", fmt.Errorf("\"Formats\" is a required property to \"%s.%s\"", path, k)
+		return "", fmt.Errorf("\"Formats\" is a required property to \"%s.%s\"", i.path, i.k)
 	}
 	formatsArrAny, ok := formatsAny.([]any)
 	if !ok {
-		return "", fmt.Errorf("fail to parse \"%s.%s.Formats\" to `[]any`", path, k)
+		return "", fmt.Errorf("fail to parse \"%s.%s.Formats\" to `[]any`", i.path, i.k)
 	}
 	formats := []string{}
 	for kk, vv := range formatsArrAny {
 		formatString, ok := vv.(string)
 		if !ok {
-			return "", fmt.Errorf("fail to parse \"%s.%s.Formats.%d\" to `string`", path, k, kk)
+			return "", fmt.Errorf("fail to parse \"%s.%s.Formats.%d\" to `string`", i.path, i.k, kk)
 		}
 		formats = append(formats, formatString)
 	}
 
 	eventTypeAny, ok := vMap["Type"]
 	if !ok {
-		return "", fmt.Errorf("\"Type\" is a required property to \"%s.%s\"", path, k)
+		return "", fmt.Errorf("\"Type\" is a required property to \"%s.%s\"", i.path, i.k)
 	}
-	eventTypeHash, err := self.resolveType(AllowedRefs{}, path, k, eventTypeAny)
+	eventTypeHash, err := self.resolveType(&resolveInput{
+		path: i.path,
+		ref:  "",
+		k:    i.k,
+		v:    eventTypeAny,
+	})
 	if err != nil {
 		return "", err
 	}
 
-	rootNode, err := getRootNode(path)
+	rootNode, err := getRootNode(i.path)
 	if err != nil {
 		return "", err
 	}
 
-	event := &schema.Event{
-		Name:         k,
+	event := &schemas.Event{
+		Ref:          ref,
+		OriginalPath: self.getPath(fmt.Sprintf("%s.%s", i.path, i.k)),
+		Name:         i.k,
 		RootNode:     rootNode,
-		OriginalPath: originalPath,
 		Formats:      formats,
 		TypeHash:     eventTypeHash,
 	}
 
 	stateHash, err := hashing.Struct(event)
 	if err != nil {
-		return "", fmt.Errorf("fail to get event \"%s\" state hash", originalPath)
+		return "", fmt.Errorf("fail to get event \"%s.%s\" state hash", i.path, i.k)
 	}
 
 	event.StateHash = stateHash
-	self.schema.Events.Events[originalPathHash] = event
+	self.schema.Events.Events[refHash] = event
 
-	return originalPathHash, nil
+	return refHash, nil
 }
 
 func (self *anvToAnvpParser) events(file map[string]any) error {
@@ -98,7 +107,12 @@ func (self *anvToAnvpParser) events(file map[string]any) error {
 	}
 
 	for k, v := range eventsMap {
-		_, err := self.resolveEvent(fullPath, k, v)
+		_, err := self.resolveEvent(&resolveInput{
+			path: fullPath,
+			ref:  "",
+			k:    k,
+			v:    v,
+		})
 		if err != nil {
 			return err
 		}

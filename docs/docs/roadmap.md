@@ -10,7 +10,7 @@ Critical and necessary features that are crucial for the project to be used inte
 
 ## Parser
 
-Parse `.anv` files to `.anvp` files(_anvil processed files_). Theses files will be the resolved value of the `.anv` file, with all the standard rules that we apply to the schema.
+Parse `.anv` files to `.anvp` files(_anvil processed files_). Theses files will be the resolved value of the `.anv` file, with all the standard rules that we apply to the schemas.
 
 ### Generator gRPC
 

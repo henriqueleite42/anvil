@@ -5,37 +5,37 @@ import (
 	"strings"
 
 	"github.com/anvil/anvil/internal/hashing"
-	"github.com/anvil/anvil/internal/schema"
+	"github.com/anvil/anvil/schemas"
 )
 
-func (self *anvToAnvpParser) resolveRelationship(path string, k string, v any) (string, error) {
+func (self *anvToAnvpParser) resolveRelationship(i *resolveInput) (string, error) {
 	if self.schema.Relationships == nil {
-		self.schema.Relationships = &schema.Relationships{}
+		self.schema.Relationships = &schemas.Relationships{}
 	}
 	if self.schema.Relationships.Relationships == nil {
-		self.schema.Relationships.Relationships = map[string]*schema.Relationship{}
+		self.schema.Relationships.Relationships = map[string]*schemas.Relationship{}
 	}
 
-	originalPath := path + "." + k
-	originalPathHash := hashing.String(originalPath)
+	ref := self.getRef(i.ref, "Relationships."+i.k)
+	refHash := hashing.String(ref)
 
-	_, ok := self.schema.Relationships.Relationships[originalPathHash]
+	_, ok := self.schema.Relationships.Relationships[refHash]
 	if ok {
-		return originalPathHash, nil
+		return refHash, nil
 	}
 
-	vMap, ok := v.(map[string]any)
+	vMap, ok := i.v.(map[string]any)
 	if !ok {
-		return "", fmt.Errorf("fail to parse \"%s.%s\" to `map[string]any`", path, k)
+		return "", fmt.Errorf("fail to parse \"%s.%s\" to `map[string]any`", i.path, i.k)
 	}
 
 	uriAny, ok := vMap["Uri"]
 	if !ok {
-		return "", fmt.Errorf("\"Uri\" is a required property to \"%s.%s\"", path, k)
+		return "", fmt.Errorf("\"Uri\" is a required property to \"%s.%s\"", i.path, i.k)
 	}
 	uriString, ok := uriAny.(string)
 	if !ok {
-		return "", fmt.Errorf("fail to parse \"%s.%s.Uri\" to `string`", path, k)
+		return "", fmt.Errorf("fail to parse \"%s.%s.Uri\" to `string`", i.path, i.k)
 	}
 
 	// Same project domains should be in the same repository
@@ -44,15 +44,16 @@ func (self *anvToAnvpParser) resolveRelationship(path string, k string, v any) (
 		isSameProject = true
 	}
 
-	rootNode, err := getRootNode(originalPath)
+	rootNode, err := getRootNode(i.path)
 	if err != nil {
 		return "", err
 	}
 
-	relationship := &schema.Relationship{
-		Name:          k,
+	relationship := &schemas.Relationship{
+		Ref:           ref,
+		OriginalPath:  self.getPath(fmt.Sprintf("%s.%s", i.path, i.k)),
+		Name:          i.k,
 		RootNode:      rootNode,
-		OriginalPath:  originalPath,
 		Uri:           uriString,
 		Version:       "",
 		IsSameProject: isSameProject,
@@ -60,13 +61,13 @@ func (self *anvToAnvpParser) resolveRelationship(path string, k string, v any) (
 
 	stateHash, err := hashing.Struct(relationship)
 	if err != nil {
-		return "", fmt.Errorf("fail to get relationship \"%s\" state hash", originalPath)
+		return "", fmt.Errorf("fail to get relationship \"%s.%s\" state hash", i.path, i.k)
 	}
 
 	relationship.StateHash = stateHash
-	self.schema.Relationships.Relationships[originalPathHash] = relationship
+	self.schema.Relationships.Relationships[refHash] = relationship
 
-	return originalPathHash, nil
+	return refHash, nil
 }
 
 func (self *anvToAnvpParser) relationships(file map[string]any) error {
@@ -83,35 +84,17 @@ func (self *anvToAnvpParser) relationships(file map[string]any) error {
 	}
 
 	for k, v := range relationshipsMap {
-		relationshipId, err := self.resolveRelationship(fullPath, k, v)
+		_, err := self.resolveRelationship(&resolveInput{
+			path: fullPath,
+			ref:  "",
+			k:    k,
+			v:    v,
+		})
 		if err != nil {
 			return err
 		}
 
-		// Load relationships into the same schema
-		relationship := self.schema.Relationships.Relationships[relationshipId]
-
-		formattedUri := relationship.Uri
-		if strings.HasPrefix(formattedUri, ".") {
-			path := strings.Split(self.filePath, "/")
-			pathWithoutFile := path[0 : len(path)-1]
-			formattedUri = strings.Join(pathWithoutFile, "/") + "/" + relationship.Uri
-		}
-
-		relationShipFile, err := self.readAnvFile(formattedUri)
-		if err != nil {
-			return err
-		}
-
-		parser := &anvToAnvpParser{
-			schema:   self.schema,
-			basePath: relationship.OriginalPath,
-		}
-
-		err = parser.parse(relationShipFile)
-		if err != nil {
-			return err
-		}
+		// TODO Load relationships
 	}
 
 	return nil

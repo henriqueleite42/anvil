@@ -4,36 +4,36 @@ import (
 	"fmt"
 
 	"github.com/anvil/anvil/internal/hashing"
-	"github.com/anvil/anvil/internal/schema"
+	"github.com/anvil/anvil/schemas"
 )
 
-func (self *anvToAnvpParser) resolveImport(path string, k string, v any) (string, error) {
+func (self *anvToAnvpParser) resolveImport(i *resolveInput) (string, error) {
 	if self.schema.Imports == nil {
-		self.schema.Imports = &schema.Imports{}
+		self.schema.Imports = &schemas.Imports{}
 	}
 	if self.schema.Imports.Imports == nil {
-		self.schema.Imports.Imports = map[string]*schema.Import{}
+		self.schema.Imports.Imports = map[string]*schemas.Import{}
 	}
 
-	originalPath := path + "." + k
-	originalPathHash := hashing.String(originalPath)
+	ref := self.getRef(i.ref, "Imports."+i.k)
+	refHash := hashing.String(ref)
 
-	_, ok := self.schema.Imports.Imports[originalPathHash]
+	_, ok := self.schema.Imports.Imports[refHash]
 	if ok {
-		return originalPathHash, nil
+		return refHash, nil
 	}
 
-	vMap, ok := v.(map[string]any)
+	vMap, ok := i.v.(map[string]any)
 	if !ok {
-		return "", fmt.Errorf("fail to parse \"%s.%s\" to `map[string]any`", path, k)
+		return "", fmt.Errorf("fail to parse \"%s.%s\" to `map[string]any`", i.path, i.k)
 	}
 
-	var importImport *schema.ImportImport = nil
+	var importImport *schemas.ImportImport = nil
 	importAny, ok := vMap["Import"]
 	if ok {
 		importMap, ok := importAny.(map[string]any)
 		if !ok {
-			return "", fmt.Errorf("fail to parse \"%s.%s.Import\" to `map[string]any`", path, k)
+			return "", fmt.Errorf("fail to parse \"%s.%s.Import\" to `map[string]any`", i.path, i.k)
 		}
 
 		var aliasPointer *string = nil
@@ -41,21 +41,21 @@ func (self *anvToAnvpParser) resolveImport(path string, k string, v any) (string
 		if ok {
 			aliasString, ok := aliasAny.(string)
 			if !ok {
-				return "", fmt.Errorf("fail to parse \"%s.%s.Import.Alias\" to `string`", path, k)
+				return "", fmt.Errorf("fail to parse \"%s.%s.Import.Alias\" to `string`", i.path, i.k)
 			}
 			aliasPointer = &aliasString
 		}
 
 		pathAny, ok := importMap["Path"]
 		if !ok {
-			return "", fmt.Errorf("\"Path\" is a required property to \"%s.%s.Import\"", path, k)
+			return "", fmt.Errorf("\"Path\" is a required property to \"%s.%s.Import\"", i.path, i.k)
 		}
 		pathString, ok := pathAny.(string)
 		if !ok {
-			return "", fmt.Errorf("fail to parse \"%s.%s.Import.Path\" to `string`", path, k)
+			return "", fmt.Errorf("fail to parse \"%s.%s.Import.Path\" to `string`", i.path, i.k)
 		}
 
-		importImport = &schema.ImportImport{
+		importImport = &schemas.ImportImport{
 			Alias: aliasPointer,
 			Path:  pathString,
 		}
@@ -63,35 +63,34 @@ func (self *anvToAnvpParser) resolveImport(path string, k string, v any) (string
 
 	typeAny, ok := vMap["Type"]
 	if !ok {
-		return "", fmt.Errorf("\"Type\" is a required property to \"%s.%s\"", path, k)
+		return "", fmt.Errorf("\"Type\" is a required property to \"%s.%s\"", i.path, i.k)
 	}
 	typeString, ok := typeAny.(string)
 	if !ok {
-		return "", fmt.Errorf("fail to parse \"%s.%s.Type\" to `string`", path, k)
+		return "", fmt.Errorf("fail to parse \"%s.%s.Type\" to `string`", i.path, i.k)
 	}
 
-	rootNode, err := getRootNode(path)
+	rootNode, err := getRootNode(i.path)
 	if err != nil {
 		return "", err
 	}
 
-	schemaImports := &schema.Import{
-		Name:         k,
-		RootNode:     rootNode,
-		OriginalPath: originalPath,
-		Import:       importImport,
-		Type:         typeString,
+	schemaImports := &schemas.Import{
+		Name:     i.k,
+		RootNode: rootNode,
+		Import:   importImport,
+		Type:     typeString,
 	}
 
 	stateHash, err := hashing.Struct(schemaImports)
 	if err != nil {
-		return "", fmt.Errorf("fail to get import \"%s\" state hash", originalPath)
+		return "", fmt.Errorf("fail to get import \"%s.%s\" state hash", i.path, i.k)
 	}
 
 	schemaImports.StateHash = stateHash
-	self.schema.Imports.Imports[originalPathHash] = schemaImports
+	self.schema.Imports.Imports[refHash] = schemaImports
 
-	return originalPathHash, nil
+	return refHash, nil
 }
 
 func (self *anvToAnvpParser) imports(file map[string]any) error {
@@ -108,7 +107,12 @@ func (self *anvToAnvpParser) imports(file map[string]any) error {
 	}
 
 	for k, v := range importsMap {
-		_, err := self.resolveImport(fullPath, k, v)
+		_, err := self.resolveImport(&resolveInput{
+			path: fullPath,
+			ref:  "",
+			k:    k,
+			v:    v,
+		})
 		if err != nil {
 			return err
 		}

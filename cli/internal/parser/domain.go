@@ -5,12 +5,12 @@ import (
 )
 
 func (self *anvToAnvpParser) domain(file map[string]any) error {
+	fullPath := self.getPath("Domain")
+
 	domainSchema, ok := file["Domain"]
 	if !ok {
-		return fmt.Errorf("\"%s\" must be specified", self.getPath("Domain"))
+		return fmt.Errorf("\"%s\" must be specified", fullPath)
 	}
-
-	fullPath := self.getPath("Domain")
 
 	domainString, ok := domainSchema.(string)
 	if !ok {

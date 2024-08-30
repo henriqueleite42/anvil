@@ -10,7 +10,7 @@ Anvil has 5 main parts, each one responsible for a specific complementary role.
 
 The schema definition is a `.anv` file that describes a domain of your service. Each project (micro-service) can have multiple domains in it, and they can be related or not (ideally, if they are in the same project, they should be).
 
-Think about the `.anv` files like a `schema.prisma` or an OpenApi spec, and from this we generate an infinity of things.
+Think about the `.anv` files like a `schemas.prisma` or an OpenApi spec, and from this we generate an infinity of things.
 
 ## `.anvilconfig`
 
@@ -36,7 +36,7 @@ Generator are were the magic oh Anvil happens.
 ## Plugins
 
 Plugins do side-effects with Anvil, like:
-- Create tasks in Jira based on the changes of the schema.
+- Create tasks in Jira based on the changes of the schemas.
 - Notify breaking changes to dependent projects
 
 Very useful for Agile environments.

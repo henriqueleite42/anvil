@@ -46,3 +46,7 @@ Be sure to replace the schema version to the latest version.
 - Low: Can be accessed by anyone with access to the service, can be logged and send in events
 - Medium: Can only be accessed by services with special permission, cannot be logged or send in events
 - High: Can only be accessed inside the domain, cannot be accessed by other services, logged or send in events
+
+## `$ref`
+
+- The only things that you can `$ref` from relationships are `Events` and `Entities`, using the format: `Relationships.Foo.Entities.Bar`. `Foo` must be replaced by the name of the relationship, and **NOT** the `Domain` specified in the relationship file.

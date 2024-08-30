@@ -1,5 +1,5 @@
 {
-	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$schema": "https://json-schemas.org/draft/2020-12/schema",
 	"$id": "https://github.com/anvil/anvil/blob/master/schemas/v1.0.0.json",
 	"title": "Anvil",
 	"description": "API Maker",
@@ -56,12 +56,7 @@
 						"Timestamp",
 						"Enum",
 						"Map",
-						"Map[String]Map",
-						"List[String]",
-						"List[Int]",
-						"List[Timestamp]",
-						"List[Enum]",
-						"List[Map]"
+						"List"
 					]
 				},
 				"Confidentiality": {
@@ -92,30 +87,25 @@
 						"type": "string"
 					}
 				},
-				"Properties": {
-					"anyOf": [
+				"Items": {
+					"type": "object",
+					"description": "Reference of a Type or Entity",
+					"oneOf": [
 						{
-							"type": "object",
-							"description": "Used for Map, Map[String]Map and List[Map]. The definition of the map.",
-							"patternProperties": {
-								"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-									"$ref": "#/$defs/Field"
-								}
-							}
+							"$ref": "#/$defs/Field"
 						},
 						{
-							"type": "object",
-							"description": "Reference of a Type or Entity",
-							"patternProperties": {
-								"^($ref)$": {
+							"properties": {
+								"$ref": {
 									"type": "string"
 								}
-							}
+							},
+							"additionalProperties": false
 						}
 					]
 				},
 				"Values": {
-					"anyOf": [
+					"oneOf": [
 						{
 							"type": "object",
 							"description": "Used for Enum and List[Enum]. The values of the enum.",
@@ -128,18 +118,131 @@
 						{
 							"type": "object",
 							"description": "Reference of an Enum",
-							"patternProperties": {
-								"^($ref)$": {
+							"properties": {
+								"$ref": {
 									"$ref": "#/$defs/Enum"
 								}
 							}
+						}
+					]
+				},
+				"Properties": {
+					"type": "object",
+					"description": "Reference of a Type or Entity",
+					"oneOf": [
+						{
+							"patternProperties": {
+								"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+									"type": "object",
+									"oneOf": [
+										{
+											"$ref": "#/$defs/Field"
+										},
+										{
+											"properties": {
+												"$ref": {
+													"type": "string"
+												}
+											},
+											"additionalProperties": false
+										}
+									]
+								}
+							},
+							"additionalProperties": false
+						},
+						{
+							"properties": {
+								"$ref": {
+									"type": "string"
+								}
+							},
+							"additionalProperties": false
 						}
 					]
 				}
 			},
 			"required": [
 				"Type"
-			]
+			],
+			"if": {
+				"properties": {
+					"Type": {
+						"const": "List"
+					}
+				}
+			},
+			"then": {
+				"required": [
+					"Items"
+				],
+				"properties": {
+					"Values": {
+						"not": {}
+					},
+					"Properties": {
+						"not": {}
+					}
+				}
+			},
+			"else": {
+				"if": {
+					"properties": {
+						"Type": {
+							"const": "Enum"
+						}
+					}
+				},
+				"then": {
+					"required": [
+						"Values"
+					],
+					"properties": {
+						"Items": {
+							"not": {}
+						},
+						"Properties": {
+							"not": {}
+						}
+					}
+				},
+				"else": {
+					"if": {
+						"properties": {
+							"Type": {
+								"const": "Map"
+							}
+						}
+					},
+					"then": {
+						"required": [
+							"Properties"
+						],
+						"properties": {
+							"Items": {
+								"not": {}
+							},
+							"Values": {
+								"not": {}
+							}
+						}
+					},
+					"else": {
+						"properties": {
+							"Items": {
+								"not": {}
+							},
+							"Values": {
+								"not": {}
+							},
+							"Properties": {
+								"not": {}
+							}
+						}
+					}
+				}
+			},
+			"additionalProperties": false
 		},
 		"Import": {
 			"type": "object",
@@ -325,18 +428,19 @@
 							}
 						},
 						"Type": {
-							"anyOf": [
+							"type": "object",
+							"description": "Reference of a Type or Entity",
+							"oneOf": [
 								{
 									"$ref": "#/$defs/Field"
 								},
 								{
-									"type": "object",
-									"description": "Reference of a Type or Entity",
-									"patternProperties": {
-										"^($ref)$": {
+									"properties": {
+										"$ref": {
 											"type": "string"
 										}
-									}
+									},
+									"additionalProperties": false
 								}
 							]
 						}
@@ -355,7 +459,7 @@
 			"properties": {
 				"Schema": {
 					"type": "string",
-					"description": "The database schema, used when you don't want to use the public schema."
+					"description": "The database schema, used when you don't want to use the public schemas."
 				},
 				"ColumnsCase": {
 					"type": "string",
@@ -377,27 +481,30 @@
 									"description": "Description of your table."
 								},
 								"Columns": {
-									"anyOf": [
-										{
-											"type": "object",
-											"description": "Database columns",
-											"patternProperties": {
-												"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+									"type": "object",
+									"description": "Database columns",
+									"patternProperties": {
+										"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+											"oneOf": [
+												{
+													"type": "object",
+													"properties": {
+														"$ref": {
+															"type": "string"
+														}
+													},
+													"required": [
+														"$ref"
+													]
+												},
+												{
 													"$ref": "#/$defs/Field"
 												}
-											},
-											"additionalProperties": false
-										},
-										{
-											"type": "object",
-											"description": "Database columns, with $ref",
-											"patternProperties": {
-												"^($ref)$": {
-													"type": "string"
-												}
-											}
+											]
 										}
-									]
+									},
+									"minProperties": 1,
+									"additionalProperties": false
 								},
 								"PrimaryKeys": {
 									"type": "array",
@@ -413,6 +520,10 @@
 									"items": {
 										"type": "object",
 										"properties": {
+											"Name": {
+												"type": "string",
+												"description": "Constraint name"
+											},
 											"Columns": {
 												"type": "array",
 												"description": "The columns that compose the index",
@@ -446,13 +557,9 @@
 													"pattern": "^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$"
 												}
 											},
-											"RefTable": {
-												"type": "string",
-												"description": "Target table to reference. The name MUST be written as in the DATABASE, and not as it appears on the schema"
-											},
 											"RefColumns": {
 												"type": "array",
-												"description": "Columns on the target entity to be referenced. The name MUST be written as in the DATABASE, and not as it appears on the schema",
+												"description": "Columns on the target entity to be referenced. The name MUST be written as in the SCHEMA, and not as it appears on the database",
 												"items": {
 													"type": "string",
 													"pattern": "^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$"
@@ -526,34 +633,36 @@
 									"description": "Description of your table."
 								},
 								"Input": {
-									"anyOf": [
+									"type": "object",
+									"description": "Reference of a Type or Entity",
+									"oneOf": [
 										{
 											"$ref": "#/$defs/Field"
 										},
 										{
-											"type": "object",
-											"description": "Reference of a Type or Entity",
-											"patternProperties": {
-												"^($ref)$": {
+											"properties": {
+												"$ref": {
 													"type": "string"
 												}
-											}
+											},
+											"additionalProperties": false
 										}
 									]
 								},
 								"Output": {
-									"anyOf": [
+									"type": "object",
+									"description": "Reference of a Type or Entity",
+									"oneOf": [
 										{
 											"$ref": "#/$defs/Field"
 										},
 										{
-											"type": "object",
-											"description": "Reference of a Type or Entity",
-											"patternProperties": {
-												"^($ref)$": {
+											"properties": {
+												"$ref": {
 													"type": "string"
 												}
-											}
+											},
+											"additionalProperties": false
 										}
 									]
 								}
@@ -604,34 +713,36 @@
 									"description": "Description of your table."
 								},
 								"Input": {
-									"anyOf": [
+									"type": "object",
+									"description": "Reference of a Type or Entity",
+									"oneOf": [
 										{
 											"$ref": "#/$defs/Field"
 										},
 										{
-											"type": "object",
-											"description": "Reference of a Type or Entity",
-											"patternProperties": {
-												"^($ref)$": {
+											"properties": {
+												"$ref": {
 													"type": "string"
 												}
-											}
+											},
+											"additionalProperties": false
 										}
 									]
 								},
 								"Output": {
-									"anyOf": [
+									"type": "object",
+									"description": "Reference of a Type or Entity",
+									"oneOf": [
 										{
 											"$ref": "#/$defs/Field"
 										},
 										{
-											"type": "object",
-											"description": "Reference of a Type or Entity",
-											"patternProperties": {
-												"^($ref)$": {
+											"properties": {
+												"$ref": {
 													"type": "string"
 												}
-											}
+											},
+											"additionalProperties": false
 										}
 									]
 								},
@@ -712,7 +823,7 @@
 													"description": "Headers in the request",
 													"patternProperties": {
 														"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-															"anyOf": [
+															"oneOf": [
 																{
 																	"type": "object",
 																	"patternProperties": {
@@ -740,7 +851,7 @@
 													"description": "Headers in the response",
 													"patternProperties": {
 														"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-															"anyOf": [
+															"oneOf": [
 																{
 																	"type": "object",
 																	"patternProperties": {

@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../schemas/json/v1.0.0.json
+# yaml-language-server: $schema=../../cli/schemas/json/v1.0.0.json
 
 Domain: EmailMailer
 
@@ -49,9 +49,11 @@ Usecase:
         Type: Map
         Properties:
           Messages:
-            Type: List[Map]
-            Properties:
-              $ref: Relationships.Authentication.Events.UserCreated # References the event `UserCreated` of the relationship `Authentication`
+            Type: List
+            Items:
+              Type: Map
+              Properties:
+                $ref: Authentication.Events.UserCreated # References the event `UserCreated` of the relationship `Authentication`
       Delivery:
         Queue:
           Id: welcome-email

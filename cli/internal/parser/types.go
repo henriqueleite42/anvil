@@ -4,66 +4,75 @@ import (
 	"fmt"
 
 	"github.com/anvil/anvil/internal/hashing"
-	"github.com/anvil/anvil/internal/schema"
+	"github.com/anvil/anvil/schemas"
 )
 
-type AllowedRefs struct {
-	All          bool
-	Relationship bool
-	Type         bool
-	Enum         bool
-}
+type AllowedRefsWhenInvalid string
 
-func (self *anvToAnvpParser) resolveType(allowedRefs AllowedRefs, path string, k string, v any) (string, error) {
+func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 	if self.schema.Types == nil {
-		self.schema.Types = &schema.Types{}
+		self.schema.Types = &schemas.Types{}
 	}
 	if self.schema.Types.Types == nil {
-		self.schema.Types.Types = map[string]*schema.Type{}
+		self.schema.Types.Types = map[string]*schemas.Type{}
 	}
 
-	originalPath := path + "." + k
-	originalPathHash := hashing.String(originalPath)
+	// Types ref works a little different,
+	// because they also can be created Entities, Usecase, Repository, etc
+	// so we use their reference instead of the Type
+	var ref string
+	if i.ref != "" {
+		ref = i.ref + "." + i.k
+	} else {
+		ref = "Types." + i.k
+		if self.baseRef != "" {
+			ref = self.baseRef + "." + ref
+		}
+	}
+	refHash := hashing.String(ref)
 
-	_, ok := self.schema.Types.Types[originalPathHash]
+	_, ok := self.schema.Types.Types[refHash]
 	if ok {
-		return originalPathHash, nil
+		return refHash, nil
 	}
 
-	vMap, ok := v.(map[string]any)
+	vMap, ok := i.v.(map[string]any)
 	if !ok {
-		return "", fmt.Errorf("fail to parse \"%s.%s\" to `map[string]any`", path, k)
+		return "", fmt.Errorf("fail to parse \"%s.%s\" to `map[string]any`", i.path, i.k)
 	}
 
-	// TODO
-	_, ok = vMap["$ref"]
+	refAny, ok := vMap["$ref"]
 	if ok {
-		return "", nil
+		refString, ok := refAny.(string)
+		if !ok {
+			return "", fmt.Errorf("fail to parse \"%s.%s.$ref\" to `string`", i.path, i.k)
+		}
+		return self.getRefHash(refString), nil
 	}
 
 	typeTypeAny, ok := vMap["Type"]
 	if !ok {
-		return "", fmt.Errorf("\"Type\" is a required property to \"%s.%s\"", path, k)
+		return "", fmt.Errorf("\"Type\" is a required property to \"%s.%s\"", i.path, i.k)
 	}
 	typeTypeString, ok := typeTypeAny.(string)
 	if !ok {
-		return "", fmt.Errorf("fail to parse \"%s.%s.Type\" to `string`", path, k)
+		return "", fmt.Errorf("fail to parse \"%s.%s.Type\" to `string`", i.path, i.k)
 	}
-	typeType, ok := schema.ToTypeType(typeTypeString)
+	typeType, ok := schemas.ToTypeType(typeTypeString)
 	if !ok {
-		return "", fmt.Errorf("fail to parse \"%s.%s.Type\" to `TypeType`", path, k)
+		return "", fmt.Errorf("fail to parse \"%s.%s.Type\" to `TypeType`", i.path, i.k)
 	}
 
-	var confidentiality schema.TypeConfidentiality = schema.TypeConfidentiality_Low
+	var confidentiality schemas.TypeConfidentiality = schemas.TypeConfidentiality_Low
 	confidentialityAny, ok := vMap["Confidentiality"]
 	if ok {
 		confidentialityString, ok := confidentialityAny.(string)
 		if !ok {
-			return "", fmt.Errorf("fail to parse \"%s.%s.Confidentiality\" to `string`", path, k)
+			return "", fmt.Errorf("fail to parse \"%s.%s.Confidentiality\" to `string`", i.path, i.k)
 		}
-		confidentiality, ok = schema.ToTypeConfidentiality(confidentialityString)
+		confidentiality, ok = schemas.ToTypeConfidentiality(confidentialityString)
 		if !ok {
-			return "", fmt.Errorf("fail to parse \"%s.%s.Confidentiality\" to `TypeConfidentiality`", path, k)
+			return "", fmt.Errorf("fail to parse \"%s.%s.Confidentiality\" to `TypeConfidentiality`", i.path, i.k)
 		}
 	}
 
@@ -72,7 +81,7 @@ func (self *anvToAnvpParser) resolveType(allowedRefs AllowedRefs, path string, k
 	if ok {
 		optionalBool, ok := optionalAny.(bool)
 		if !ok {
-			return "", fmt.Errorf("fail to parse \"%s.%s.Optional\" to `bool`", path, k)
+			return "", fmt.Errorf("fail to parse \"%s.%s.Optional\" to `bool`", i.path, i.k)
 		}
 		optional = optionalBool
 	}
@@ -82,7 +91,7 @@ func (self *anvToAnvpParser) resolveType(allowedRefs AllowedRefs, path string, k
 	if ok {
 		formatString, ok := formatAny.(string)
 		if !ok {
-			return "", fmt.Errorf("fail to parse \"%s.%s.Format\" to `string`", path, k)
+			return "", fmt.Errorf("fail to parse \"%s.%s.Format\" to `string`", i.path, i.k)
 		}
 		format = &formatString
 	}
@@ -92,48 +101,41 @@ func (self *anvToAnvpParser) resolveType(allowedRefs AllowedRefs, path string, k
 	if ok {
 		validateArrAny, ok := validateAny.([]any)
 		if !ok {
-			return "", fmt.Errorf("fail to parse \"%s.%s.Validate\" to `[]any`", path, k)
+			return "", fmt.Errorf("fail to parse \"%s.%s.Validate\" to `[]any`", i.path, i.k)
 		}
 		validateArr := make([]string, len(validateArrAny)-1)
 		for kk, vv := range validateArrAny {
 			vString, ok := vv.(string)
 			if !ok {
-				return "", fmt.Errorf("fail to parse \"%s.%s.Validate.%d\" to `string`", path, k, kk)
+				return "", fmt.Errorf("fail to parse \"%s.%s.Validate.%d\" to `string`", i.path, i.k, kk)
 			}
 			validateArr = append(validateArr, vString)
 		}
 		validate = validateArr
 	}
 
-	var dbType *string = nil
-	dbTypeAny, ok := vMap["DbType"]
-	if ok {
-		dbTypeString, ok := dbTypeAny.(string)
-		if !ok {
-			return "", fmt.Errorf("fail to parse \"%s.%s.DbType\" to `string`", path, k)
-		}
-		dbType = &dbTypeString
-	}
-
 	var childTypesHashes []string = nil
 	propertiesAny, ok := vMap["Properties"]
 	if ok {
-		if typeType != schema.TypeType_ListMap &&
-			typeType != schema.TypeType_Map &&
-			typeType != schema.TypeType_MapStringMap {
-			return "", fmt.Errorf("Type \"%s.%s\" cannot have property \"Properties\". Only types with map \"Type\" can.", path, k)
+		if typeType != schemas.TypeType_Map {
+			return "", fmt.Errorf("Type \"%s.%s\" cannot have property \"Properties\". Only types with map \"Type\" can.", i.path, i.k)
 		}
 
 		propertiesMap, ok := propertiesAny.(map[string]any)
 		if !ok {
-			return "", fmt.Errorf("fail to parse \"%s.%s.Properties\" to `map[string]any`", path, k)
+			return "", fmt.Errorf("fail to parse \"%s.%s.Properties\" to `map[string]any`", i.path, i.k)
 		}
 
 		typesHashes := []string{}
 
 		for kk, vv := range propertiesMap {
 			// Not including "Properties" is intentional to make it smaller and only contain relevant data
-			typeHash, err := self.resolveType(allowedRefs, path+"."+k, kk, vv)
+			typeHash, err := self.resolveType(&resolveInput{
+				path: i.path + ".Properties",
+				ref:  ref,
+				k:    kk,
+				v:    vv,
+			})
 			if err != nil {
 				return "", err
 			}
@@ -141,40 +143,65 @@ func (self *anvToAnvpParser) resolveType(allowedRefs AllowedRefs, path string, k
 		}
 
 		childTypesHashes = typesHashes
-	} else if typeType == schema.TypeType_ListMap ||
-		typeType == schema.TypeType_Map ||
-		typeType == schema.TypeType_MapStringMap {
-		return "", fmt.Errorf("Type \"%s.%s\" must have property \"Properties\". All types with map \"Type\" must.", path, k)
+	} else if typeType == schemas.TypeType_Map {
+		return "", fmt.Errorf("Type \"%s.%s\" must have property \"Properties\". All types with map \"Type\" must.", i.path, i.k)
 	}
 
 	var enumHash *string = nil
 	valuesAny, ok := vMap["Values"]
 	if ok {
-		if typeType != schema.TypeType_Enum &&
-			typeType != schema.TypeType_ListEnum {
-			return "", fmt.Errorf("Type \"%s.%s\" cannot have property \"Values\". Only types with enum \"Type\" can.", path, k)
+		if typeType != schemas.TypeType_Enum {
+			return "", fmt.Errorf("Type \"%s.%s\" cannot have property \"Values\". Only types with enum \"Type\" can.", i.path, i.k)
 		}
 
-		valuesHash, err := self.resolveEnum(path+"."+k, "Values", valuesAny)
+		valuesHash, err := self.resolveEnum(&resolveInput{
+			path: i.path + ".Values",
+			ref:  ref,
+			k:    i.k,
+			v:    valuesAny,
+		})
 		if err != nil {
 			return "", err
 		}
 
 		enumHash = &valuesHash
-	} else if typeType == schema.TypeType_Enum ||
-		typeType == schema.TypeType_ListEnum {
-		return "", fmt.Errorf("Type \"%s.%s\" must have property \"Values\". All types with enum \"Type\" must.", path, k)
+	}
+	if typeType == schemas.TypeType_Enum && enumHash == nil {
+		return "", fmt.Errorf("Type \"%s.%s\" must have property \"Values\". All types with enum \"Type\" must.", i.path, i.k)
 	}
 
-	rootNode, err := getRootNode(path)
+	var dbType *string = nil
+	dbTypeAny, ok := vMap["DbType"]
+	if ok {
+		dbTypeString, ok := dbTypeAny.(string)
+		if !ok {
+			return "", fmt.Errorf("fail to parse \"%s.%s.DbType\" to `string`", i.path, i.k)
+		}
+		dbType = &dbTypeString
+	} else if typeType == schemas.TypeType_Enum {
+		// TODO make it dynamic to match pattern specified in Entities.ColumnsCase (maybe create a Entities.ConstraintCase?)
+		if self.schema.Enums == nil || self.schema.Enums.Enums == nil {
+			return "", fmt.Errorf("something went wrong when parsing the enum of \"%s.%s\": no enums parsed.", i.path, i.k)
+		}
+		enum := self.schema.Enums.Enums[*enumHash]
+
+		if enum == nil {
+			return "", fmt.Errorf("something went wrong when parsing the enum of \"%s.%s\": enum notfound", i.path, i.k)
+		}
+
+		dbType = &enum.DbType
+	}
+
+	rootNode, err := getRootNode(i.path)
 	if err != nil {
 		return "", err
 	}
 
-	schemaTypes := &schema.Type{
-		Name:             k,
+	schemaTypes := &schemas.Type{
+		Ref:              ref,
+		OriginalPath:     self.getPath(fmt.Sprintf("%s.%s", i.path, i.k)),
+		Name:             i.k,
 		RootNode:         rootNode,
-		OriginalPath:     originalPath,
 		Confidentiality:  confidentiality,
 		Optional:         optional,
 		Format:           format,
@@ -187,13 +214,13 @@ func (self *anvToAnvpParser) resolveType(allowedRefs AllowedRefs, path string, k
 
 	stateHash, err := hashing.Struct(schemaTypes)
 	if err != nil {
-		return "", fmt.Errorf("fail to get import \"%s\" state hash", originalPath)
+		return "", fmt.Errorf("fail to get import \"%s.%s\" state hash", i.path, i.k)
 	}
 
 	schemaTypes.StateHash = stateHash
-	self.schema.Types.Types[originalPathHash] = schemaTypes
+	self.schema.Types.Types[refHash] = schemaTypes
 
-	return originalPathHash, nil
+	return refHash, nil
 }
 
 func (self *anvToAnvpParser) types(file map[string]any) error {
@@ -210,9 +237,12 @@ func (self *anvToAnvpParser) types(file map[string]any) error {
 	}
 
 	for k, v := range typesMap {
-		_, err := self.resolveType(AllowedRefs{
-			Relationship: true,
-		}, fullPath, k, v)
+		_, err := self.resolveType(&resolveInput{
+			path: fullPath,
+			ref:  "",
+			k:    k,
+			v:    v,
+		})
 		if err != nil {
 			return err
 		}

@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../schemas/json/v1.0.0.json
+# yaml-language-server: $schema=../../cli/schemas/json/v1.0.0.json
 
 Domain: HelloWorld
 
@@ -13,6 +13,4 @@ Usecase:
           Message:
             Type: String
       Delivery:
-        Http:
-          Method: GET
-          Path: /hello-world
+        Grpc: {}

@@ -16,6 +16,7 @@
 		"Protofiles",
 		"Timestampz",
 		"Usecase",
-		"Usecases"
+		"Usecases",
+		"VARCHAR"
 	]
 }

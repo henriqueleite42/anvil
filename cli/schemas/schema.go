@@ -1,85 +1,10 @@
-package schema
+package schemas
 
 import "slices"
 
-// Common
-
-type TypeType string
-
-const (
-	TypeType_String        TypeType = "String"
-	TypeType_Int           TypeType = "Int"
-	TypeType_Timestamp     TypeType = "Timestamp"
-	TypeType_Enum          TypeType = "Enum"
-	TypeType_Map           TypeType = "Map"
-	TypeType_MapStringMap  TypeType = "Map[String]Map"
-	TypeType_ListString    TypeType = "List[String]"
-	TypeType_ListInt       TypeType = "List[Int]"
-	TypeType_ListTimestamp TypeType = "List[Timestamp]"
-	TypeType_ListEnum      TypeType = "List[Enum]"
-	TypeType_ListMap       TypeType = "List[Map]"
-)
-
-var TypeTypeArr = []TypeType{
-	TypeType_String,
-	TypeType_Int,
-	TypeType_Timestamp,
-	TypeType_Enum,
-	TypeType_Map,
-	TypeType_MapStringMap,
-	TypeType_ListString,
-	TypeType_ListInt,
-	TypeType_ListTimestamp,
-	TypeType_ListEnum,
-	TypeType_ListMap,
-}
-
-func ToTypeType(i string) (TypeType, bool) {
-	ft := TypeType(i)
-
-	return ft, slices.Contains(TypeTypeArr, ft)
-}
-
-type TypeConfidentiality string
-
-const (
-	TypeConfidentiality_Low    TypeConfidentiality = "LOW"
-	TypeConfidentiality_Medium TypeConfidentiality = "MEDIUM"
-	TypeConfidentiality_High   TypeConfidentiality = "HIGH"
-)
-
-var TypeConfidentialityArr = []TypeConfidentiality{
-	TypeConfidentiality_Low,
-	TypeConfidentiality_Medium,
-	TypeConfidentiality_High,
-}
-
-func ToTypeConfidentiality(i string) (TypeConfidentiality, bool) {
-	ft := TypeConfidentiality(i)
-
-	return ft, slices.Contains(TypeConfidentialityArr, ft)
-}
-
-type Type struct {
-	Name            string              `yaml:"Name"`
-	RootNode        string              `yaml:"RootNode"`
-	OriginalPath    string              `yaml:"OriginalPath"`
-	StateHash       string              `yaml:"StateHash"`
-	Confidentiality TypeConfidentiality `yaml:"Confidentiality"`
-	Optional        bool                `yaml:"Optional"`
-	Format          *string             `yaml:"Format,omitempty" json:"Format,omitempty"`
-	Validate        []string            `yaml:"Validate,omitempty" json:"Validate,omitempty"`
-	Type            TypeType            `yaml:"Type"`
-	DbType          *string             `yaml:"DbType,omitempty" json:"DbType,omitempty"`
-	// Used for Map and List[Map]
-	ChildTypesHashes []string `yaml:"ChildTypesHashes,omitempty" json:"ChildTypesHashes,omitempty"`
-	// Used for Enum and List[Enum]
-	EnumHash *string `yaml:"EnumHash,omitempty" json:"EnumHash,omitempty"`
-}
-
 type Dependency struct {
-	Name         string `yaml:"Name"`
 	OriginalPath string `yaml:"OriginalPath"`
+	Name         string `yaml:"Name"`
 	StateHash    string `yaml:"StateHash"`
 	ImportHash   string `yaml:"ImportHash"`
 }
@@ -108,13 +33,15 @@ type Metadata struct {
 // Relationship
 
 type Relationship struct {
-	Name          string `yaml:"Name"`
-	RootNode      string `yaml:"RootNode"`
-	OriginalPath  string `yaml:"OriginalPath"`
-	StateHash     string `yaml:"StateHash"`
-	Uri           string `yaml:"Uri"`
-	Version       string `yaml:"Version"`
-	IsSameProject bool   `yaml:"IsSameProject"`
+	Ref           string  `yaml:"Ref"`
+	OriginalPath  string  `yaml:"OriginalPath"`
+	Name          string  `yaml:"Name"`
+	RootNode      string  `yaml:"RootNode"`
+	StateHash     string  `yaml:"StateHash"`
+	Uri           string  `yaml:"Uri"`
+	Version       string  `yaml:"Version"`
+	IsSameProject bool    `yaml:"IsSameProject"`
+	Schema        *Schema `yaml:"Schema"`
 }
 
 type Relationships struct {
@@ -130,9 +57,9 @@ type ImportImport struct {
 }
 
 type Import struct {
+	OriginalPath string        `yaml:"OriginalPath"`
 	Name         string        `yaml:"Name"`
 	RootNode     string        `yaml:"RootNode"`
-	OriginalPath string        `yaml:"OriginalPath"`
 	StateHash    string        `yaml:"StateHash"`
 	Import       *ImportImport `yaml:"Import"`
 	Type         string        `yaml:"Type"`
@@ -146,9 +73,10 @@ type Imports struct {
 // Auth
 
 type Auth struct {
+	Ref              string  `yaml:"Ref"`
+	OriginalPath     string  `yaml:"OriginalPath"`
 	Name             string  `yaml:"Name"`
 	RootNode         string  `yaml:"RootNode"`
-	OriginalPath     string  `yaml:"OriginalPath"`
 	StateHash        string  `yaml:"StateHash"`
 	Description      *string `yaml:"Description"`
 	Scheme           string  `yaml:"Scheme"`
@@ -165,7 +93,7 @@ type Auths struct {
 
 type EnumType string
 
-const (
+var (
 	EnumType_String EnumType = "String"
 	EnumType_Int    EnumType = "Int"
 )
@@ -176,9 +104,11 @@ type EnumValue struct {
 }
 
 type Enum struct {
-	Name         string       `yaml:"Name"`
-	RootNode     string       `yaml:"RootNode"`
+	Ref          string       `yaml:"Ref"`
 	OriginalPath string       `yaml:"OriginalPath"`
+	Name         string       `yaml:"Name"`
+	DbType       string       `yaml:"DbType"`
+	RootNode     string       `yaml:"RootNode"`
 	StateHash    string       `yaml:"StateHash"`
 	Type         EnumType     `yaml:"Type"`
 	Values       []*EnumValue `yaml:"Values"`
@@ -191,6 +121,70 @@ type Enums struct {
 
 // Types
 
+type TypeType string
+
+var (
+	TypeType_String    TypeType = "String"
+	TypeType_Int       TypeType = "Int"
+	TypeType_Timestamp TypeType = "Timestamp"
+	TypeType_Enum      TypeType = "Enum"
+	TypeType_Map       TypeType = "Map"
+	TypeType_List      TypeType = "List"
+)
+
+var TypeTypeArr = []TypeType{
+	TypeType_String,
+	TypeType_Int,
+	TypeType_Timestamp,
+	TypeType_Enum,
+	TypeType_Map,
+	TypeType_List,
+}
+
+func ToTypeType(i string) (TypeType, bool) {
+	ft := TypeType(i)
+
+	return ft, slices.Contains(TypeTypeArr, ft)
+}
+
+type TypeConfidentiality string
+
+var (
+	TypeConfidentiality_Low    TypeConfidentiality = "LOW"
+	TypeConfidentiality_Medium TypeConfidentiality = "MEDIUM"
+	TypeConfidentiality_High   TypeConfidentiality = "HIGH"
+)
+
+var TypeConfidentialityArr = []TypeConfidentiality{
+	TypeConfidentiality_Low,
+	TypeConfidentiality_Medium,
+	TypeConfidentiality_High,
+}
+
+func ToTypeConfidentiality(i string) (TypeConfidentiality, bool) {
+	ft := TypeConfidentiality(i)
+
+	return ft, slices.Contains(TypeConfidentialityArr, ft)
+}
+
+type Type struct {
+	Ref             string              `yaml:"Ref"`
+	OriginalPath    string              `yaml:"OriginalPath"`
+	Name            string              `yaml:"Name"`
+	RootNode        string              `yaml:"RootNode"`
+	StateHash       string              `yaml:"StateHash"`
+	Confidentiality TypeConfidentiality `yaml:"Confidentiality"`
+	Optional        bool                `yaml:"Optional"`
+	Format          *string             `yaml:"Format,omitempty" json:"Format,omitempty"`
+	Validate        []string            `yaml:"Validate,omitempty" json:"Validate,omitempty"`
+	Type            TypeType            `yaml:"Type"`
+	DbType          *string             `yaml:"DbType,omitempty" json:"DbType,omitempty"`
+	// Used for Map and List (List will always only have 1 item inside the slice)
+	ChildTypesHashes []string `yaml:"ChildTypesHashes,omitempty" json:"ChildTypesHashes,omitempty"`
+	// Used for Enum
+	EnumHash *string `yaml:"EnumHash,omitempty" json:"EnumHash,omitempty"`
+}
+
 type Types struct {
 	StateHash string           `yaml:"StateHash"`
 	Types     map[string]*Type `yaml:"Types"`
@@ -199,9 +193,10 @@ type Types struct {
 // Events
 
 type Event struct {
+	Ref          string   `yaml:"Ref"`
+	OriginalPath string   `yaml:"OriginalPath"`
 	Name         string   `yaml:"Name"`
 	RootNode     string   `yaml:"RootNode"`
-	OriginalPath string   `yaml:"OriginalPath"`
 	StateHash    string   `yaml:"StateHash"`
 	Formats      []string `yaml:"Formats"`
 	TypeHash     string   `yaml:"TypeHash"`
@@ -214,33 +209,56 @@ type Events struct {
 
 // Entities
 
-type EntitiesMetatada struct {
-	Schema      string `yaml:"Schema"`
-	ColumnsCase string `yaml:"ColumnsCase"`
+type ColumnsCase string
+
+var (
+	ColumnsCase_Snake  ColumnsCase = "snake"
+	ColumnsCase_Pascal ColumnsCase = "pascal"
+	ColumnsCase_Camel  ColumnsCase = "camel"
+)
+
+var ColumnsCaseArr = []ColumnsCase{
+	ColumnsCase_Snake,
+	ColumnsCase_Pascal,
+	ColumnsCase_Camel,
+}
+
+func ToColumnsCase(i string) (ColumnsCase, bool) {
+	ft := ColumnsCase(i)
+
+	return ft, slices.Contains(ColumnsCaseArr, ft)
+}
+
+type EntitiesMetadata struct {
+	ColumnsCase *ColumnsCase `yaml:"ColumnsCase,omitempty" json:"ColumnsCase,omitempty"`
 }
 
 type EntityColumn struct {
+	Ref          string `yaml:"Ref"`
+	OriginalPath string `yaml:"OriginalPath"`
 	Name         string `yaml:"Name"`
 	ColumnName   string `yaml:"ColumnName"`
-	OriginalPath string `yaml:"OriginalPath"`
 	StateHash    string `yaml:"StateHash"`
 	TypeHash     string `yaml:"TypeHash"`
-	Type         string `yaml:"Type"`
 }
 
 type EntityPrimaryKey struct {
-	Hash           string   `yaml:"Hash"`
+	StateHash      string   `yaml:"StateHash"`
 	ConstraintName string   `yaml:"ConstraintName"`
 	ColumnsHashes  []string `yaml:"ColumnsHashes"`
 }
 
 type EntityIndex struct {
+	OriginalPath   string   `yaml:"OriginalPath"`
+	StateHash      string   `yaml:"StateHash"`
 	ConstraintName string   `yaml:"ConstraintName"`
 	ColumnsHashes  []string `yaml:"ColumnsHashes"`
 	Unique         bool     `yaml:"Unique"`
 }
 
 type EntityForeignKey struct {
+	OriginalPath     string   `yaml:"OriginalPath"`
+	StateHash        string   `yaml:"StateHash"`
 	ConstraintName   string   `yaml:"ConstraintName"`
 	ColumnsHashes    []string `yaml:"ColumnsHashes"`
 	RefTableHash     string   `yaml:"RefTableHash"`
@@ -250,21 +268,23 @@ type EntityForeignKey struct {
 }
 
 type Entity struct {
+	Ref          string                       `yaml:"Ref"`
+	OriginalPath string                       `yaml:"OriginalPath"`
 	Name         string                       `yaml:"Name"`
 	RootNode     string                       `yaml:"RootNode"`
-	OriginalPath string                       `yaml:"OriginalPath"`
-	Schema       string                       `yaml:"Schema"`
+	TypeHash     string                       `yaml:"TypeHash"`
+	Schema       *string                      `yaml:"Schema,omitempty" json:"Schema,omitempty"`
 	TableName    string                       `yaml:"TableName"`
 	StateHash    string                       `yaml:"StateHash"`
 	Columns      map[string]*EntityColumn     `yaml:"Columns"`
 	PrimaryKeys  *EntityPrimaryKey            `yaml:"PrimaryKeys"`
-	Indexes      map[string]*EntityIndex      `yaml:"Indexes"`
-	ForeignKeys  map[string]*EntityForeignKey `yaml:"ForeignKeys"`
+	Indexes      map[string]*EntityIndex      `yaml:"Indexes,omitempty" json:"Indexes,omitempty"`
+	ForeignKeys  map[string]*EntityForeignKey `yaml:"ForeignKeys,omitempty" json:"ForeignKeys,omitempty"`
 }
 
 type Entities struct {
 	StateHash string             `yaml:"StateHash"`
-	Metadata  *EntitiesMetatada  `yaml:"Metadata"`
+	Metadata  *EntitiesMetadata  `yaml:"Metadata"`
 	Entities  map[string]*Entity `yaml:"Entities"`
 }
 
@@ -279,8 +299,8 @@ type RepositoryMethodOutput struct {
 }
 
 type RepositoryMethod struct {
-	Name         string                  `yaml:"Name"`
 	OriginalPath string                  `yaml:"OriginalPath"`
+	Name         string                  `yaml:"Name"`
 	StateHash    string                  `yaml:"StateHash"`
 	Input        *RepositoryMethodInput  `yaml:"Input"`
 	Output       *RepositoryMethodOutput `yaml:"Output"`
@@ -309,8 +329,8 @@ type UsecaseMethodOutput struct {
 }
 
 type UsecaseMethod struct {
-	Name         string               `yaml:"Name"`
 	OriginalPath string               `yaml:"OriginalPath"`
+	Name         string               `yaml:"Name"`
 	StateHash    string               `yaml:"StateHash"`
 	Input        *UsecaseMethodInput  `yaml:"Input"`
 	Output       *UsecaseMethodOutput `yaml:"Output"`
@@ -332,8 +352,8 @@ type Usecase struct {
 // Delivery
 
 type DeliveryGrpcRpcExample struct {
-	Name         string `yaml:"Name"`
 	OriginalPath string `yaml:"OriginalPath"`
+	Name         string `yaml:"Name"`
 	StateHash    string `yaml:"StateHash"`
 	StatusCode   int    `yaml:"StatusCode"`
 	Message      any    `yaml:"Message"`
@@ -341,8 +361,8 @@ type DeliveryGrpcRpcExample struct {
 }
 
 type DeliveryGrpcRpc struct {
-	MethodHash   string                             `yaml:"MethodHash"`
 	OriginalPath string                             `yaml:"OriginalPath"`
+	MethodHash   string                             `yaml:"MethodHash"`
 	Examples     map[string]*DeliveryGrpcRpcExample `yaml:"Examples"`
 }
 

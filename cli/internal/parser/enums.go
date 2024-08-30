@@ -3,60 +3,75 @@ package parser
 import (
 	"fmt"
 
+	"github.com/anvil/anvil/internal/formatter"
 	"github.com/anvil/anvil/internal/hashing"
-	"github.com/anvil/anvil/internal/schema"
+	"github.com/anvil/anvil/schemas"
 )
 
-func (self *anvToAnvpParser) resolveEnum(path string, k string, v any) (string, error) {
+func (self *anvToAnvpParser) resolveEnum(i *resolveInput) (string, error) {
 	if self.schema.Enums == nil {
-		self.schema.Enums = &schema.Enums{}
+		self.schema.Enums = &schemas.Enums{}
 	}
 	if self.schema.Enums.Enums == nil {
-		self.schema.Enums.Enums = map[string]*schema.Enum{}
+		self.schema.Enums.Enums = map[string]*schemas.Enum{}
 	}
 
-	originalPath := path + "." + k
-	originalPathHash := hashing.String(originalPath)
+	// Enums ref works a little different,
+	// because they also can be created Entities, Usecase, Repository, etc
+	// so we use their reference instead of the Enum
+	var ref string
+	if i.ref != "" {
+		ref = i.ref + "." + i.k
+	} else {
+		ref = "Enums." + i.k
+		if self.baseRef != "" {
+			ref = self.baseRef + "." + ref
+		}
+	}
+	refHash := hashing.String(ref)
 
-	_, ok := self.schema.Enums.Enums[originalPathHash]
+	_, ok := self.schema.Enums.Enums[refHash]
 	if ok {
-		return originalPathHash, nil
+		return refHash, nil
 	}
 
-	vMap, ok := v.(map[string]any)
+	vMap, ok := i.v.(map[string]any)
 	if !ok {
-		return "", fmt.Errorf("fail to parse \"%s.%s\" to `map[string]any`", path, k)
+		return "", fmt.Errorf("fail to parse \"%s.%s\" to `map[string]any`", i.path, i.k)
 	}
 
-	// TODO
-	_, ok = vMap["$ref"]
+	refAny, ok := vMap["$ref"]
 	if ok {
-		return "", nil
+		refString, ok := refAny.(string)
+		if !ok {
+			return "", fmt.Errorf("fail to parse \"%s.%s.$ref\" to `string`", i.path, i.k)
+		}
+		return hashing.String(refString), nil
 	}
 
 	typeAny, ok := vMap["Type"]
 	if !ok {
-		return "", fmt.Errorf("\"Type\" is a required property to \"%s.%s\"", path, k)
+		return "", fmt.Errorf("\"Type\" is a required property to \"%s.%s\"", i.path, i.k)
 	}
 	typeString, ok := typeAny.(string)
 	if !ok {
-		return "", fmt.Errorf("fail to parse \"%s.%s.Type\" to `string`", path, k)
+		return "", fmt.Errorf("fail to parse \"%s.%s.Type\" to `string`", i.path, i.k)
 	}
 
 	valuesAny, ok := vMap["Values"]
 	if !ok {
-		return "", fmt.Errorf("\"Values\" is a required property to \"%s.%s\"", path, k)
+		return "", fmt.Errorf("\"Values\" is a required property to \"%s.%s\"", i.path, i.k)
 	}
 	valuesMap, ok := valuesAny.(map[string]any)
 	if !ok {
-		return "", fmt.Errorf("fail to parse \"%s.%s.Values\" to `map[string]any`", path, k)
+		return "", fmt.Errorf("fail to parse \"%s.%s.Values\" to `map[string]any`", i.path, i.k)
 	}
 
-	values := []*schema.EnumValue{}
+	values := []*schemas.EnumValue{}
 	for valuesK, valuesV := range valuesMap {
 		valuesVMap, ok := valuesV.(map[string]any)
 		if !ok {
-			return "", fmt.Errorf("fail to parse \"%s.%s.Values.%s\" to `map[string]any`", path, k, valuesK)
+			return "", fmt.Errorf("fail to parse \"%s.%s.Values.%s\" to `map[string]any`", i.path, i.k, valuesK)
 		}
 
 		var nameString *string = nil
@@ -64,44 +79,49 @@ func (self *anvToAnvpParser) resolveEnum(path string, k string, v any) (string, 
 		if ok {
 			localNameString, ok := nameAny.(string)
 			if !ok {
-				return "", fmt.Errorf("fail to parse \"%s.%s.Values.%s.Name\" to `string`", path, k, valuesK)
+				return "", fmt.Errorf("fail to parse \"%s.%s.Values.%s.Name\" to `string`", i.path, i.k, valuesK)
 			}
 			nameString = &localNameString
 		}
 
 		valueString, ok := valuesVMap["Value"].(string)
 		if !ok {
-			return "", fmt.Errorf("fail to parse \"%s.%s.Values.%s.Value\" to `string`", path, k, valuesK)
+			return "", fmt.Errorf("fail to parse \"%s.%s.Values.%s.Value\" to `string`", i.path, i.k, valuesK)
 		}
 
-		values = append(values, &schema.EnumValue{
+		values = append(values, &schemas.EnumValue{
 			Name:  nameString,
 			Value: valueString,
 		})
 	}
 
-	rootNode, err := getRootNode(path)
+	// TODO make it dynamic based on the metadata
+	dbType := formatter.PascalToSnake(i.k) + "_enum"
+
+	rootNode, err := getRootNode(i.path)
 	if err != nil {
 		return "", err
 	}
 
-	enum := &schema.Enum{
-		Name:         k,
+	enum := &schemas.Enum{
+		Ref:          ref,
+		OriginalPath: self.getPath(fmt.Sprintf("%s.Enums.%s", i.path, i.k)),
+		Name:         i.k,
+		DbType:       dbType,
 		RootNode:     rootNode,
-		OriginalPath: originalPath,
-		Type:         schema.EnumType(typeString),
+		Type:         schemas.EnumType(typeString),
 		Values:       values,
 	}
 
 	stateHash, err := hashing.Struct(enum)
 	if err != nil {
-		return "", fmt.Errorf("fail to get enum \"%s\" state hash", originalPath)
+		return "", fmt.Errorf("fail to get enum \"%s.%s\" state hash", i.path, i.k)
 	}
 
 	enum.StateHash = stateHash
-	self.schema.Enums.Enums[originalPathHash] = enum
+	self.schema.Enums.Enums[refHash] = enum
 
-	return originalPathHash, nil
+	return refHash, nil
 }
 
 func (self *anvToAnvpParser) enums(file map[string]any) error {
@@ -118,7 +138,12 @@ func (self *anvToAnvpParser) enums(file map[string]any) error {
 	}
 
 	for k, v := range enumsMap {
-		_, err := self.resolveEnum(fullPath, k, v)
+		_, err := self.resolveEnum(&resolveInput{
+			path: fullPath,
+			ref:  "",
+			k:    k,
+			v:    v,
+		})
 		if err != nil {
 			return err
 		}

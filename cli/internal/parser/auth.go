@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/anvil/anvil/internal/hashing"
-	"github.com/anvil/anvil/internal/schema"
+	"github.com/anvil/anvil/schemas"
 )
 
 func (self *anvToAnvpParser) auth(file map[string]any) error {
@@ -13,24 +13,24 @@ func (self *anvToAnvpParser) auth(file map[string]any) error {
 		return nil
 	}
 
-	fullPath := self.getPath("Auth")
+	path := self.getPath("Auth")
 
 	authMap, ok := authSchema.(map[string]any)
 	if !ok {
-		return fmt.Errorf("fail to parse \"%s\" to `map[string]any`", fullPath)
+		return fmt.Errorf("fail to parse \"%s\" to `map[string]any`", path)
 	}
 
 	if self.schema.Auths == nil {
-		self.schema.Auths = &schema.Auths{}
+		self.schema.Auths = &schemas.Auths{}
 	}
 	if self.schema.Auths.Auths == nil {
-		self.schema.Auths.Auths = map[string]*schema.Auth{}
+		self.schema.Auths.Auths = map[string]*schemas.Auth{}
 	}
 
 	for k, v := range authMap {
 		vMap, ok := v.(map[string]any)
 		if !ok {
-			return fmt.Errorf("fail to parse \"%s.%s\" to `map[string]any`", fullPath, k)
+			return fmt.Errorf("fail to parse \"%s.%s\" to `map[string]any`", path, k)
 		}
 
 		var description *string = nil
@@ -38,7 +38,7 @@ func (self *anvToAnvpParser) auth(file map[string]any) error {
 		if ok {
 			descriptionString, ok := descriptionAny.(string)
 			if !ok {
-				return fmt.Errorf("fail to parse \"%s.%s.Description\" to `string`", fullPath, k)
+				return fmt.Errorf("fail to parse \"%s.%s.Description\" to `string`", path, k)
 			}
 			description = &descriptionString
 		}
@@ -48,7 +48,7 @@ func (self *anvToAnvpParser) auth(file map[string]any) error {
 		if ok {
 			schemeString, ok := schemeAny.(string)
 			if !ok {
-				return fmt.Errorf("fail to parse \"%s.%s.Scheme\" to `string`", fullPath, k)
+				return fmt.Errorf("fail to parse \"%s.%s.Scheme\" to `string`", path, k)
 			}
 			scheme = schemeString
 		}
@@ -58,46 +58,47 @@ func (self *anvToAnvpParser) auth(file map[string]any) error {
 		if ok {
 			formatString, ok := formatAny.(string)
 			if !ok {
-				return fmt.Errorf("fail to parse \"%s.%s.Format\" to `string`", fullPath, k)
+				return fmt.Errorf("fail to parse \"%s.%s.Format\" to `string`", path, k)
 			}
 			format = &formatString
 		}
 
-		var applyToallRoutes bool
-		applyToallRoutesAny, ok := vMap["ApplyToAllRoutes"]
+		var applyToAllRoutes bool
+		applyToAllRoutesAny, ok := vMap["ApplyToAllRoutes"]
 		if ok {
-			applyToallRoutesString, ok := applyToallRoutesAny.(bool)
+			applyToAllRoutesString, ok := applyToAllRoutesAny.(bool)
 			if !ok {
-				return fmt.Errorf("fail to parse \"%s.%s.ApplyToAllRoutes\" to `string`", fullPath, k)
+				return fmt.Errorf("fail to parse \"%s.%s.ApplyToAllRoutes\" to `string`", path, k)
 			}
-			applyToallRoutes = applyToallRoutesString
+			applyToAllRoutes = applyToAllRoutesString
 		}
 
-		originalPath := fullPath + "." + k
-		originalPathHash := hashing.String(originalPath)
+		ref := self.getRef("", "Auth."+k)
+		refHash := hashing.String(ref)
 
-		rootNode, err := getRootNode(fullPath)
+		rootNode, err := getRootNode(path)
 		if err != nil {
 			return err
 		}
 
-		auth := &schema.Auth{
+		auth := &schemas.Auth{
+			Ref:              ref,
+			OriginalPath:     path + k,
 			Name:             k,
 			RootNode:         rootNode,
-			OriginalPath:     originalPath,
 			Description:      description,
 			Scheme:           scheme,
 			Format:           format,
-			ApplyToAllRoutes: applyToallRoutes,
+			ApplyToAllRoutes: applyToAllRoutes,
 		}
 
 		stateHash, err := hashing.Struct(auth)
 		if err != nil {
-			return fmt.Errorf("fail to get enum \"%s\" state hash", originalPath)
+			return fmt.Errorf("fail to get enum \"%s.%s\" state hash", path, k)
 		}
 
 		auth.StateHash = stateHash
-		self.schema.Auths.Auths[originalPathHash] = auth
+		self.schema.Auths.Auths[refHash] = auth
 	}
 
 	return nil
