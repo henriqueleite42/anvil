@@ -10,6 +10,8 @@ import (
 
 var (
 	schemaFile string // Used for flags.
+	silent     bool
+	generators []string
 
 	rootCmd = &cobra.Command{
 		Use:   "anvil",
@@ -29,6 +31,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&schemaFile, "schema", "", "config file")
+	rootCmd.MarkPersistentFlagRequired("schema")
 	viper.BindPFlag("schema", rootCmd.PersistentFlags().Lookup("schema"))
 
 	addVersionCommand(rootCmd)
@@ -37,11 +40,9 @@ func init() {
 }
 
 func initConfig() {
-	viper.SetConfigFile(schemaFile)
-
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using schema file:", viper.ConfigFileUsed())
+		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
 }

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/anvil/anvil/internal/hashing"
+	"github.com/henriqueleite42/anvil/cli/internal/hashing"
 )
 
 //	Add the state hash to all the properties

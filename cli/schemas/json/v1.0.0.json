@@ -1,6 +1,6 @@
 {
 	"$schema": "https://json-schemas.org/draft/2020-12/schema",
-	"$id": "https://github.com/anvil/anvil/blob/master/schemas/v1.0.0.json",
+	"$id": "https://github.com/henriqueleite42/anvil/cli/blob/master/schemas/v1.0.0.json",
 	"title": "Anvil",
 	"description": "API Maker",
 	"type": "object",

@@ -3,8 +3,8 @@ package parser_anv
 import (
 	"fmt"
 
-	"github.com/anvil/anvil/internal/hashing"
-	"github.com/anvil/anvil/schemas"
+	"github.com/henriqueleite42/anvil/cli/internal/hashing"
+	"github.com/henriqueleite42/anvil/cli/schemas"
 )
 
 func (self *anvToAnvpParser) resolveEvent(i *resolveInput) (string, error) {

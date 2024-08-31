@@ -74,7 +74,7 @@ Anvil plugins:
 
 ## Examples
 
-[See the examples here.](https://github.com/henriqueleite42/anvil/tree/master/examples)
+[See the examples here.](https://github.com/henriqueleite42/anvil/cli/tree/master/examples)
 
 ## How it works
 

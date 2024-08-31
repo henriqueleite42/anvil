@@ -1,8 +1,8 @@
 package parser_anv
 
 import (
-	"github.com/anvil/anvil/internal/files"
-	"github.com/anvil/anvil/schemas"
+	"github.com/henriqueleite42/anvil/cli/internal/files"
+	"github.com/henriqueleite42/anvil/cli/schemas"
 )
 
 type anvToAnvpParser struct {

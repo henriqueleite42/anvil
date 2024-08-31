@@ -1,11 +1,16 @@
 package main
 
-import parser_anv_test "github.com/anvil/anvil/tests/parser_anv"
+import (
+	files_test "github.com/henriqueleite42/anvil/cli/tests/files"
+	parser_anv_test "github.com/henriqueleite42/anvil/cli/tests/parser_anv"
+)
 
 func main() {
 	logJson := false
 
-	parser_anv_test.Authentication(true)
+	files_test.ReadAnvpFile(logJson)
+
+	parser_anv_test.Authentication(logJson)
 	parser_anv_test.EmailMailer(logJson)
 	parser_anv_test.UrlShortener(logJson)
 	parser_anv_test.Counter(logJson)

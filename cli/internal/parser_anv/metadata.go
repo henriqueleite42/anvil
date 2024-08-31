@@ -3,7 +3,7 @@ package parser_anv
 import (
 	"fmt"
 
-	"github.com/anvil/anvil/schemas"
+	"github.com/henriqueleite42/anvil/cli/schemas"
 )
 
 func (self *anvToAnvpParser) metadata(file map[string]any) error {

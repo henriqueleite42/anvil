@@ -1,4 +1,4 @@
-module github.com/anvil/anvil
+module github.com/henriqueleite42/anvil/cli
 
 go 1.22.4
 

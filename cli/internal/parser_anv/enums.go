@@ -3,9 +3,9 @@ package parser_anv
 import (
 	"fmt"
 
-	"github.com/anvil/anvil/internal/formatter"
-	"github.com/anvil/anvil/internal/hashing"
-	"github.com/anvil/anvil/schemas"
+	"github.com/henriqueleite42/anvil/cli/internal/formatter"
+	"github.com/henriqueleite42/anvil/cli/internal/hashing"
+	"github.com/henriqueleite42/anvil/cli/schemas"
 )
 
 func (self *anvToAnvpParser) resolveEnum(i *resolveInput) (string, error) {

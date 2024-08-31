@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/anvil/anvil/cmd/config"
+	"github.com/henriqueleite42/anvil/cli/cmd/config"
 	"github.com/spf13/cobra"
 )
 

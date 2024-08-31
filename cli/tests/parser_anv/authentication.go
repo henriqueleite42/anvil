@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/anvil/anvil/internal/parser_anv"
+	"github.com/henriqueleite42/anvil/cli/internal/parser_anv"
 )
 
 func Authentication(logJson bool) {

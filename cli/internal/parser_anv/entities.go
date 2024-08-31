@@ -5,9 +5,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/anvil/anvil/internal/formatter"
-	"github.com/anvil/anvil/internal/hashing"
-	"github.com/anvil/anvil/schemas"
+	"github.com/henriqueleite42/anvil/cli/internal/formatter"
+	"github.com/henriqueleite42/anvil/cli/internal/hashing"
+	"github.com/henriqueleite42/anvil/cli/schemas"
 )
 
 var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")

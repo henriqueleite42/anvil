@@ -1,31 +1,61 @@
 package cmd
 
 import (
+	"encoding/json"
 	"log"
+	"os"
+	"os/exec"
 
-	"github.com/anvil/anvil/internal/files"
-	"github.com/anvil/anvil/internal/parser_anv"
+	"github.com/henriqueleite42/anvil/cli/internal/files"
+	"github.com/henriqueleite42/anvil/cli/internal/parser_anv"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 func addBuildCommand(rootCmd *cobra.Command) {
-	parseCmd := &cobra.Command{
+	buildCmd := &cobra.Command{
 		Use:   "build",
 		Short: "Build the file to check for errors",
 		Run: func(cmd *cobra.Command, args []string) {
-			schemaFile := cmd.Flag("schema").Value.String()
-
 			schema, err := parser_anv.ParseAnvToAnvp(schemaFile)
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			err = files.WriteFile(schema)
+			err = files.WriteAnvpFile(schema, schemaFile)
 			if err != nil {
 				log.Fatal(err)
+			}
+
+			json, err := json.Marshal(schema)
+			if err != nil {
+				log.Fatal(err)
+			}
+			jsonString := string(json)
+
+			var silentFlag string
+			if silent {
+				silentFlag = "--silent"
+			}
+
+			for _, v := range generators {
+				generatorCmd := exec.Command(v, jsonString, silentFlag)
+				generatorCmd.Stdout = os.Stdout
+				generatorCmd.Stderr = os.Stderr
+				err = generatorCmd.Run()
+				if err != nil {
+					log.Fatal(err)
+				}
 			}
 		},
 	}
 
-	rootCmd.AddCommand(parseCmd)
+	buildCmd.PersistentFlags().BoolVar(&silent, "silent", false, "if it should have an effect or only run it silently")
+	viper.BindPFlag("silent", rootCmd.PersistentFlags().Lookup("silent"))
+
+	buildCmd.PersistentFlags().StringArrayVar(&generators, "generators", []string{}, "generator to be used, can be passed more than once")
+	buildCmd.MarkPersistentFlagRequired("generators")
+	viper.BindPFlag("generators", rootCmd.PersistentFlags().Lookup("generators"))
+
+	rootCmd.AddCommand(buildCmd)
 }

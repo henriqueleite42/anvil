@@ -15,12 +15,12 @@ They have extensions for the most famous code editors:
 
 To configure the LSP, you must specify a JSON schema that we provide:
 ```
-https://github.com/henriqueleite42/anvil/blob/master/schemas/v1.0.0.json
+https://github.com/henriqueleite42/anvil/cli/blob/master/schemas/v1.0.0.json
 ```
 
 Heres an example of how to configure it in VSCode and Zed, at the begging of your `.anv` file, add this:
 ```
-# yaml-language-server: $schema=https://github.com/henriqueleite42/anvil/blob/master/schemas/v1.0.0.json
+# yaml-language-server: $schema=https://github.com/henriqueleite42/anvil/cli/blob/master/schemas/v1.0.0.json
 ```
 
 :::danger

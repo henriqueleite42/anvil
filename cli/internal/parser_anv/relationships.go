@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/anvil/anvil/internal/hashing"
-	"github.com/anvil/anvil/schemas"
+	"github.com/henriqueleite42/anvil/cli/internal/hashing"
+	"github.com/henriqueleite42/anvil/cli/schemas"
 )
 
 func (self *anvToAnvpParser) resolveRelationship(i *resolveInput) (string, error) {
