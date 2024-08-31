@@ -167,33 +167,33 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 
 	self.schema.Types.Types[refHash] = entityType
 
-	primaryKeysAny, ok := vMap["PrimaryKeys"]
+	primaryKeyAny, ok := vMap["PrimaryKey"]
 	if !ok {
-		return "", fmt.Errorf("\"PrimaryKeys\" is a required property to \"%s.%s\"", i.path, i.k)
+		return "", fmt.Errorf("\"PrimaryKey\" is a required property to \"%s.%s\"", i.path, i.k)
 	}
-	primaryKeysArr, ok := primaryKeysAny.([]any)
+	primaryKeyArr, ok := primaryKeyAny.([]any)
 	if !ok {
-		return "", fmt.Errorf("fail to parse \"%s.%s.PrimaryKeys\" to `[]any`", i.path, i.k)
+		return "", fmt.Errorf("fail to parse \"%s.%s.PrimaryKey\" to `[]any`", i.path, i.k)
 	}
 	pkColumnsHashes := []string{}
-	for cni, columnNameAny := range primaryKeysArr {
+	for cni, columnNameAny := range primaryKeyArr {
 		columnNameString, ok := columnNameAny.(string)
 		if !ok {
-			return "", fmt.Errorf("fail to parse \"%s.%s.PrimaryKeys.%d\" to `[]any`", i.path, i.k, cni)
+			return "", fmt.Errorf("fail to parse \"%s.%s.PrimaryKey.%d\" to `[]any`", i.path, i.k, cni)
 		}
 		columnRef := fmt.Sprintf("%s.Entities.%s.%s", i.path, i.k, columnNameString)
 		hash := hashing.String(columnRef)
 		pkColumnsHashes = append(pkColumnsHashes, hash)
 	}
-	primaryKeys := &schemas.EntityPrimaryKey{
+	primaryKey := &schemas.EntityPrimaryKey{
 		ConstraintName: tableName + "_pk",
 		ColumnsHashes:  pkColumnsHashes, // TODO
 	}
-	primaryKeysHash, err := hashing.Struct(primaryKeys)
+	primaryKeyHash, err := hashing.Struct(primaryKey)
 	if err != nil {
-		return "", fmt.Errorf("fail to get \"%s.%s.PrimaryKeys\" state hash", i.path, i.k)
+		return "", fmt.Errorf("fail to get \"%s.%s.PrimaryKey\" state hash", i.path, i.k)
 	}
-	primaryKeys.StateHash = primaryKeysHash
+	primaryKey.StateHash = primaryKeyHash
 
 	var indexes map[string]*schemas.EntityIndex = nil
 	indexesAny, ok := vMap["Indexes"]
@@ -399,7 +399,7 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 		Schema:       tableSchema,
 		TableName:    tableName,
 		Columns:      columns,
-		PrimaryKeys:  primaryKeys,
+		PrimaryKey:   primaryKey,
 		Indexes:      indexes,
 	}
 

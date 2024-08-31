@@ -83,7 +83,7 @@ func (self *anvToAnvpParser) auth(file map[string]any) error {
 
 		auth := &schemas.Auth{
 			Ref:              ref,
-			OriginalPath:     path + k,
+			OriginalPath:     self.getPath(fmt.Sprintf("%s.%s", path, k)),
 			Name:             k,
 			RootNode:         rootNode,
 			Description:      description,
@@ -94,7 +94,7 @@ func (self *anvToAnvpParser) auth(file map[string]any) error {
 
 		stateHash, err := hashing.Struct(auth)
 		if err != nil {
-			return fmt.Errorf("fail to get enum \"%s.%s\" state hash", path, k)
+			return fmt.Errorf("fail to get state hash for \"%s.%s\"", path, k)
 		}
 
 		auth.StateHash = stateHash

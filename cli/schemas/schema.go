@@ -277,7 +277,7 @@ type Entity struct {
 	TableName    string                       `yaml:"TableName"`
 	StateHash    string                       `yaml:"StateHash"`
 	Columns      map[string]*EntityColumn     `yaml:"Columns"`
-	PrimaryKeys  *EntityPrimaryKey            `yaml:"PrimaryKeys"`
+	PrimaryKey   *EntityPrimaryKey            `yaml:"PrimaryKey"`
 	Indexes      map[string]*EntityIndex      `yaml:"Indexes,omitempty" json:"Indexes,omitempty"`
 	ForeignKeys  map[string]*EntityForeignKey `yaml:"ForeignKeys,omitempty" json:"ForeignKeys,omitempty"`
 }
@@ -299,11 +299,13 @@ type RepositoryMethodOutput struct {
 }
 
 type RepositoryMethod struct {
+	Ref          string                  `yaml:"Ref"`
 	OriginalPath string                  `yaml:"OriginalPath"`
-	Name         string                  `yaml:"Name"`
 	StateHash    string                  `yaml:"StateHash"`
-	Input        *RepositoryMethodInput  `yaml:"Input"`
-	Output       *RepositoryMethodOutput `yaml:"Output"`
+	Name         string                  `yaml:"Name"`
+	Description  *string                 `yaml:"Description,omitempty" json:"Description,omitempty"`
+	Input        *RepositoryMethodInput  `yaml:"Input,omitempty" json:"Input,omitempty"`
+	Output       *RepositoryMethodOutput `yaml:"Output,omitempty" json:"Output,omitempty"`
 }
 
 type RepositoryMethods struct {
@@ -313,8 +315,8 @@ type RepositoryMethods struct {
 
 type Repository struct {
 	StateHash    string             `yaml:"StateHash"`
-	Dependencies *Dependencies      `yaml:"Dependencies"`
-	Inputs       *Inputs            `yaml:"Inputs"`
+	Dependencies *Dependencies      `yaml:"Dependencies,omitempty" json:"Dependencies,omitempty"`
+	Inputs       *Inputs            `yaml:"Inputs,omitempty" json:"Inputs,omitempty"`
 	Methods      *RepositoryMethods `yaml:"Methods"`
 }
 

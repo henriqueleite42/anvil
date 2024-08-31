@@ -129,9 +129,8 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 		typesHashes := []string{}
 
 		for kk, vv := range propertiesMap {
-			// Not including "Properties" is intentional to make it smaller and only contain relevant data
 			typeHash, err := self.resolveType(&resolveInput{
-				path: i.path + ".Properties",
+				path: fmt.Sprintf("%s.%s.Properties", i.path, i.k),
 				ref:  ref,
 				k:    kk,
 				v:    vv,
@@ -238,8 +237,8 @@ func (self *anvToAnvpParser) types(file map[string]any) error {
 
 	for k, v := range typesMap {
 		_, err := self.resolveType(&resolveInput{
-			path: fullPath,
-			ref:  "",
+			path: "Types.Types",
+			ref:  "Types",
 			k:    k,
 			v:    v,
 		})

@@ -8,13 +8,15 @@ import (
 	"github.com/anvil/anvil/internal/parser"
 )
 
-func Counter() {
+func Counter(logJson bool) {
 	schema, err := parser.ParseAnvToAnvp("../examples/beginner/counter.anv")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	json, _ := json.Marshal(schema)
+	if logJson {
+		json, _ := json.Marshal(schema)
 
-	fmt.Println(string(json))
+		fmt.Println(string(json))
+	}
 }

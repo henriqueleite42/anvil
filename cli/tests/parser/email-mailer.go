@@ -8,13 +8,15 @@ import (
 	"github.com/anvil/anvil/internal/parser"
 )
 
-func EmailMailer() {
+func EmailMailer(logJson bool) {
 	schema, err := parser.ParseAnvToAnvp("../examples/advanced/email-mailer.anv")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	json, _ := json.Marshal(schema)
+	if logJson {
+		json, _ := json.Marshal(schema)
 
-	fmt.Println(string(json))
+		fmt.Println(string(json))
+	}
 }

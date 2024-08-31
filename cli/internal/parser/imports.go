@@ -76,10 +76,11 @@ func (self *anvToAnvpParser) resolveImport(i *resolveInput) (string, error) {
 	}
 
 	schemaImports := &schemas.Import{
-		Name:     i.k,
-		RootNode: rootNode,
-		Import:   importImport,
-		Type:     typeString,
+		OriginalPath: fmt.Sprintf("%s.%s", i.path, i.k),
+		Name:         i.k,
+		RootNode:     rootNode,
+		Import:       importImport,
+		Type:         typeString,
 	}
 
 	stateHash, err := hashing.Struct(schemaImports)

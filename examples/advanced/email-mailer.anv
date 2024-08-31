@@ -29,16 +29,14 @@ Entities:
         Body:
           Type: String
           DbType: VARCHAR(1000)
-      PrimaryKeys:
+      PrimaryKey:
         - Id
 
 Repository:
   Methods:
     GetById:
       Output:
-        Type: Map
-        Properties:
-          $ref: Entities.Template
+        $ref: Entities.Template
 
 Usecase:
   Methods:
@@ -51,9 +49,7 @@ Usecase:
           Messages:
             Type: List
             Items:
-              Type: Map
-              Properties:
-                $ref: Authentication.Events.UserCreated # References the event `UserCreated` of the relationship `Authentication`
+              $ref: Authentication.Events.UserCreated # References the event `UserCreated` of the relationship `Authentication`
       Delivery:
         Queue:
           Id: welcome-email

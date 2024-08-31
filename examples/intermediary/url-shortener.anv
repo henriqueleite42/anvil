@@ -26,7 +26,7 @@ Entities:
         CreatedAt:
           Type: Timestamp
           DbType: Timestampz
-      PrimaryKeys:
+      PrimaryKey:
         - Id
 
 Repository:
@@ -40,14 +40,10 @@ Repository:
             Validate:
               - url
       Output:
-        Type: Map
-        Properties:
-          $ref: Entities.Url
+        $ref: Entities.Url
     GetById:
       Output:
-        Type: Map
-        Properties:
-          $ref: Entities.Url
+        $ref: Entities.Url
 
 Usecase:
   Methods:
@@ -60,9 +56,7 @@ Usecase:
             Validate:
               - url
       Output:
-        Type: Map
-        Properties:
-          $ref: Entities.Url
+        $ref: Entities.Url
       Delivery:
         Http:
           Method: POST

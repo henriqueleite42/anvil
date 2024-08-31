@@ -60,7 +60,7 @@ func (self *anvToAnvpParser) resolveEvent(i *resolveInput) (string, error) {
 	}
 	eventTypeHash, err := self.resolveType(&resolveInput{
 		path: i.path,
-		ref:  "",
+		ref:  "Events",
 		k:    i.k,
 		v:    eventTypeAny,
 	})

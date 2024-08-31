@@ -99,22 +99,6 @@ func (self *anvToAnvpParser) stateHashes() error {
 	return nil
 }
 
-func (self *anvToAnvpParser) getPath(path string) string {
-	if self.baseRef == "" {
-		return path
-	}
-
-	return self.baseRef + "." + path
-}
-
-func getRootNode(path string) (string, error) {
-	nodes := strings.Split(path, ".")
-	if len(nodes) == 0 {
-		return "", fmt.Errorf("fail to get root node from \"%s\"", path)
-	}
-	return nodes[0], nil
-}
-
 type GetRefInput struct {
 	SchemaProperty string
 	Name           string
@@ -134,4 +118,20 @@ func (self *anvToAnvpParser) getRef(parentRef string, ref string) string {
 func (self *anvToAnvpParser) getRefHash(ref string) string {
 	fullRef := self.baseRef + "." + ref
 	return hashing.String(fullRef)
+}
+
+func (self *anvToAnvpParser) getPath(path string) string {
+	if self.baseRef == "" {
+		return path
+	}
+
+	return self.baseRef + "." + path
+}
+
+func getRootNode(path string) (string, error) {
+	nodes := strings.Split(path, ".")
+	if len(nodes) == 0 {
+		return "", fmt.Errorf("fail to get root node from \"%s\"", path)
+	}
+	return nodes[0], nil
 }

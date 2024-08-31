@@ -15,7 +15,7 @@ Entities:
         CreatedAt:
           Type: Timestamp
           DbType: Timestampz
-      PrimaryKeys:
+      PrimaryKey:
         - Id
 
 Repository:
@@ -24,9 +24,7 @@ Repository:
       Description: |
         Creates a new record of a request is made
       Output:
-        Type: Map
-        Properties:
-          $ref: Entities.Request
+        $ref: Entities.Request
     GetCount:
       Description: |
         Returns the amount of requests made

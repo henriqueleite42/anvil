@@ -129,37 +129,25 @@
 				"Properties": {
 					"type": "object",
 					"description": "Reference of a Type or Entity",
-					"oneOf": [
-						{
-							"patternProperties": {
-								"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-									"type": "object",
-									"oneOf": [
-										{
-											"$ref": "#/$defs/Field"
-										},
-										{
-											"properties": {
-												"$ref": {
-													"type": "string"
-												}
-											},
-											"additionalProperties": false
+					"patternProperties": {
+						"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+							"type": "object",
+							"oneOf": [
+								{
+									"$ref": "#/$defs/Field"
+								},
+								{
+									"properties": {
+										"$ref": {
+											"type": "string"
 										}
-									]
+									},
+									"additionalProperties": false
 								}
-							},
-							"additionalProperties": false
-						},
-						{
-							"properties": {
-								"$ref": {
-									"type": "string"
-								}
-							},
-							"additionalProperties": false
+							]
 						}
-					]
+					},
+					"additionalProperties": false
 				}
 			},
 			"required": [
@@ -506,7 +494,7 @@
 									"minProperties": 1,
 									"additionalProperties": false
 								},
-								"PrimaryKeys": {
+								"PrimaryKey": {
 									"type": "array",
 									"description": "A list of all the primary keys of your table",
 									"items": {
@@ -585,7 +573,7 @@
 							},
 							"required": [
 								"Columns",
-								"PrimaryKeys"
+								"PrimaryKey"
 							],
 							"additionalProperties": false
 						}

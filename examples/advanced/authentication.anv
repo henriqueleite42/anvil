@@ -96,7 +96,7 @@ Entities:
         CreatedAt:
           Type: Timestamp
           DbType: Timestampz
-      PrimaryKeys:
+      PrimaryKey:
         - Id
       Indexes:
         - Columns:
@@ -128,9 +128,7 @@ Repository:
           # Here we receive the original password, because it's responsibility of the repository to encrypt it.
           $ref: Types.UserPassword
       Output:
-        Type: Map
-        Properties:
-          $ref: Entities.User
+        $ref: Entities.User
     GetByEmail:
       Input:
         Type: Map
@@ -138,9 +136,7 @@ Repository:
           Email:
             $ref: Types.UserEmail
       Output:
-        Type: Map
-        Properties:
-          $ref: Entities.User
+        $ref: Entities.User
 
 Usecase:
   Dependencies:
@@ -160,9 +156,7 @@ Usecase:
           Password:
             $ref: Types.UserPassword
       Output:
-        Type: Map
-        Properties:
-          $ref: Types.AuthOutput # You can reference Types here, but not Enums. The same applies for the Input.
+        $ref: Types.AuthOutput # You can reference Types here, but not Enums. The same applies for the Input.
       Events:
         - UserCreated
       Delivery:
@@ -180,9 +174,7 @@ Usecase:
           Password:
             $ref: Types.UserPassword
       Output:
-        Type: Map
-        Properties:
-          $ref: Types.AuthOutput # You can reference Types here, but not Enums. The same applies for the Input.
+        $ref: Types.AuthOutput # You can reference Types here, but not Enums. The same applies for the Input.
       Delivery:
         Grpc: # You can have different deliveries for the same usecase. Different methods don't have to have the same deliveries.
           Examples:

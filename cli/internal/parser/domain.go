@@ -5,16 +5,15 @@ import (
 )
 
 func (self *anvToAnvpParser) domain(file map[string]any) error {
-	fullPath := self.getPath("Domain")
+	path := self.getPath("Domain")
 
-	domainSchema, ok := file["Domain"]
+	domainAny, ok := file["Domain"]
 	if !ok {
-		return fmt.Errorf("\"%s\" must be specified", fullPath)
+		return fmt.Errorf("\"%s\" must be specified", path)
 	}
-
-	domainString, ok := domainSchema.(string)
+	domainString, ok := domainAny.(string)
 	if !ok {
-		return fmt.Errorf("fail to parse \"%s\" to `string`", fullPath)
+		return fmt.Errorf("fail to parse \"%s\" to `string`", path)
 	}
 
 	self.schema.Domain = domainString

@@ -68,6 +68,11 @@ func (self *anvToAnvpParser) parse(file map[string]any) error {
 		return err
 	}
 
+	err = self.repository(file)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

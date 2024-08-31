@@ -115,7 +115,7 @@ func (self *anvToAnvpParser) resolveEnum(i *resolveInput) (string, error) {
 
 	stateHash, err := hashing.Struct(enum)
 	if err != nil {
-		return "", fmt.Errorf("fail to get enum \"%s.%s\" state hash", i.path, i.k)
+		return "", fmt.Errorf("fail to get state hash for \"%s.%s\"", i.path, i.k)
 	}
 
 	enum.StateHash = stateHash
