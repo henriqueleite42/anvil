@@ -1,4 +1,4 @@
-package parser
+package parser_anv
 
 import (
 	"github.com/anvil/anvil/internal/files"

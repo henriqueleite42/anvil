@@ -1,4 +1,4 @@
-package parser
+package parser_anv
 
 import (
 	"fmt"
@@ -7,14 +7,14 @@ import (
 	"github.com/anvil/anvil/schemas"
 )
 
-func (self *anvToAnvpParser) usecase(file map[string]any) error {
-	path := self.getPath("Usecase")
+func (self *anvToAnvpParser) repository(file map[string]any) error {
+	path := self.getPath("Repository")
 
-	usecaseAny, ok := file["Usecase"]
+	repositoryAny, ok := file["Repository"]
 	if !ok {
 		return nil
 	}
-	usecaseMap, ok := usecaseAny.(map[string]any)
+	repositoryMap, ok := repositoryAny.(map[string]any)
 	if !ok {
 		return fmt.Errorf("fail to parse \"%s\" to `map[string]any`", path)
 	}
@@ -22,7 +22,7 @@ func (self *anvToAnvpParser) usecase(file map[string]any) error {
 	// TODO dependencies
 	// TODO inputs
 
-	methodsAny, ok := usecaseMap["Methods"]
+	methodsAny, ok := repositoryMap["Methods"]
 	if !ok {
 		return fmt.Errorf("\"Methods\" is a required property to \"%s\"", path)
 	}
@@ -31,8 +31,8 @@ func (self *anvToAnvpParser) usecase(file map[string]any) error {
 		return fmt.Errorf("fail to parse \"%s.Methods\" to `map[string]any`", path)
 	}
 
-	methods := &schemas.UsecaseMethods{
-		Methods: map[string]*schemas.UsecaseMethod{},
+	methods := &schemas.RepositoryMethods{
+		Methods: map[string]*schemas.RepositoryMethod{},
 	}
 
 	for k, v := range methodsMap {
@@ -51,7 +51,7 @@ func (self *anvToAnvpParser) usecase(file map[string]any) error {
 			description = &descriptionString
 		}
 
-		var input *schemas.UsecaseMethodInput = nil
+		var input *schemas.RepositoryMethodInput = nil
 		inputAny, ok := vMap["Input"]
 		if ok {
 			inputMap, ok := inputAny.(map[string]any)
@@ -70,12 +70,12 @@ func (self *anvToAnvpParser) usecase(file map[string]any) error {
 				return err
 			}
 
-			input = &schemas.UsecaseMethodInput{
+			input = &schemas.RepositoryMethodInput{
 				TypeHash: typeHash,
 			}
 		}
 
-		var output *schemas.UsecaseMethodOutput = nil
+		var output *schemas.RepositoryMethodOutput = nil
 		outputAny, ok := vMap["Output"]
 		if ok {
 			outputMap, ok := outputAny.(map[string]any)
@@ -94,16 +94,14 @@ func (self *anvToAnvpParser) usecase(file map[string]any) error {
 				return err
 			}
 
-			output = &schemas.UsecaseMethodOutput{
+			output = &schemas.RepositoryMethodOutput{
 				TypeHash: typeHash,
 			}
 		}
 
-		// TODO implement EventHashes
-
 		fullPath := self.getPath(fmt.Sprintf("%s.Methods.Methods.%s", path, k))
 
-		method := &schemas.UsecaseMethod{
+		method := &schemas.RepositoryMethod{
 			Ref:          self.getRef("", fmt.Sprintf("%s.%s", path, k)),
 			OriginalPath: fullPath,
 			Name:         k,
@@ -128,17 +126,17 @@ func (self *anvToAnvpParser) usecase(file map[string]any) error {
 	}
 	methods.StateHash = methodsStateHash
 
-	usecase := &schemas.Usecase{
+	repository := &schemas.Repository{
 		Methods: methods,
 	}
 
-	usecaseStateHash, err := hashing.Struct(usecase)
+	repositoryStateHash, err := hashing.Struct(repository)
 	if err != nil {
 		return fmt.Errorf("fail to get state hash for \"%s\"", path)
 	}
-	usecase.StateHash = usecaseStateHash
+	repository.StateHash = repositoryStateHash
 
-	self.schema.Usecase = usecase
+	self.schema.Repository = repository
 
 	return nil
 }

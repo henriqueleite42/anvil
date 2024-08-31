@@ -1,15 +1,15 @@
-package parser_test
+package parser_anv_test
 
 import (
 	"encoding/json"
 	"fmt"
 	"log"
 
-	"github.com/anvil/anvil/internal/parser"
+	"github.com/anvil/anvil/internal/parser_anv"
 )
 
 func UrlShortener(logJson bool) {
-	schema, err := parser.ParseAnvToAnvp("../examples/intermediary/url-shortener.anv")
+	schema, err := parser_anv.ParseAnvToAnvp("../examples/intermediary/url-shortener.anv")
 	if err != nil {
 		log.Fatal(err)
 	}

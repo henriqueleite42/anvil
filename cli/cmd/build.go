@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/anvil/anvil/internal/files"
-	"github.com/anvil/anvil/internal/parser"
+	"github.com/anvil/anvil/internal/parser_anv"
 	"github.com/spf13/cobra"
 )
 
@@ -15,7 +15,7 @@ func addBuildCommand(rootCmd *cobra.Command) {
 		Run: func(cmd *cobra.Command, args []string) {
 			schemaFile := cmd.Flag("schema").Value.String()
 
-			schema, err := parser.ParseAnvToAnvp(schemaFile)
+			schema, err := parser_anv.ParseAnvToAnvp(schemaFile)
 			if err != nil {
 				log.Fatal(err)
 			}
