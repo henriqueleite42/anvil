@@ -331,12 +331,14 @@ type UsecaseMethodOutput struct {
 }
 
 type UsecaseMethod struct {
+	Ref          string               `yaml:"Ref"`
 	OriginalPath string               `yaml:"OriginalPath"`
 	Name         string               `yaml:"Name"`
+	Description  *string              `yaml:"Description,omitempty" json:"Description,omitempty"`
 	StateHash    string               `yaml:"StateHash"`
-	Input        *UsecaseMethodInput  `yaml:"Input"`
-	Output       *UsecaseMethodOutput `yaml:"Output"`
-	EventHashes  []string             `yaml:"EventHashes"`
+	Input        *UsecaseMethodInput  `yaml:"Input,omitempty" json:"Input,omitempty"`
+	Output       *UsecaseMethodOutput `yaml:"Output,omitempty" json:"Output,omitempty"`
+	EventHashes  []string             `yaml:"EventHashes,omitempty" json:"EventHashes,omitempty"`
 }
 
 type UsecaseMethods struct {
@@ -346,9 +348,9 @@ type UsecaseMethods struct {
 
 type Usecase struct {
 	StateHash    string          `yaml:"StateHash"`
-	Dependencies *Dependencies   `yaml:"Dependencies"`
-	Inputs       *Inputs         `yaml:"Inputs"`
-	Methods      *UsecaseMethods `yaml:"Methods"`
+	Dependencies *Dependencies   `yaml:"Dependencies,omitempty" json:"Dependencies,omitempty"`
+	Inputs       *Inputs         `yaml:"Inputs,omitempty" json:"Inputs,omitempty"`
+	Methods      *UsecaseMethods `yaml:"Methods,omitempty"`
 }
 
 // Delivery

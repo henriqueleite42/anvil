@@ -1,4 +1,4 @@
-package parser
+package files
 
 import (
 	"log"
@@ -7,7 +7,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func (self *anvToAnvpParser) readAnvFile(uri string) (map[string]any, error) {
+func ReadAnvFile(uri string) (map[string]any, error) {
 	fileData, err := os.ReadFile(uri)
 	if err != nil {
 		log.Fatal(err)

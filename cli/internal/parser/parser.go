@@ -1,6 +1,9 @@
 package parser
 
-import "github.com/anvil/anvil/schemas"
+import (
+	"github.com/anvil/anvil/internal/files"
+	"github.com/anvil/anvil/schemas"
+)
 
 type anvToAnvpParser struct {
 	schema *schemas.Schema
@@ -73,6 +76,11 @@ func (self *anvToAnvpParser) parse(file map[string]any) error {
 		return err
 	}
 
+	err = self.usecase(file)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -82,7 +90,7 @@ func ParseAnvToAnvp(uri string) (*schemas.Schema, error) {
 		filePath: uri,
 	}
 
-	file, err := parser.readAnvFile(uri)
+	file, err := files.ReadAnvFile(uri)
 	if err != nil {
 		return nil, err
 	}

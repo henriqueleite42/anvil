@@ -3,6 +3,7 @@ package cmd
 import (
 	"log"
 
+	"github.com/anvil/anvil/internal/files"
 	"github.com/anvil/anvil/internal/parser"
 	"github.com/spf13/cobra"
 )
@@ -14,7 +15,12 @@ func addBuildCommand(rootCmd *cobra.Command) {
 		Run: func(cmd *cobra.Command, args []string) {
 			schemaFile := cmd.Flag("schema").Value.String()
 
-			_, err := parser.ParseAnvToAnvp(schemaFile)
+			schema, err := parser.ParseAnvToAnvp(schemaFile)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			err = files.WriteFile(schema)
 			if err != nil {
 				log.Fatal(err)
 			}
