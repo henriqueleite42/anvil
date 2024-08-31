@@ -1,6 +1,6 @@
 <div align="center">
   <img src="./docs/static/img/logo.webp" alt="anvil" width="500" height="500">
-<div>
+</div>
 
 # Anvil
 
