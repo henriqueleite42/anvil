@@ -1,4 +1,4 @@
-package parser_anv
+package parser
 
 import (
 	"fmt"
@@ -125,14 +125,14 @@ func (self *anvToAnvpParser) resolveEnum(i *resolveInput) (string, error) {
 }
 
 func (self *anvToAnvpParser) enums(file map[string]any) error {
-	enumsSchema, ok := file["Enums"]
+	enumsAny, ok := file["Enums"]
 	if !ok {
 		return nil
 	}
 
 	fullPath := self.getPath("Enums")
 
-	enumsMap, ok := enumsSchema.(map[string]any)
+	enumsMap, ok := enumsAny.(map[string]any)
 	if !ok {
 		return fmt.Errorf("fail to parse \"%s\" to `map[string]any`", fullPath)
 	}

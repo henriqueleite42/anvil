@@ -2,7 +2,7 @@ package main
 
 import (
 	files_test "github.com/henriqueleite42/anvil/cli/tests/files"
-	parser_anv_test "github.com/henriqueleite42/anvil/cli/tests/parser_anv"
+	parser_test "github.com/henriqueleite42/anvil/cli/tests/parser"
 )
 
 func main() {
@@ -10,8 +10,8 @@ func main() {
 
 	files_test.ReadAnvpFile(logJson)
 
-	parser_anv_test.Authentication(logJson)
-	parser_anv_test.EmailMailer(logJson)
-	parser_anv_test.UrlShortener(logJson)
-	parser_anv_test.Counter(logJson)
+	parser_test.Authentication(logJson)
+	parser_test.EmailMailer(logJson)
+	parser_test.UrlShortener(logJson)
+	parser_test.Counter(logJson)
 }

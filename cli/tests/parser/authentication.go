@@ -1,15 +1,15 @@
-package parser_anv_test
+package parser_test
 
 import (
 	"encoding/json"
 	"fmt"
 	"log"
 
-	"github.com/henriqueleite42/anvil/cli/internal/parser_anv"
+	"github.com/henriqueleite42/anvil/cli/internal/parser"
 )
 
 func Authentication(logJson bool) {
-	schema, err := parser_anv.ParseAnvToAnvp("../examples/advanced/authentication.anv")
+	schema, err := parser.ParseAnvToAnvp("../examples/advanced/authentication.anv")
 	if err != nil {
 		log.Fatal(err)
 	}

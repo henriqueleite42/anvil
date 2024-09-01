@@ -1,4 +1,4 @@
-package parser_anv
+package parser
 
 import (
 	"github.com/henriqueleite42/anvil/cli/internal/files"
@@ -77,6 +77,11 @@ func (self *anvToAnvpParser) parse(file map[string]any) error {
 	}
 
 	err = self.usecase(file)
+	if err != nil {
+		return err
+	}
+
+	err = self.delivery(file)
 	if err != nil {
 		return err
 	}

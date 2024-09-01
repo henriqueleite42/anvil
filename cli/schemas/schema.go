@@ -365,9 +365,10 @@ type DeliveryGrpcRpcExample struct {
 }
 
 type DeliveryGrpcRpc struct {
-	OriginalPath string                             `yaml:"OriginalPath"`
-	MethodHash   string                             `yaml:"MethodHash"`
-	Examples     map[string]*DeliveryGrpcRpcExample `yaml:"Examples"`
+	Ref               string                             `yaml:"Ref"`
+	OriginalPath      string                             `yaml:"OriginalPath"`
+	UsecaseMethodHash string                             `yaml:"UsecaseMethodHash"`
+	Examples          map[string]*DeliveryGrpcRpcExample `yaml:"Examples"`
 }
 
 type DeliveryGrpc struct {
@@ -375,10 +376,58 @@ type DeliveryGrpc struct {
 	Rpcs      map[string]*DeliveryGrpcRpc `yaml:"Rpcs"`
 }
 
+type DeliveryHttpRouteExample struct {
+	OriginalPath string `yaml:"OriginalPath"`
+	Name         string `yaml:"Name"`
+	StateHash    string `yaml:"StateHash"`
+	// TODO
+}
+
+type DeliveryHttpRoute struct {
+	Ref                string                               `yaml:"Ref"`
+	OriginalPath       string                               `yaml:"OriginalPath"`
+	UsecaseMethodHash  string                               `yaml:"UsecaseMethodHash"`
+	StatusCode         int                                  `yaml:"StatusCode"`
+	HttpMethod         string                               `yaml:"HttpMethod"`
+	Path               string                               `yaml:"Path"`
+	ReqHeadersTypeHash *string                              `yaml:"ReqHeadersTypesHashes,omitempty" json:"ReqHeadersTypesHashes,omitempty"`
+	ResHeadersTypeHash *string                              `yaml:"ResHeadersTypesHashes,omitempty" json:"ResHeadersTypesHashes,omitempty"`
+	Auth               *string                              `yaml:"Auth,omitempty" json:"Auth,omitempty"`
+	Examples           map[string]*DeliveryHttpRouteExample `yaml:"Examples"`
+}
+
+type DeliveryHttp struct {
+	StateHash string                        `yaml:"StateHash"`
+	Routes    map[string]*DeliveryHttpRoute `yaml:"Routes"`
+}
+
+type DeliveryQueueQueueExample struct {
+	OriginalPath string `yaml:"OriginalPath"`
+	Name         string `yaml:"Name"`
+	StateHash    string `yaml:"StateHash"`
+	// TODO
+}
+
+type DeliveryQueueQueue struct {
+	Ref               string                                `yaml:"Ref"`
+	OriginalPath      string                                `yaml:"OriginalPath"`
+	UsecaseMethodHash string                                `yaml:"UsecaseMethodHash"`
+	QueueId           string                                `yaml:"QueueId"`
+	Bulk              bool                                  `yaml:"Bulk"`
+	Examples          map[string]*DeliveryQueueQueueExample `yaml:"Examples"`
+}
+
+type DeliveryQueue struct {
+	StateHash string                         `yaml:"StateHash"`
+	Queues    map[string]*DeliveryQueueQueue `yaml:"Queues"`
+}
+
 type Delivery struct {
-	StateHash    string        `yaml:"StateHash"`
-	Dependencies *Dependencies `yaml:"Dependencies"`
-	Grpc         *DeliveryGrpc `yaml:"Grpc"`
+	StateHash    string         `yaml:"StateHash"`
+	Dependencies *Dependencies  `yaml:"Dependencies"`
+	Grpc         *DeliveryGrpc  `yaml:"Grpc"`
+	Http         *DeliveryHttp  `yaml:"Http"`
+	Queue        *DeliveryQueue `yaml:"Queue"`
 }
 
 // Schema

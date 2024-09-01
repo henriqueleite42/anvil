@@ -741,175 +741,6 @@
 										"type": "string",
 										"pattern": "^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$"
 									}
-								},
-								"Delivery": {
-									"type": "object",
-									"description": "Configuration about how the users/clients/things will access this usecase",
-									"properties": {
-										"Grpc": {
-											"type": "object",
-											"description": "gRPC delivery configuration. By just including an empty `Grpc` on the delivery, the route will already be created.",
-											"properties": {
-												"Examples": {
-													"type": "object",
-													"description": "Examples of requests. This can be used as documentation or by generators to create e2e tests.",
-													"patternProperties": {
-														"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-															"type": "object",
-															"description": "A name for the example. Example: `Success`, `DuplicatedUser`, `PostNotFound`",
-															"properties": {
-																"StatusCode": {
-																	"type": "integer",
-																	"description": "Expected status code returned. Default is `0`."
-																},
-																"Message": {
-																	"type": "object",
-																	"description": "The message to be sent in the request"
-																},
-																"Returns": {
-																	"type": "object",
-																	"description": "The expected response"
-																}
-															}
-														}
-													},
-													"additionalProperties": false
-												}
-											},
-											"additionalProperties": false
-										},
-										"Http": {
-											"type": "object",
-											"description": "http delivery configuration",
-											"properties": {
-												"StatusCode": {
-													"type": "integer",
-													"description": "Response http status code. Default is `200`."
-												},
-												"Method": {
-													"type": "string",
-													"description": "http method that the route accepts",
-													"enum": [
-														"GET",
-														"HEAD",
-														"POST",
-														"PUT",
-														"DELETE",
-														"CONNECT",
-														"OPTIONS",
-														"TRACE",
-														"PATCH"
-													]
-												},
-												"Path": {
-													"type": "string",
-													"description": "The path for the route to be called. You can use `{}` for parameters, and they will be automatically mapped to the usecase `Input`. Example: `/foo/{Bar}` or `/foo?bar={Bar}`.",
-													"pattern": "^/"
-												},
-												"ReqHeaders": {
-													"type": "object",
-													"description": "Headers in the request",
-													"patternProperties": {
-														"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-															"oneOf": [
-																{
-																	"type": "object",
-																	"patternProperties": {
-																		"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-																			"$ref": "#/$defs/Field"
-																		}
-																	},
-																	"additionalProperties": false
-																},
-																{
-																	"type": "object",
-																	"patternProperties": {
-																		"^($inputRef)$": {
-																			"type": "string",
-																			"description": "A reference for the usecase `Input`"
-																		}
-																	}
-																}
-															]
-														}
-													}
-												},
-												"ResHeaders": {
-													"type": "object",
-													"description": "Headers in the response",
-													"patternProperties": {
-														"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-															"oneOf": [
-																{
-																	"type": "object",
-																	"patternProperties": {
-																		"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-																			"$ref": "#/$defs/Field"
-																		}
-																	},
-																	"additionalProperties": false
-																},
-																{
-																	"type": "object",
-																	"patternProperties": {
-																		"^($outputRef)$": {
-																			"type": "string",
-																			"description": "A reference for the usecase `Output`"
-																		}
-																	}
-																}
-															]
-														}
-													}
-												},
-												"Auth": {
-													"type": "string",
-													"description": "$ref to Auth. Applies it to this route."
-												},
-												"Examples": {
-													"type": "object",
-													"description": "Examples of requests and their responses",
-													"properties": {
-														"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-															"type": "object",
-															"properties": {
-																"Req": {
-																	"$ref": "#/$defs/HttpExample"
-																},
-																"Res": {
-																	"$ref": "#/$defs/HttpExample"
-																}
-															}
-														}
-													}
-												}
-											},
-											"required": [
-												"Method",
-												"Path"
-											],
-											"additionalProperties": false
-										},
-										"Queue": {
-											"type": "object",
-											"description": "Queue delivery configuration",
-											"properties": {
-												"Id": {
-													"type": "string",
-													"description": "Queue ID. This is not the true value to listen the queue (like the sqs url when using sqs), it's only a identifier to be formatted by the generator. Example: If you put the id `foo-bar` and the generator uses queue listeners as env vars, so the generator can format the queue id to `QUEUE_ID_FOO_BAR`. The final value of this depends on the generator."
-												},
-												"Bulk": {
-													"type": "boolean",
-													"description": "If it process the queues one-by-one or in bulk."
-												}
-											},
-											"required": [
-												"Id"
-											],
-											"additionalProperties": false
-										}
-									},
-									"additionalProperties": false
 								}
 							},
 							"additionalProperties": false
@@ -933,6 +764,210 @@
 						"type": "object",
 						"properties": {
 							"$ref": "#/$defs/Import"
+						}
+					}
+				},
+				"Grpc": {
+					"type": "object",
+					"description": "delivery usecase methods through gRPC",
+					"properties": {
+						"Rpcs": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"description": "gRPC delivery configuration. By just including an empty `Grpc` on the delivery, the route will already be created.",
+								"properties": {
+									"UsecaseMethod": {
+										"type": "string",
+										"description": "Usecase method that will be delivered by this RPC"
+									},
+									"Examples": {
+										"type": "object",
+										"description": "Examples of requests. This can be used as documentation or by generators to create e2e tests.",
+										"patternProperties": {
+											"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+												"type": "object",
+												"description": "A name for the example. Example: `Success`, `DuplicatedUser`, `PostNotFound`",
+												"properties": {
+													"StatusCode": {
+														"type": "integer",
+														"description": "Expected status code returned. Default is `0`."
+													},
+													"Message": {
+														"type": "object",
+														"description": "The message to be sent in the request"
+													},
+													"Returns": {
+														"type": "object",
+														"description": "The expected response"
+													}
+												}
+											}
+										},
+										"additionalProperties": false
+									}
+								},
+								"required": [
+									"UsecaseMethod"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"Http": {
+					"type": "object",
+					"properties": {
+						"Routes": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"description": "http delivery configuration",
+								"properties": {
+									"UsecaseMethod": {
+										"type": "string",
+										"description": "Usecase method that will be delivered by this route"
+									},
+									"StatusCode": {
+										"type": "integer",
+										"description": "Response http status code. Default is `200`."
+									},
+									"Method": {
+										"type": "string",
+										"description": "http method that the route accepts",
+										"enum": [
+											"GET",
+											"HEAD",
+											"POST",
+											"PUT",
+											"DELETE",
+											"CONNECT",
+											"OPTIONS",
+											"TRACE",
+											"PATCH"
+										]
+									},
+									"Path": {
+										"type": "string",
+										"description": "The path for the route to be called. You can use `{}` for parameters, and they will be automatically mapped to the usecase `Input`. Example: `/foo/{Bar}` or `/foo?bar={Bar}`.",
+										"pattern": "^/"
+									},
+									"ReqHeaders": {
+										"type": "object",
+										"description": "Headers in the request",
+										"patternProperties": {
+											"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+												"oneOf": [
+													{
+														"type": "object",
+														"patternProperties": {
+															"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+																"$ref": "#/$defs/Field"
+															}
+														},
+														"additionalProperties": false
+													},
+													{
+														"type": "object",
+														"patternProperties": {
+															"^($inputRef)$": {
+																"type": "string",
+																"description": "A reference for the usecase `Input`"
+															}
+														}
+													}
+												]
+											}
+										}
+									},
+									"ResHeaders": {
+										"type": "object",
+										"description": "Headers in the response",
+										"patternProperties": {
+											"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+												"oneOf": [
+													{
+														"type": "object",
+														"patternProperties": {
+															"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+																"$ref": "#/$defs/Field"
+															}
+														},
+														"additionalProperties": false
+													},
+													{
+														"type": "object",
+														"patternProperties": {
+															"^($outputRef)$": {
+																"type": "string",
+																"description": "A reference for the usecase `Output`"
+															}
+														}
+													}
+												]
+											}
+										}
+									},
+									"Auth": {
+										"type": "string",
+										"description": "$ref to Auth. Applies it to this route."
+									},
+									"Examples": {
+										"type": "object",
+										"description": "Examples of requests and their responses",
+										"properties": {
+											"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+												"type": "object",
+												"properties": {
+													"Req": {
+														"$ref": "#/$defs/HttpExample"
+													},
+													"Res": {
+														"$ref": "#/$defs/HttpExample"
+													}
+												}
+											}
+										}
+									}
+								},
+								"required": [
+									"UsecaseMethod",
+									"Method",
+									"Path"
+								],
+								"additionalProperties": false
+							}
+						}
+					}
+				},
+				"Queue": {
+					"type": "object",
+					"properties": {
+						"Queues": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"description": "Queue delivery configuration",
+								"properties": {
+									"UsecaseMethod": {
+										"type": "string",
+										"description": "Usecase method that will be delivered by this Queue"
+									},
+									"Id": {
+										"type": "string",
+										"description": "Queue ID. This is not the true value to listen the queue (like the sqs url when using sqs), it's only a identifier to be formatted by the generator. Example: If you put the id `foo-bar` and the generator uses queue listeners as env vars, so the generator can format the queue id to `QUEUE_ID_FOO_BAR`. The final value of this depends on the generator."
+									},
+									"Bulk": {
+										"type": "boolean",
+										"description": "If it process the queues one-by-one or in bulk."
+									}
+								},
+								"required": [
+									"UsecaseMethod",
+									"Id"
+								],
+								"additionalProperties": false
+							}
 						}
 					}
 				}

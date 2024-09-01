@@ -12,5 +12,8 @@ Usecase:
         Properties:
           Message:
             Type: String
-      Delivery:
-        Grpc: {}
+
+Delivery:
+  Grpc:
+    Rpcs:
+      - UsecaseMethod: HelloWorld

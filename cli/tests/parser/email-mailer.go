@@ -1,15 +1,15 @@
-package parser_anv_test
+package parser_test
 
 import (
 	"encoding/json"
 	"fmt"
 	"log"
 
-	"github.com/henriqueleite42/anvil/cli/internal/parser_anv"
+	"github.com/henriqueleite42/anvil/cli/internal/parser"
 )
 
 func EmailMailer(logJson bool) {
-	schema, err := parser_anv.ParseAnvToAnvp("../examples/advanced/email-mailer.anv")
+	schema, err := parser.ParseAnvToAnvp("../examples/advanced/email-mailer.anv")
 	if err != nil {
 		log.Fatal(err)
 	}

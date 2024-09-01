@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/henriqueleite42/anvil/cli/internal/files"
-	"github.com/henriqueleite42/anvil/cli/internal/parser_anv"
+	"github.com/henriqueleite42/anvil/cli/internal/parser"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -14,7 +14,7 @@ func addParseCommand(rootCmd *cobra.Command) {
 		Use:   "parse",
 		Short: "Parse the file to create the formatted version",
 		Run: func(cmd *cobra.Command, args []string) {
-			schema, err := parser_anv.ParseAnvToAnvp(schemaFile)
+			schema, err := parser.ParseAnvToAnvp(schemaFile)
 			if err != nil {
 				log.Fatal(err)
 			}

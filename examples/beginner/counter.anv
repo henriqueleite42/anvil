@@ -44,7 +44,10 @@ Usecase:
         Properties:
           Total:
             Type: Int
-      Delivery:
-        Http:
-          Method: GET
-          Path: /hello-world
+
+Delivery:
+  Http:
+    Routes:
+      - UsecaseMethod: GetCount
+        Method: GET
+        Path: /counter

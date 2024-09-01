@@ -12,7 +12,10 @@ Usecase:
         Properties:
           Message:
             Type: String
-      Delivery:
-        Http:
-          Method: GET
-          Path: /hello-world
+
+Delivery:
+  Http:
+    Routes:
+      - UsecaseMethod: HelloWorld
+        Method: GET
+        Path: /hello-world

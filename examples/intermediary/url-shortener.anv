@@ -57,10 +57,6 @@ Usecase:
               - url
       Output:
         $ref: Entities.Url
-      Delivery:
-        Http:
-          Method: POST
-          Path: /shorten
     Redirect:
       Description: |
         Redirects based on a Url ID
@@ -74,11 +70,17 @@ Usecase:
         Properties:
           Location:
             Type: String
-      Delivery:
-        Http:
-          StatusCode: 303 # Because the `StatusCode` is 303, the `body` of the response will not be returned.
-          Method: GET
-          Path: /r/{Id} # Automatic links to the `Input` instead of getting from the request body.
-          ResHeaders:
-            Location: # Automatically formatted to header style, like `CacheControl -> Cache-Control`
-              $outputRef: Location # Links `Output.Location` to this value
+
+Delivery:
+  Http:
+    Routes:
+      - UsecaseMethod: Create
+        Method: POST
+        Path: /shorten
+      - UsecaseMethod: Redirect
+        StatusCode: 303 # Because the `StatusCode` is 303, the `body` of the response will not be returned.
+        Method: GET
+        Path: /r/{Id} # Automatic links to the `Input` instead of getting from the request body.
+        ResHeaders:
+          Location: # Automatically formatted to header style, like `CacheControl -> Cache-Control`
+            $outputRef: Location # Links `Output.Location` to this value

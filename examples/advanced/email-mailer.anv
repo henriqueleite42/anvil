@@ -50,7 +50,11 @@ Usecase:
             Type: List
             Items:
               $ref: Authentication.Events.UserCreated # References the event `UserCreated` of the relationship `Authentication`
-      Delivery:
-        Queue:
-          Id: welcome-email
-          Bulk: true # Process multiple messages at once instead of one-by-one
+
+Delivery:
+  Queue:
+    Queues:
+      - UsecaseMethod: SendWelcomeEmail
+        Id: welcome-email
+        Bulk: true # Process multiple messages at once instead of one-by-one
+

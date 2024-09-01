@@ -159,8 +159,6 @@ Usecase:
         $ref: Types.AuthOutput # You can reference Types here, but not Enums. The same applies for the Input.
       Events:
         - UserCreated
-      Delivery:
-        Grpc: {}
     Login:
       # Here we could create a shared type between the methods `Create` and `Login`, but since their purposes are not the same
       # (one creates a user and other logins in that user), we should not do it.
@@ -175,36 +173,6 @@ Usecase:
             $ref: Types.UserPassword
       Output:
         $ref: Types.AuthOutput # You can reference Types here, but not Enums. The same applies for the Input.
-      Delivery:
-        Grpc: # You can have different deliveries for the same usecase. Different methods don't have to have the same deliveries.
-          Examples:
-            Success:
-              Message:
-                Email: foo@bar.com
-                Password: foo123
-              Returns:
-                AccessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-                ExpiresAt: 2024-08-13T13:16:14Z
-                RefreshToken: fkwfnpbqfgaugpshbpejejtmemzgidgw
-        Http:
-          StatusCode: 204 # Because the status is 204, the body will not be returned. If the status was 201, the body would be returned.
-          Method: POST
-          Path: /login
-          ResHeaders:
-            Authentication:
-              Type: String
-            SetCookies:
-              Type: String
-          Examples:
-            Success:
-              Req:
-                Body:
-                  Email: foo@bar.com
-                  Password: foo123
-              Res:
-                Headers:
-                  Authentication: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-                  SetCookie: expires_at=2024-08-13T13:16:14Z; refresh_token=fkwfnpbqfgaugpshbpejejtmemzgidgw;
     GetMyData:
       Input:
         Type: Map
@@ -216,8 +184,43 @@ Usecase:
         Properties:
           Data:
             $ref: Entities.User # Automatically censors things with `Confidentiality=HIGH`
-      Delivery:
-        Http:
-          Method: GET
-          Path: /accounts/@me
-          Auth: Jwt # Says that the auth will be JWT mode
+
+Delivery:
+  Grpc:
+    Rpcs:
+      - UsecaseMethod: Create
+      - UsecaseMethod: Login
+        Examples:
+          Success:
+            Message:
+              Email: foo@bar.com
+              Password: foo123
+            Returns:
+              AccessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+              ExpiresAt: 2024-08-13T13:16:14Z
+              RefreshToken: fkwfnpbqfgaugpshbpejejtmemzgidgw
+  Http:
+    Routes:
+      - UsecaseMethod: Login
+        StatusCode: 204 # Because the status is 204, the body will not be returned. If the status was 201, the body would be returned.
+        Method: POST
+        Path: /login
+        ResHeaders:
+          Authentication:
+            Type: String
+          SetCookies:
+            Type: String
+        Examples:
+          Success:
+            Req:
+              Body:
+                Email: foo@bar.com
+                Password: foo123
+            Res:
+              Headers:
+                Authentication: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+                SetCookie: expires_at=2024-08-13T13:16:14Z; refresh_token=fkwfnpbqfgaugpshbpejejtmemzgidgw;
+      - UsecaseMethod: GetMyData
+        Method: GET
+        Path: /accounts/@me
+        Auth: Jwt # Says that the auth will be JWT mode
