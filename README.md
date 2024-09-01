@@ -70,7 +70,7 @@ Anvil plugins:
 
 ## F.A.Q.
 
-[See the F.A.Q. here.](https://henriqueleite42.github.io/anvil/docs/faq)
+[See the F.A.Q. here.](https://anvil.henriqueleite42.com/docs/faq)
 
 ## Examples
 
@@ -78,4 +78,4 @@ Anvil plugins:
 
 ## How it works
 
-[Understand how it works here.](https://henriqueleite42.github.io/anvil/docs/how-it-works)
+[Understand how it works here.](https://anvil.henriqueleite42.com/docs/how-it-works)

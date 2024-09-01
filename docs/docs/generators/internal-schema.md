@@ -23,7 +23,7 @@ The internal `schema` that Anvil uses is focused on:
 - Organized on the way that your program will generate things
 
 To identify the difference between processed / internal `schema`s and "user-friendly" `schema`s, we have 2 different types of files:
-- `.anv`: user friendly schema, the one described [here](../use/schemas.md).
+- `.anv`: user friendly schema, the one described [here](../use/schema.md).
 - `.anvp`: processed schema, made by the machine for the machine
 
 You will never touch a `.anvp` file, but Anvil will always use this format to communicate to your generator.
