@@ -215,8 +215,8 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("fail to get import \"%s.%s\" state hash", i.path, i.k)
 	}
-
 	schemaTypes.StateHash = stateHash
+
 	self.schema.Types.Types[refHash] = schemaTypes
 
 	return refHash, nil
