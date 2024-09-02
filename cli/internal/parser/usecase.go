@@ -62,8 +62,8 @@ func (self *anvToAnvpParser) usecase(file map[string]any) error {
 			var typeHash string
 			typeHash, err := self.resolveType(&resolveInput{
 				path: fmt.Sprintf("%s.Methods.%s", path, k),
-				ref:  self.getRef("", fmt.Sprintf("%s.%s", path, k)),
-				k:    "Input",
+				ref:  self.getRef("Usecase", k),
+				k:    k + "Input",
 				v:    inputMap,
 			})
 			if err != nil {
@@ -86,8 +86,8 @@ func (self *anvToAnvpParser) usecase(file map[string]any) error {
 			var typeHash string
 			typeHash, err := self.resolveType(&resolveInput{
 				path: fmt.Sprintf("%s.Methods.%s", path, k),
-				ref:  self.getRef("", fmt.Sprintf("%s.Methods.%s.%s", path, k, "Output")),
-				k:    "Output",
+				ref:  self.getRef("Usecase", k),
+				k:    k + "Output",
 				v:    outputMap,
 			})
 			if err != nil {
@@ -101,10 +101,11 @@ func (self *anvToAnvpParser) usecase(file map[string]any) error {
 
 		// TODO implement EventHashes
 
+		ref := self.getRef(path, k)
 		fullPath := self.getPath(fmt.Sprintf("%s.Methods.Methods.%s", path, k))
 
 		method := &schemas.UsecaseMethod{
-			Ref:          self.getRef("", fmt.Sprintf("%s.%s", path, k)),
+			Ref:          ref,
 			OriginalPath: fullPath,
 			Name:         k,
 			Description:  description,
@@ -118,8 +119,8 @@ func (self *anvToAnvpParser) usecase(file map[string]any) error {
 		}
 		method.StateHash = methodStateHash
 
-		methodHash := hashing.String(fullPath)
-		methods.Methods[methodHash] = method
+		refHash := hashing.String(ref)
+		methods.Methods[refHash] = method
 	}
 
 	methodsStateHash, err := hashing.Struct(methods)

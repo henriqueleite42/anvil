@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
-	"os"
 	"os/exec"
 
 	"github.com/henriqueleite42/anvil/cli/internal/files"
@@ -39,13 +39,12 @@ func addBuildCommand(rootCmd *cobra.Command) {
 			}
 
 			for _, v := range generators {
-				generatorCmd := exec.Command(v, jsonString, silentFlag)
-				generatorCmd.Stdout = os.Stdout
-				generatorCmd.Stderr = os.Stderr
-				err = generatorCmd.Run()
+				stdout, err := exec.Command(v, jsonString, silentFlag).Output()
 				if err != nil {
 					log.Fatal(err)
+					return
 				}
+				fmt.Println(string(stdout))
 			}
 		},
 	}

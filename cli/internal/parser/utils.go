@@ -116,6 +116,9 @@ func (self *anvToAnvpParser) getRef(parentRef string, ref string) string {
 }
 
 func (self *anvToAnvpParser) getRefHash(ref string) string {
+	if self.baseRef == "" {
+		return hashing.String(ref)
+	}
 	fullRef := self.baseRef + "." + ref
 	return hashing.String(fullRef)
 }
