@@ -53,6 +53,8 @@
 					"enum": [
 						"String",
 						"Int",
+						"Float",
+						"Bool",
 						"Timestamp",
 						"Enum",
 						"Map",
