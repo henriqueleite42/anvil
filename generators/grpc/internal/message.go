@@ -20,6 +20,12 @@ func (self *protoFile) resolveMsgPropType(schema *schemas.Schema, sourceTypeRef 
 	if refType.Type == schemas.TypeType_Int {
 		typeString = "int32"
 	}
+	if refType.Type == schemas.TypeType_Float {
+		typeString = "float"
+	}
+	if refType.Type == schemas.TypeType_Bool {
+		typeString = "bool"
+	}
 	if refType.Type == schemas.TypeType_Timestamp {
 		self.imports["import \"google/protobuf/timestamp.proto\";"] = true
 		typeString = "google.protobuf.Timestamp"
