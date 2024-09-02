@@ -126,6 +126,8 @@ type TypeType string
 var (
 	TypeType_String    TypeType = "String"
 	TypeType_Int       TypeType = "Int"
+	TypeType_Float     TypeType = "Float"
+	TypeType_Bool      TypeType = "Bool"
 	TypeType_Timestamp TypeType = "Timestamp"
 	TypeType_Enum      TypeType = "Enum"
 	TypeType_Map       TypeType = "Map"
@@ -135,6 +137,8 @@ var (
 var TypeTypeArr = []TypeType{
 	TypeType_String,
 	TypeType_Int,
+	TypeType_Float,
+	TypeType_Bool,
 	TypeType_Timestamp,
 	TypeType_Enum,
 	TypeType_Map,
@@ -177,6 +181,8 @@ type Type struct {
 	Optional        bool                `yaml:"Optional"`
 	Format          *string             `yaml:"Format,omitempty" json:"Format,omitempty"`
 	Validate        []string            `yaml:"Validate,omitempty" json:"Validate,omitempty"`
+	AutoIncrement   bool                `yaml:"AutoIncrement"`
+	Default         *string             `yaml:"Default,omitempty" json:"Default,omitempty"`
 	Type            TypeType            `yaml:"Type"`
 	DbType          *string             `yaml:"DbType,omitempty" json:"DbType,omitempty"`
 	// Used for Map and List (List will always only have 1 item inside the slice)

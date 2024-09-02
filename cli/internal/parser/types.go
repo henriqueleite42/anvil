@@ -114,6 +114,26 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 		validate = validateArr
 	}
 
+	var autoIncrement bool
+	autoIncrementAny, ok := vMap["AutoIncrement"]
+	if ok {
+		autoIncrementBool, ok := autoIncrementAny.(bool)
+		if !ok {
+			return "", fmt.Errorf("fail to parse \"%s.%s.Format\" to `bool`", i.path, i.k)
+		}
+		autoIncrement = autoIncrementBool
+	}
+
+	var defaultV *string = nil
+	defaultVAny, ok := vMap["Default"]
+	if ok {
+		defaultVString, ok := defaultVAny.(string)
+		if !ok {
+			return "", fmt.Errorf("fail to parse \"%s.%s.Default\" to `string`", i.path, i.k)
+		}
+		defaultV = &defaultVString
+	}
+
 	var childTypesHashes []string = nil
 	propertiesAny, ok := vMap["Properties"]
 	if ok {
@@ -205,6 +225,8 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 		Optional:         optional,
 		Format:           format,
 		Validate:         validate,
+		AutoIncrement:    autoIncrement,
+		Default:          defaultV,
 		Type:             typeType,
 		DbType:           dbType,
 		ChildTypesHashes: childTypesHashes,
