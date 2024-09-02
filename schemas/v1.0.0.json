@@ -557,8 +557,7 @@
 												"type": "array",
 												"description": "Columns on the target entity to be referenced. The name MUST be written as in the SCHEMA, and not as it appears on the database",
 												"items": {
-													"type": "string",
-													"pattern": "^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$"
+													"type": "string"
 												}
 											},
 											"OnDelete": {
@@ -572,7 +571,6 @@
 										},
 										"required": [
 											"Columns",
-											"RefTable",
 											"RefColumns"
 										],
 										"additionalProperties": false
