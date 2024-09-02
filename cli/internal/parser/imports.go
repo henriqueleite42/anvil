@@ -100,7 +100,7 @@ func (self *anvToAnvpParser) imports(file map[string]any) error {
 		return nil
 	}
 
-	fullPath := self.getPath("Imports")
+	fullPath := "Imports"
 
 	importsMap, ok := importsSchema.(map[string]any)
 	if !ok {

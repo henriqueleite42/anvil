@@ -13,7 +13,7 @@ func (self *anvToAnvpParser) auth(file map[string]any) error {
 		return nil
 	}
 
-	path := self.getPath("Auth")
+	path := "Auth"
 
 	authMap, ok := authSchema.(map[string]any)
 	if !ok {
@@ -83,7 +83,7 @@ func (self *anvToAnvpParser) auth(file map[string]any) error {
 
 		auth := &schemas.Auth{
 			Ref:              ref,
-			OriginalPath:     self.getPath(fmt.Sprintf("%s.%s", path, k)),
+			OriginalPath:     fmt.Sprintf("%s.%s", path, k),
 			Name:             k,
 			RootNode:         rootNode,
 			Description:      description,

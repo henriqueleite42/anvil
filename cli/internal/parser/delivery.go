@@ -8,7 +8,7 @@ import (
 )
 
 func (self *anvToAnvpParser) delivery(file map[string]any) error {
-	path := self.getPath("Delivery")
+	path := "Delivery"
 
 	deliveryAny, ok := file["Delivery"]
 	if !ok {

@@ -27,7 +27,7 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 	}
 	refHash := hashing.String(ref)
 
-	path := self.getPath(fmt.Sprintf("%s.%s", i.path, i.k))
+	path := fmt.Sprintf("%s.%s", i.path, i.k)
 
 	_, ok := self.schema.Entities.Entities[refHash]
 	if ok {
@@ -45,7 +45,7 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 		if !ok {
 			return "", fmt.Errorf("fail to parse \"%s.%s.$ref\" to `string`", i.path, i.k)
 		}
-		return self.getRefHash(refString), nil
+		return hashing.String(refString), nil
 	}
 
 	var tableSchema *string = nil
@@ -126,7 +126,7 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 			columnName = kk
 		}
 
-		columnPath := self.getPath(fmt.Sprintf("%s.%s.Columns.%s", i.path, i.k, kk))
+		columnPath := fmt.Sprintf("%s.%s.Columns.%s", i.path, i.k, kk)
 		columnRef := ref + "." + kk
 
 		var typeHash string
@@ -264,7 +264,7 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 				unique = uniqueBool
 			}
 
-			indexPath := self.getPath(fmt.Sprintf("%s.Indexes.%d", path, kk))
+			indexPath := fmt.Sprintf("%s.Indexes.%d", path, kk)
 			indexHash := hashing.String(indexPath)
 
 			index := &schemas.EntityIndex{
@@ -367,7 +367,7 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 				onUpdate = &onUpdateString
 			}
 
-			fkPath := self.getPath(fmt.Sprintf("%s.ForeignKeys.%d", i.path, kk))
+			fkPath := fmt.Sprintf("%s.ForeignKeys.%d", i.path, kk)
 			fkHash := hashing.String(fkPath)
 
 			fk := &schemas.EntityForeignKey{
@@ -420,11 +420,11 @@ func (self *anvToAnvpParser) resolveEntitiesMetadata(file map[string]any) error 
 		return nil
 	}
 
-	fullPath := self.getPath("Entities")
+	path := "Entities"
 
 	entitiesMap, ok := entitiesSchema.(map[string]any)
 	if !ok {
-		return fmt.Errorf("fail to parse \"%s\" to `map[string]any`", fullPath)
+		return fmt.Errorf("fail to parse \"%s\" to `map[string]any`", path)
 	}
 
 	if self.schema.Entities == nil {
@@ -436,14 +436,14 @@ func (self *anvToAnvpParser) resolveEntitiesMetadata(file map[string]any) error 
 	if ok {
 		columnsCaseString, ok := columnsCaseAny.(string)
 		if !ok {
-			return fmt.Errorf("fail to parse \"%s.ColumnsCase\" to `string`", fullPath)
+			return fmt.Errorf("fail to parse \"%s.ColumnsCase\" to `string`", path)
 		}
 		if !ok {
-			return fmt.Errorf("fail to parse \"%s.ColumnsCase\" to `string`", fullPath)
+			return fmt.Errorf("fail to parse \"%s.ColumnsCase\" to `string`", path)
 		}
 		columnsCaseStr, ok := schemas.ToColumnsCase(columnsCaseString)
 		if !ok {
-			return fmt.Errorf("fail to parse \"%s.ColumnsCase\" to `TypeConfidentiality`", fullPath)
+			return fmt.Errorf("fail to parse \"%s.ColumnsCase\" to `TypeConfidentiality`", path)
 		}
 		columnsCase = &columnsCaseStr
 	}
@@ -461,11 +461,11 @@ func (self *anvToAnvpParser) entities(file map[string]any) error {
 		return nil
 	}
 
-	fullPath := self.getPath("Entities")
+	path := "Entities"
 
 	entitiesMap, ok := entitiesSchema.(map[string]any)
 	if !ok {
-		return fmt.Errorf("fail to parse \"%s\" to `map[string]any`", fullPath)
+		return fmt.Errorf("fail to parse \"%s\" to `map[string]any`", path)
 	}
 
 	if self.schema.Entities == nil {
@@ -474,16 +474,16 @@ func (self *anvToAnvpParser) entities(file map[string]any) error {
 
 	entitiesAny, ok := entitiesMap["Entities"]
 	if !ok {
-		return fmt.Errorf("\"Entities\" is a required property to \"%s.Entities.Entities\"", fullPath)
+		return fmt.Errorf("\"Entities\" is a required property to \"%s.Entities.Entities\"", path)
 	}
 	entitiesMap, ok = entitiesAny.(map[string]any)
 	if !ok {
-		return fmt.Errorf("fail to parse \"%s.Entities.Entities\" to `map[string]any`", fullPath)
+		return fmt.Errorf("fail to parse \"%s.Entities.Entities\" to `map[string]any`", path)
 	}
 
 	for k, v := range entitiesMap {
 		_, err := self.resolveEntity(&resolveInput{
-			path: fullPath + ".Entities",
+			path: path + ".Entities",
 			ref:  "",
 			k:    k,
 			v:    v,

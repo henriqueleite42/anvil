@@ -8,7 +8,7 @@ import (
 )
 
 func (self *anvToAnvpParser) usecase(file map[string]any) error {
-	path := self.getPath("Usecase")
+	path := "Usecase"
 
 	usecaseAny, ok := file["Usecase"]
 	if !ok {
@@ -102,7 +102,7 @@ func (self *anvToAnvpParser) usecase(file map[string]any) error {
 		// TODO implement EventHashes
 
 		ref := self.getRef(path, k)
-		fullPath := self.getPath(fmt.Sprintf("%s.Methods.Methods.%s", path, k))
+		fullPath := fmt.Sprintf("%s.Methods.Methods.%s", path, k)
 
 		method := &schemas.UsecaseMethod{
 			Ref:          ref,

@@ -51,7 +51,7 @@ func (self *anvToAnvpParser) resolveRelationship(i *resolveInput) (string, error
 
 	relationship := &schemas.Relationship{
 		Ref:           ref,
-		OriginalPath:  self.getPath(fmt.Sprintf("%s.%s", i.path, i.k)),
+		OriginalPath:  fmt.Sprintf("%s.%s", i.path, i.k),
 		Name:          i.k,
 		RootNode:      rootNode,
 		Uri:           uriString,
@@ -76,16 +76,16 @@ func (self *anvToAnvpParser) relationships(file map[string]any) error {
 		return nil
 	}
 
-	fullPath := self.getPath("Relationships")
+	path := "Relationships"
 
 	relationshipsMap, ok := relationshipsSchema.(map[string]any)
 	if !ok {
-		return fmt.Errorf("fail to parse \"%s\" to `map[string]any`", fullPath)
+		return fmt.Errorf("fail to parse \"%s\" to `map[string]any`", path)
 	}
 
 	for k, v := range relationshipsMap {
 		_, err := self.resolveRelationship(&resolveInput{
-			path: fullPath,
+			path: path,
 			ref:  "",
 			k:    k,
 			v:    v,

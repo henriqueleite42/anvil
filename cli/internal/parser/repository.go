@@ -8,7 +8,7 @@ import (
 )
 
 func (self *anvToAnvpParser) repository(file map[string]any) error {
-	path := self.getPath("Repository")
+	path := "Repository"
 
 	repositoryAny, ok := file["Repository"]
 	if !ok {
@@ -99,7 +99,7 @@ func (self *anvToAnvpParser) repository(file map[string]any) error {
 			}
 		}
 
-		fullPath := self.getPath(fmt.Sprintf("%s.Methods.Methods.%s", path, k))
+		fullPath := fmt.Sprintf("%s.Methods.Methods.%s", path, k)
 
 		method := &schemas.RepositoryMethod{
 			Ref:          self.getRef("", fmt.Sprintf("%s.%s", path, k)),

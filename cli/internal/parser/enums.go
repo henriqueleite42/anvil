@@ -24,9 +24,6 @@ func (self *anvToAnvpParser) resolveEnum(i *resolveInput) (string, error) {
 		ref = i.ref + "." + i.k
 	} else {
 		ref = "Enums." + i.k
-		if self.baseRef != "" {
-			ref = self.baseRef + "." + ref
-		}
 	}
 	refHash := hashing.String(ref)
 
@@ -105,7 +102,7 @@ func (self *anvToAnvpParser) resolveEnum(i *resolveInput) (string, error) {
 
 	enum := &schemas.Enum{
 		Ref:          ref,
-		OriginalPath: self.getPath(fmt.Sprintf("%s.Enums.%s", i.path, i.k)),
+		OriginalPath: fmt.Sprintf("%s.Enums.%s", i.path, i.k),
 		Name:         i.k,
 		DbType:       dbType,
 		RootNode:     rootNode,
@@ -130,7 +127,7 @@ func (self *anvToAnvpParser) enums(file map[string]any) error {
 		return nil
 	}
 
-	fullPath := self.getPath("Enums")
+	fullPath := "Enums"
 
 	enumsMap, ok := enumsAny.(map[string]any)
 	if !ok {

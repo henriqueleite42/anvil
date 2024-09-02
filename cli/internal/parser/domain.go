@@ -5,7 +5,7 @@ import (
 )
 
 func (self *anvToAnvpParser) domain(file map[string]any) error {
-	path := self.getPath("Domain")
+	path := "Domain"
 
 	domainAny, ok := file["Domain"]
 	if !ok {

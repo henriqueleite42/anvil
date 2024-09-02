@@ -34,7 +34,7 @@ func (self *anvToAnvpParser) resolveEvent(i *resolveInput) (string, error) {
 		if !ok {
 			return "", fmt.Errorf("fail to parse \"%s.%s.$ref\" to `string`", i.path, i.k)
 		}
-		return self.getRefHash(refString), nil
+		return hashing.String(refString), nil
 	}
 
 	formatsAny, ok := vMap["Formats"]
@@ -75,7 +75,7 @@ func (self *anvToAnvpParser) resolveEvent(i *resolveInput) (string, error) {
 
 	event := &schemas.Event{
 		Ref:          ref,
-		OriginalPath: self.getPath(fmt.Sprintf("%s.%s", i.path, i.k)),
+		OriginalPath: fmt.Sprintf("%s.%s", i.path, i.k),
 		Name:         i.k,
 		RootNode:     rootNode,
 		Formats:      formats,
@@ -99,16 +99,16 @@ func (self *anvToAnvpParser) events(file map[string]any) error {
 		return nil
 	}
 
-	fullPath := self.getPath("Events")
+	path := "Events"
 
 	eventsMap, ok := eventsSchema.(map[string]any)
 	if !ok {
-		return fmt.Errorf("fail to parse \"%s\" to `map[string]any`", fullPath)
+		return fmt.Errorf("fail to parse \"%s\" to `map[string]any`", path)
 	}
 
 	for k, v := range eventsMap {
 		_, err := self.resolveEvent(&resolveInput{
-			path: fullPath,
+			path: path,
 			ref:  "",
 			k:    k,
 			v:    v,

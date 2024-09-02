@@ -8,8 +8,6 @@ import (
 type anvToAnvpParser struct {
 	schema *schemas.Schema
 
-	baseRef string
-
 	filePath string
 }
 

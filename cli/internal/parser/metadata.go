@@ -12,7 +12,7 @@ func (self *anvToAnvpParser) metadata(file map[string]any) error {
 		return nil
 	}
 
-	fullPath := self.getPath("Metadata")
+	fullPath := "Metadata"
 
 	valMap, ok := metadataSchema.(map[string]any)
 	if !ok {
