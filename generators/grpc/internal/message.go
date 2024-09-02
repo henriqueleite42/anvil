@@ -97,12 +97,20 @@ func (self *protoFile) resolveMsg(schema *schemas.Schema, sourceTypeRef string) 
 			return "", err
 		}
 
+		typeType := schema.Types.Types[v]
+
+		var optional string
+		if typeType.Optional {
+			optional = "optional "
+		}
+
 		props = append(
 			props,
 			fmt.Sprintf(
-				"	%s %s = %d;",
+				"	%s%s %s = %d;",
+				optional,
 				propType,
-				schema.Types.Types[v].Name,
+				typeType.Name,
 				k,
 			),
 		)
