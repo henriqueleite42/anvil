@@ -1,2 +1,2 @@
 build:
-	go build -C . -o ./bin
+	go build -C . -o ./grpc

@@ -8,6 +8,7 @@
 *.so
 *.dylib
 /bin
+/cli/cli
 
 # Test binary, built with `go test -c`
 *.test
@@ -33,3 +34,4 @@ go.work
 *.anvp
 !/examples/**/*.anv
 /anvil
+*.hcl

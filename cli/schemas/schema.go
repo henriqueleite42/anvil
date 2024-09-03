@@ -269,8 +269,8 @@ type EntityForeignKey struct {
 	ColumnsHashes    []string `yaml:"ColumnsHashes"`
 	RefTableHash     string   `yaml:"RefTableHash"`
 	RefColumnsHashes []string `yaml:"RefColumnsHashes"`
-	OnDelete         *string  `yaml:"OnDelete"`
-	OnUpdate         *string  `yaml:"OnUpdate"`
+	OnDelete         *string  `yaml:"OnDelete,omitempty" json:"OnDelete,omitempty"`
+	OnUpdate         *string  `yaml:"OnUpdate,omitempty" json:"OnUpdate,omitempty"`
 }
 
 type Entity struct {

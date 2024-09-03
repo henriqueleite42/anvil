@@ -1,0 +1,4 @@
+github.com/henriqueleite42/anvil/cli v0.0.0-20240902155424-6f84f6a4496d h1:WIqSOkCZhoJwjGH2UxKuj1HfGOCyeAH24LU3AI++AQ4=
+github.com/henriqueleite42/anvil/cli v0.0.0-20240902155424-6f84f6a4496d/go.mod h1:blYSiSnRWxCQwQIwNndm3vlxK3n3O8edZLJgl6EG9uU=
+golang.org/x/exp v0.0.0-20240823005443-9b4947da3948 h1:kx6Ds3MlpiUHKj7syVnbp57++8WpuKPcR5yjLBjvLEA=
+golang.org/x/exp v0.0.0-20240823005443-9b4947da3948/go.mod h1:akd2r19cwCdwSwWeIdzYQGa/EZZyqcOdwWiwj5L5eKQ=

@@ -8,7 +8,7 @@
 *.so
 *.dylib
 /bin
-/grpc
+/atlas
 
 # Test binary, built with `go test -c`
 *.test

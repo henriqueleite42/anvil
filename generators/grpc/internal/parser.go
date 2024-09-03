@@ -42,9 +42,7 @@ func (self *protoFile) toString() string {
 
 %s
 
-%s
-
-`, imports, self.service, enums, messages)
+%s`, imports, self.service, enums, messages)
 }
 
 func Parse(schema *schemas.Schema) (string, error) {

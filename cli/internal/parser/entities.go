@@ -181,7 +181,7 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 		if !ok {
 			return "", fmt.Errorf("fail to parse \"%s.%s.PrimaryKey.%d\" to `[]any`", i.path, i.k, cni)
 		}
-		columnRef := fmt.Sprintf("%s.Entities.%s.%s", i.path, i.k, columnNameString)
+		columnRef := fmt.Sprintf("Entities.%s.%s", i.k, columnNameString)
 		hash := hashing.String(columnRef)
 		pkColumnsHashes = append(pkColumnsHashes, hash)
 	}
@@ -300,6 +300,7 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 				return "", fmt.Errorf("fail to parse \"%s.%s.ForeignKeys.%d\" to `map[string]any`", i.path, i.k, kk)
 			}
 
+			columnsNamesForFkName := []string{}
 			columnsHashes := []string{}
 			columnsAny, ok := vvMap["Columns"]
 			if !ok {
@@ -314,23 +315,65 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 				if !ok {
 					return "", fmt.Errorf("fail to parse \"%s.%s.ForeignKeys.%d.Columns.%d\" to `string`", i.path, i.k, kk, kkk)
 				}
-				columnRef := fmt.Sprintf("%s.Entities.%s.%s", i.path, i.k, vvvString)
+				columnRef := fmt.Sprintf("Entities.%s.%s", i.k, vvvString)
 				hash := hashing.String(columnRef)
+
+				column := columns[hash]
+
+				if column == nil {
+					return "", fmt.Errorf("fail to find column \"%s\" for \"%s.%s.ForeignKeys.%d.Columns.%d\"", vvvString, i.path, i.k, kk, kkk)
+				}
+
+				columnsNamesForFkName = append(columnsNamesForFkName, column.ColumnName)
 				columnsHashes = append(columnsHashes, hash)
 			}
 
-			// TODO implement it (get from refColumns, validate if it has only one)
 			var refTableHash string
 
-			// TODO implement it
 			refColumnsHashes := []string{}
 			refColumnsAny, ok := vvMap["RefColumns"]
 			if !ok {
 				return "", fmt.Errorf("\"RefColumns\" is a required property to \"%s.%s.ForeignKeys.%d\"", i.path, i.k, kk)
 			}
-			_, ok = refColumnsAny.([]any)
+			refColumnsArr, ok := refColumnsAny.([]any)
 			if !ok {
 				return "", fmt.Errorf("fail to parse \"%s.%s.ForeignKeys.%d.RefColumns\" to `[]any`", i.path, i.k, kk)
+			}
+			if len(refColumnsArr) == 0 {
+				return "", fmt.Errorf("at least 1 column is required for \"%s.%s.ForeignKeys.%d.RefColumns\"", i.path, i.k, kk)
+			}
+			var firstTableRefName string
+			for kkk, vvv := range refColumnsArr {
+				vvvString, ok := vvv.(string)
+				if !ok {
+					return "", fmt.Errorf("fail to parse \"%s.%s.ForeignKeys.%d.RefColumns.%d\" to `string`", i.path, i.k, kk, kkk)
+				}
+
+				parts := strings.Split(vvvString, ".")
+				if len(parts) != 2 {
+					return "", fmt.Errorf("You can only reference columns using the pattern \"TableName.ColumnName\" on \"%s.%s.ForeignKeys.%d.RefColumns.%d\" to `string`", i.path, i.k, kk, kkk)
+				}
+
+				refTableName := parts[0]
+				refColumnName := parts[1]
+
+				if firstTableRefName == "" {
+					firstTableRefName = refTableName
+				}
+
+				if firstTableRefName != refTableName {
+					return "", fmt.Errorf("You can only reference one ref table per foreign key. Error found on \"%s.%s.ForeignKeys.%d.RefColumns.%d\" to `string`", i.path, i.k, kk, kkk)
+				}
+
+				if refTableHash == "" {
+					refTableHash = hashing.String("Entities." + refTableName)
+				}
+
+				refColumn := "Entities." + refTableName + "." + refColumnName
+
+				refColumnHash := hashing.String(refColumn)
+
+				refColumnsHashes = append(refColumnsHashes, refColumnHash)
 			}
 
 			var name string
@@ -342,9 +385,7 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 				}
 				name = nameString
 			} else {
-				// TODO get entity table name, columns names, ref table name and ref columns names
-				// Then join it to create the fk name
-				name = ""
+				name = fmt.Sprintf("%s_%s_fk", tableName, strings.Join(columnsNamesForFkName, "_"))
 			}
 
 			var onDelete *string = nil
@@ -401,6 +442,7 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 		Columns:      columns,
 		PrimaryKey:   primaryKey,
 		Indexes:      indexes,
+		ForeignKeys:  foreignKeys,
 	}
 
 	stateHash, err := hashing.Struct(entity)
