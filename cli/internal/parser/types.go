@@ -100,7 +100,7 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 		if !ok {
 			return "", fmt.Errorf("fail to parse \"%s.%s.Validate\" to `[]any`", i.path, i.k)
 		}
-		validateArr := make([]string, len(validateArrAny)-1)
+		validateArr := []string{}
 		for kk, vv := range validateArrAny {
 			vString, ok := vv.(string)
 			if !ok {

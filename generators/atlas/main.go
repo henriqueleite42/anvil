@@ -12,6 +12,10 @@ import (
 )
 
 func main() {
+	if len(os.Args) == 0 {
+		log.Fatal("no args provided")
+	}
+
 	schemaString := os.Args[1]
 	if schemaString == "" {
 		log.Fatal("schema is required")

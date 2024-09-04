@@ -13,7 +13,7 @@ func ReadAnvFile(uri string) (map[string]any, error) {
 		log.Fatal(err)
 	}
 
-	data := make(map[string]any)
+	data := map[string]any{}
 	err = yaml.Unmarshal(fileData, &data)
 	if err != nil {
 		log.Fatal(err)

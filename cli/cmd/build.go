@@ -39,8 +39,11 @@ func addBuildCommand(rootCmd *cobra.Command) {
 			}
 
 			for _, v := range generators {
-				stdout, _ := exec.Command(v, jsonString, silentFlag).Output()
+				stdout, err := exec.Command(v, jsonString, silentFlag).Output()
 				fmt.Println(string(stdout))
+				if err != nil {
+					fmt.Println(err)
+				}
 			}
 		},
 	}

@@ -2,10 +2,16 @@ package internal
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/henriqueleite42/anvil/cli/schemas"
 )
+
+type SortedByOrder struct {
+	Order int
+	Key   string
+}
 
 const EMPTY_TYPE = "google.protobuf.Empty"
 
@@ -29,8 +35,25 @@ func (self *protoFile) resolveService(schema *schemas.Schema) error {
 		return fmt.Errorf("no usecases methods to deliver")
 	}
 
-	methods := []string{}
+	sortedRpcs := []*SortedByOrder{}
 	for k, v := range schema.Delivery.Grpc.Rpcs {
+		sortedRpcs = append(sortedRpcs, &SortedByOrder{
+			Order: v.Order,
+			Key:   k,
+		})
+	}
+	sort.Slice(sortedRpcs, func(i, j int) bool {
+		return sortedRpcs[i].Order < sortedRpcs[j].Order
+	})
+	for _, k := range sortedRpcs {
+		fmt.Println(k.Order)
+	}
+
+	methods := []string{}
+	for _, sortedRpc := range sortedRpcs {
+		k := sortedRpc.Key
+		v := schema.Delivery.Grpc.Rpcs[k]
+
 		if v.UsecaseMethodHash == "" {
 			return fmt.Errorf("missing \"UsecaseMethodHash\" for RPC \"%s\"", k)
 		}

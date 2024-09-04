@@ -3,7 +3,7 @@ package parser
 import (
 	"fmt"
 	"regexp"
-	"slices"
+	"sort"
 	"strings"
 
 	"github.com/henriqueleite42/anvil/cli/internal/hashing"
@@ -94,13 +94,23 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 	if !ok {
 		return "", fmt.Errorf("\"Columns\" is a required property to \"%s.%s\"", i.path, i.k)
 	}
-	columnsArr, ok := columnsAny.(map[string]any)
+	columnsMap, ok := columnsAny.(map[string]any)
 	if !ok {
 		return "", fmt.Errorf("fail to parse \"%s.%s.Columns\" to `map[string]any`", i.path, i.k)
 	}
 	columns := map[string]*schemas.EntityColumn{}
-	columnOrder := 0
-	for kk, vv := range columnsArr {
+
+	// Necessary to keep some kind of order
+	keys := []string{}
+	for key := range columnsMap {
+		keys = append(keys, key)
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		return keys[i] < keys[j]
+	})
+
+	for columnOrder, kk := range keys {
+		vv := columnsMap[kk]
 		vvMap, ok := vv.(map[string]any)
 		if !ok {
 			return "", fmt.Errorf("fail to parse \"%s.%s.Columns.%s\" to `map[string]any`", i.path, i.k, kk)
@@ -524,14 +534,15 @@ func (self *anvToAnvpParser) entities(file map[string]any) error {
 	}
 
 	// Necessary to keep some kind of order
-	keys := make([]string, 0, len(entitiesMap))
+	keys := []string{}
 	for key := range entitiesMap {
 		keys = append(keys, key)
 	}
-	slices.Sort(keys)
+	sort.Slice(keys, func(i, j int) bool {
+		return keys[i] < keys[j]
+	})
 
 	for _, k := range keys {
-		fmt.Println(k)
 		v := entitiesMap[k]
 		_, err := self.resolveEntity(&resolveInput{
 			path: path + ".Entities",

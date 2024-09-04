@@ -2,7 +2,7 @@ package parser
 
 import (
 	"fmt"
-	"slices"
+	"sort"
 
 	"github.com/henriqueleite42/anvil/cli/internal/hashing"
 	"github.com/henriqueleite42/anvil/cli/schemas"
@@ -37,11 +37,13 @@ func (self *anvToAnvpParser) repository(file map[string]any) error {
 	}
 
 	// Necessary to keep some kind of order
-	keys := make([]string, 0, len(methodsMap))
+	keys := []string{}
 	for key := range methodsMap {
 		keys = append(keys, key)
 	}
-	slices.Sort(keys)
+	sort.Slice(keys, func(i, j int) bool {
+		return keys[i] < keys[j]
+	})
 
 	for _, k := range keys {
 		v := methodsMap[k]

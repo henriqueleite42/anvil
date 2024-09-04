@@ -2,10 +2,16 @@ package postgres
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/henriqueleite42/anvil/cli/schemas"
 )
+
+type SortedByOrder struct {
+	Order int
+	Key   string
+}
 
 func (self *hclFile) resolveTables(schema *schemas.Schema) error {
 	if schema.Domain == "" {
@@ -18,8 +24,22 @@ func (self *hclFile) resolveTables(schema *schemas.Schema) error {
 		return fmt.Errorf("no types specified")
 	}
 
-	tables := []string{}
+	sortedEntities := []*SortedByOrder{}
 	for k, v := range schema.Entities.Entities {
+		sortedEntities = append(sortedEntities, &SortedByOrder{
+			Order: v.Order,
+			Key:   k,
+		})
+	}
+	sort.Slice(sortedEntities, func(i, j int) bool {
+		return sortedEntities[i].Order < sortedEntities[j].Order
+	})
+
+	tables := []string{}
+	for _, sortedEntity := range sortedEntities {
+		k := sortedEntity.Key
+		v := schema.Entities.Entities[k]
+
 		if v.Name == "" {
 			return fmt.Errorf("missing \"Name\" for table \"%s\"", k)
 		}
@@ -30,8 +50,22 @@ func (self *hclFile) resolveTables(schema *schemas.Schema) error {
 		}
 		dbSchema := "schema." + schemaName
 
+		sortedColumns := []*SortedByOrder{}
+		for k, v := range v.Columns {
+			sortedColumns = append(sortedColumns, &SortedByOrder{
+				Order: v.Order,
+				Key:   k,
+			})
+		}
+		sort.Slice(sortedColumns, func(i, j int) bool {
+			return sortedColumns[i].Order < sortedColumns[j].Order
+		})
+
 		columnsArr := []string{}
-		for _, vv := range v.Columns {
+		for _, sortedColumn := range sortedColumns {
+			kk := sortedColumn.Key
+			vv := v.Columns[kk]
+
 			columnTypeType, ok := schema.Types.Types[vv.TypeHash]
 			if !ok {
 				return fmt.Errorf("type \"%s\" not found for table \"%s\"", vv.TypeHash, v.Name)
