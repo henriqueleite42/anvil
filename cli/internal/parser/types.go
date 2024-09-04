@@ -195,7 +195,7 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 		}
 		dbType = &dbTypeString
 	} else if typeType == schemas.TypeType_Enum {
-		// TODO make it dynamic to match pattern specified in Entities.ColumnsCase (maybe create a Entities.ConstraintCase?)
+		// TODO make it dynamic to match pattern specified in Entities.NamingCase (maybe create a Entities.ConstraintCase?)
 		if self.schema.Enums == nil || self.schema.Enums.Enums == nil {
 			return "", fmt.Errorf("something went wrong when parsing the enum of \"%s.%s\": no enums parsed.", i.path, i.k)
 		}

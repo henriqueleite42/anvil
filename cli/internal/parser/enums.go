@@ -92,8 +92,17 @@ func (self *anvToAnvpParser) resolveEnum(i *resolveInput) (string, error) {
 		})
 	}
 
-	// TODO make it dynamic based on the metadata
-	dbType := formatter.PascalToSnake(i.k) + "_enum"
+	dbType := i.k + "Enum"
+	if self.schema.Entities != nil &&
+		self.schema.Entities.Metadata != nil &&
+		self.schema.Entities.Metadata.NamingCase != nil {
+		if *self.schema.Entities.Metadata.NamingCase == schemas.NamingCase_Camel {
+			dbType = formatter.PascalToCamel(dbType)
+		}
+		if *self.schema.Entities.Metadata.NamingCase == schemas.NamingCase_Snake {
+			dbType = formatter.PascalToSnake(dbType)
+		}
+	}
 
 	rootNode, err := getRootNode(i.path)
 	if err != nil {
@@ -104,6 +113,7 @@ func (self *anvToAnvpParser) resolveEnum(i *resolveInput) (string, error) {
 		Ref:          ref,
 		OriginalPath: fmt.Sprintf("%s.Enums.%s", i.path, i.k),
 		Name:         i.k,
+		DbName:       dbType,
 		DbType:       dbType,
 		RootNode:     rootNode,
 		Type:         schemas.EnumType(typeString),

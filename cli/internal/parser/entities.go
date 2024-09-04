@@ -114,10 +114,10 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 			columnName = columnNameString
 		} else if self.schema.Entities != nil &&
 			self.schema.Entities.Metadata != nil &&
-			self.schema.Entities.Metadata.ColumnsCase != nil {
-			if *self.schema.Entities.Metadata.ColumnsCase == schemas.ColumnsCase_Snake {
+			self.schema.Entities.Metadata.NamingCase != nil {
+			if *self.schema.Entities.Metadata.NamingCase == schemas.NamingCase_Snake {
 				columnName = formatter.PascalToSnake(kk)
-			} else if *self.schema.Entities.Metadata.ColumnsCase == schemas.ColumnsCase_Camel {
+			} else if *self.schema.Entities.Metadata.NamingCase == schemas.NamingCase_Camel {
 				columnName = formatter.PascalToCamel(kk)
 			} else {
 				columnName = kk
@@ -145,7 +145,7 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 			Ref:          columnRef,
 			OriginalPath: columnPath,
 			Name:         kk,
-			ColumnName:   columnName,
+			DbName:       columnName,
 			TypeHash:     typeHash,
 		}
 
@@ -248,9 +248,9 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 					if !ok {
 						return "", fmt.Errorf("fail to find one of the columns to created database name for \"%s.%s.Indexes.%d\"", i.path, i.k, kk)
 					}
-					columnsToCreateName = append(columnsToCreateName, column.ColumnName)
+					columnsToCreateName = append(columnsToCreateName, column.DbName)
 				}
-				// TODO make it dynamic to match pattern specified in Entities.ColumnsCase (maybe create a Entities.ConstraintCase?)
+				// TODO make it dynamic to match pattern specified in Entities.NamingCase (maybe create a Entities.ConstraintCase?)
 				name = strings.Join(columnsToCreateName, "_") + "_idx"
 			}
 
@@ -324,7 +324,7 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 					return "", fmt.Errorf("fail to find column \"%s\" for \"%s.%s.ForeignKeys.%d.Columns.%d\"", vvvString, i.path, i.k, kk, kkk)
 				}
 
-				columnsNamesForFkName = append(columnsNamesForFkName, column.ColumnName)
+				columnsNamesForFkName = append(columnsNamesForFkName, column.DbName)
 				columnsHashes = append(columnsHashes, hash)
 			}
 
@@ -438,7 +438,7 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 		RootNode:     rootNode,
 		TypeHash:     refHash,
 		Schema:       tableSchema,
-		TableName:    tableName,
+		DbName:       tableName,
 		Columns:      columns,
 		PrimaryKey:   primaryKey,
 		Indexes:      indexes,
@@ -473,25 +473,25 @@ func (self *anvToAnvpParser) resolveEntitiesMetadata(file map[string]any) error 
 		self.schema.Entities = &schemas.Entities{}
 	}
 
-	var columnsCase *schemas.ColumnsCase = nil
-	columnsCaseAny, ok := entitiesMap["ColumnsCase"]
+	var columnsCase *schemas.NamingCase = nil
+	columnsCaseAny, ok := entitiesMap["NamingCase"]
 	if ok {
 		columnsCaseString, ok := columnsCaseAny.(string)
 		if !ok {
-			return fmt.Errorf("fail to parse \"%s.ColumnsCase\" to `string`", path)
+			return fmt.Errorf("fail to parse \"%s.NamingCase\" to `string`", path)
 		}
 		if !ok {
-			return fmt.Errorf("fail to parse \"%s.ColumnsCase\" to `string`", path)
+			return fmt.Errorf("fail to parse \"%s.NamingCase\" to `string`", path)
 		}
-		columnsCaseStr, ok := schemas.ToColumnsCase(columnsCaseString)
+		columnsCaseStr, ok := schemas.ToNamingCase(columnsCaseString)
 		if !ok {
-			return fmt.Errorf("fail to parse \"%s.ColumnsCase\" to `TypeConfidentiality`", path)
+			return fmt.Errorf("fail to parse \"%s.NamingCase\" to `TypeConfidentiality`", path)
 		}
 		columnsCase = &columnsCaseStr
 	}
 
 	self.schema.Entities.Metadata = &schemas.EntitiesMetadata{
-		ColumnsCase: columnsCase,
+		NamingCase: columnsCase,
 	}
 
 	return nil

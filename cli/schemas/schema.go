@@ -107,6 +107,7 @@ type Enum struct {
 	Ref          string       `yaml:"Ref"`
 	OriginalPath string       `yaml:"OriginalPath"`
 	Name         string       `yaml:"Name"`
+	DbName       string       `yaml:"DbName"`
 	DbType       string       `yaml:"DbType"`
 	RootNode     string       `yaml:"RootNode"`
 	StateHash    string       `yaml:"StateHash"`
@@ -215,35 +216,35 @@ type Events struct {
 
 // Entities
 
-type ColumnsCase string
+type NamingCase string
 
 var (
-	ColumnsCase_Snake  ColumnsCase = "snake"
-	ColumnsCase_Pascal ColumnsCase = "pascal"
-	ColumnsCase_Camel  ColumnsCase = "camel"
+	NamingCase_Snake  NamingCase = "snake"
+	NamingCase_Pascal NamingCase = "pascal"
+	NamingCase_Camel  NamingCase = "camel"
 )
 
-var ColumnsCaseArr = []ColumnsCase{
-	ColumnsCase_Snake,
-	ColumnsCase_Pascal,
-	ColumnsCase_Camel,
+var NamingCaseArr = []NamingCase{
+	NamingCase_Snake,
+	NamingCase_Pascal,
+	NamingCase_Camel,
 }
 
-func ToColumnsCase(i string) (ColumnsCase, bool) {
-	ft := ColumnsCase(i)
+func ToNamingCase(i string) (NamingCase, bool) {
+	ft := NamingCase(i)
 
-	return ft, slices.Contains(ColumnsCaseArr, ft)
+	return ft, slices.Contains(NamingCaseArr, ft)
 }
 
 type EntitiesMetadata struct {
-	ColumnsCase *ColumnsCase `yaml:"ColumnsCase,omitempty" json:"ColumnsCase,omitempty"`
+	NamingCase *NamingCase `yaml:"NamingCase,omitempty" json:"NamingCase,omitempty"`
 }
 
 type EntityColumn struct {
 	Ref          string `yaml:"Ref"`
 	OriginalPath string `yaml:"OriginalPath"`
 	Name         string `yaml:"Name"`
-	ColumnName   string `yaml:"ColumnName"`
+	DbName       string `yaml:"DbName"`
 	StateHash    string `yaml:"StateHash"`
 	TypeHash     string `yaml:"TypeHash"`
 }
@@ -280,7 +281,7 @@ type Entity struct {
 	RootNode     string                       `yaml:"RootNode"`
 	TypeHash     string                       `yaml:"TypeHash"`
 	Schema       *string                      `yaml:"Schema,omitempty" json:"Schema,omitempty"`
-	TableName    string                       `yaml:"TableName"`
+	DbName       string                       `yaml:"DbName"`
 	StateHash    string                       `yaml:"StateHash"`
 	Columns      map[string]*EntityColumn     `yaml:"Columns"`
 	PrimaryKey   *EntityPrimaryKey            `yaml:"PrimaryKey"`

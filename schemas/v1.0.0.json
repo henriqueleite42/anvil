@@ -459,7 +459,7 @@
 					"type": "string",
 					"description": "The database schema, used when you don't want to use the public schemas."
 				},
-				"ColumnsCase": {
+				"NamingCase": {
 					"type": "string",
 					"description": "The case to format the columns when generating migrations or database-related things."
 				},
