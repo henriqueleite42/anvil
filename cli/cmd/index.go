@@ -9,9 +9,11 @@ import (
 )
 
 var (
-	schemaFile string // Used for flags.
-	silent     bool
-	generators []string
+	// Used for flags.
+	schemaFile       string
+	silent           bool
+	generators       []string
+	outputFolderPath string
 
 	rootCmd = &cobra.Command{
 		Use:   "anvil",

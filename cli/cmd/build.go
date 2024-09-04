@@ -33,13 +33,22 @@ func addBuildCommand(rootCmd *cobra.Command) {
 			}
 			jsonString := string(json)
 
-			var silentFlag string
+			argsToGenerator := []string{
+				"gen",
+				"--schema",
+				jsonString,
+			}
+
 			if silent {
-				silentFlag = "--silent"
+				argsToGenerator = append(argsToGenerator, "--silent")
+			}
+
+			if outputFolderPath != "" {
+				argsToGenerator = append(argsToGenerator, "--outDir", outputFolderPath)
 			}
 
 			for _, v := range generators {
-				stdout, err := exec.Command(v, jsonString, silentFlag).Output()
+				stdout, err := exec.Command(v, argsToGenerator...).Output()
 				fmt.Println(string(stdout))
 				if err != nil {
 					fmt.Println(err)
@@ -54,6 +63,9 @@ func addBuildCommand(rootCmd *cobra.Command) {
 	buildCmd.PersistentFlags().StringArrayVar(&generators, "generators", []string{}, "generator to be used, can be passed more than once")
 	buildCmd.MarkPersistentFlagRequired("generators")
 	viper.BindPFlag("generators", rootCmd.PersistentFlags().Lookup("generators"))
+
+	buildCmd.PersistentFlags().StringVar(&outputFolderPath, "outDir", "", "output directory path")
+	viper.BindPFlag("outDir", rootCmd.PersistentFlags().Lookup("outDir"))
 
 	rootCmd.AddCommand(buildCmd)
 }

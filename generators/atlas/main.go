@@ -2,13 +2,14 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/henriqueleite42/anvil/cli/schemas"
 	"github.com/henriqueleite42/anvil/generators/atlas/internal"
 	"github.com/henriqueleite42/anvil/generators/atlas/internal/postgres"
-	"golang.org/x/exp/slices"
 )
 
 func main() {
@@ -16,7 +17,35 @@ func main() {
 		log.Fatal("no args provided")
 	}
 
-	schemaString := os.Args[1]
+	command := os.Args[1]
+	if command != "gen" {
+		log.Fatal(fmt.Sprintf("invalid command \"%s\"", command))
+	}
+
+	var schemaString string
+	var outputFolderPath string
+	var silent bool
+	for idx, arg := range os.Args {
+		if !strings.HasPrefix(arg, "--") {
+			continue
+		}
+
+		if arg == "--schema" {
+			schemaString = os.Args[idx+1]
+			continue
+		}
+
+		if arg == "--outDir" {
+			outputFolderPath = os.Args[idx+1]
+			continue
+		}
+
+		if arg == "--silent" {
+			silent = true
+			continue
+		}
+	}
+
 	if schemaString == "" {
 		log.Fatal("schema is required")
 	}
@@ -32,10 +61,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	remainingArgs := os.Args[2:]
-
-	if !slices.Contains(remainingArgs, "--silent") {
-		err := internal.WriteHclFile(schema, result)
+	if !silent {
+		err := internal.WriteHclFile(outputFolderPath, schema, result)
 		if err != nil {
 			log.Fatal(err)
 		}
