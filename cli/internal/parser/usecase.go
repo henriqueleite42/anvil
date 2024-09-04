@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/henriqueleite42/anvil/cli/internal/hashing"
 	"github.com/henriqueleite42/anvil/cli/schemas"
@@ -35,7 +36,15 @@ func (self *anvToAnvpParser) usecase(file map[string]any) error {
 		Methods: map[string]*schemas.UsecaseMethod{},
 	}
 
-	for k, v := range methodsMap {
+	// Necessary to keep some kind of order
+	keys := make([]string, 0, len(methodsMap))
+	for key := range methodsMap {
+		keys = append(keys, key)
+	}
+	slices.Sort(keys)
+
+	for _, k := range keys {
+		v := methodsMap[k]
 		vMap, ok := v.(map[string]any)
 		if !ok {
 			return fmt.Errorf("fail to parse \"%s.Methods.%s\" to `map[string]any`", path, k)
@@ -104,9 +113,11 @@ func (self *anvToAnvpParser) usecase(file map[string]any) error {
 		ref := self.getRef(path, k)
 		fullPath := fmt.Sprintf("%s.Methods.Methods.%s", path, k)
 
+		order := len(methods.Methods)
 		method := &schemas.UsecaseMethod{
 			Ref:          ref,
 			OriginalPath: fullPath,
+			Order:        order,
 			Name:         k,
 			Description:  description,
 			Input:        input,

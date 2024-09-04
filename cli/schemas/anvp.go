@@ -244,6 +244,7 @@ type EntityColumn struct {
 	Ref          string `yaml:"Ref"`
 	OriginalPath string `yaml:"OriginalPath"`
 	Name         string `yaml:"Name"`
+	Order        int    `yaml:"Order"`
 	DbName       string `yaml:"DbName"`
 	StateHash    string `yaml:"StateHash"`
 	TypeHash     string `yaml:"TypeHash"`
@@ -280,6 +281,7 @@ type Entity struct {
 	Name         string                       `yaml:"Name"`
 	RootNode     string                       `yaml:"RootNode"`
 	TypeHash     string                       `yaml:"TypeHash"`
+	Order        int                          `yaml:"Order"`
 	Schema       *string                      `yaml:"Schema,omitempty" json:"Schema,omitempty"`
 	DbName       string                       `yaml:"DbName"`
 	StateHash    string                       `yaml:"StateHash"`
@@ -309,6 +311,7 @@ type RepositoryMethod struct {
 	Ref          string                  `yaml:"Ref"`
 	OriginalPath string                  `yaml:"OriginalPath"`
 	StateHash    string                  `yaml:"StateHash"`
+	Order        int                     `yaml:"Order"`
 	Name         string                  `yaml:"Name"`
 	Description  *string                 `yaml:"Description,omitempty" json:"Description,omitempty"`
 	Input        *RepositoryMethodInput  `yaml:"Input,omitempty" json:"Input,omitempty"`
@@ -340,6 +343,7 @@ type UsecaseMethodOutput struct {
 type UsecaseMethod struct {
 	Ref          string               `yaml:"Ref"`
 	OriginalPath string               `yaml:"OriginalPath"`
+	Order        int                  `yaml:"Order"`
 	Name         string               `yaml:"Name"`
 	Description  *string              `yaml:"Description,omitempty" json:"Description,omitempty"`
 	StateHash    string               `yaml:"StateHash"`
@@ -376,6 +380,7 @@ type DeliveryGrpcRpc struct {
 	OriginalPath      string                             `yaml:"OriginalPath"`
 	StateHash         string                             `yaml:"StateHash"`
 	UsecaseMethodHash string                             `yaml:"UsecaseMethodHash"`
+	Order             int                                `yaml:"Order"`
 	Examples          map[string]*DeliveryGrpcRpcExample `yaml:"Examples,omitempty" json:"Examples,omitempty"`
 }
 
@@ -396,6 +401,7 @@ type DeliveryHttpRoute struct {
 	OriginalPath       string                               `yaml:"OriginalPath"`
 	StateHash          string                               `yaml:"StateHash"`
 	UsecaseMethodHash  string                               `yaml:"UsecaseMethodHash"`
+	Order              int                                  `yaml:"Order"`
 	StatusCode         int                                  `yaml:"StatusCode"`
 	HttpMethod         string                               `yaml:"HttpMethod"`
 	Path               string                               `yaml:"Path"`
@@ -414,6 +420,7 @@ type DeliveryQueueQueueExample struct {
 	OriginalPath string `yaml:"OriginalPath"`
 	Name         string `yaml:"Name"`
 	StateHash    string `yaml:"StateHash"`
+	Order        int    `yaml:"Order"`
 	// TODO
 }
 

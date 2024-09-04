@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/henriqueleite42/anvil/cli/internal/hashing"
@@ -98,6 +99,7 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 		return "", fmt.Errorf("fail to parse \"%s.%s.Columns\" to `map[string]any`", i.path, i.k)
 	}
 	columns := map[string]*schemas.EntityColumn{}
+	columnOrder := 0
 	for kk, vv := range columnsArr {
 		vvMap, ok := vv.(map[string]any)
 		if !ok {
@@ -134,6 +136,7 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 		column := &schemas.EntityColumn{
 			Ref:          columnRef,
 			OriginalPath: columnPath,
+			Order:        columnOrder,
 			Name:         kk,
 			DbName:       columnName,
 			TypeHash:     typeHash,
@@ -147,6 +150,8 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 
 		columns[columnRefHash] = column
 		entityType.ChildTypesHashes = append(entityType.ChildTypesHashes, columnRefHash)
+
+		columnOrder++
 	}
 
 	entityTypeStateHash, err := hashing.Struct(entityType)
@@ -421,12 +426,14 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 		}
 	}
 
+	order := len(self.schema.Entities.Entities)
 	entity := &schemas.Entity{
 		Ref:          ref,
 		OriginalPath: path,
 		Name:         i.k,
 		RootNode:     rootNode,
 		TypeHash:     refHash,
+		Order:        order,
 		Schema:       tableSchema,
 		DbName:       tableName,
 		Columns:      columns,
@@ -503,6 +510,9 @@ func (self *anvToAnvpParser) entities(file map[string]any) error {
 	if self.schema.Entities == nil {
 		self.schema.Entities = &schemas.Entities{}
 	}
+	if self.schema.Entities.Entities == nil {
+		self.schema.Entities.Entities = map[string]*schemas.Entity{}
+	}
 
 	entitiesAny, ok := entitiesMap["Entities"]
 	if !ok {
@@ -513,7 +523,16 @@ func (self *anvToAnvpParser) entities(file map[string]any) error {
 		return fmt.Errorf("fail to parse \"%s.Entities.Entities\" to `map[string]any`", path)
 	}
 
-	for k, v := range entitiesMap {
+	// Necessary to keep some kind of order
+	keys := make([]string, 0, len(entitiesMap))
+	for key := range entitiesMap {
+		keys = append(keys, key)
+	}
+	slices.Sort(keys)
+
+	for _, k := range keys {
+		fmt.Println(k)
+		v := entitiesMap[k]
 		_, err := self.resolveEntity(&resolveInput{
 			path: path + ".Entities",
 			ref:  "",

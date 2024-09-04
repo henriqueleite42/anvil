@@ -77,6 +77,7 @@ func (self *anvToAnvpParser) delivery(file map[string]any) error {
 				Ref:               ref,
 				OriginalPath:      originalPath,
 				UsecaseMethodHash: usecaseMethodHash,
+				Order:             k,
 			}
 
 			stateHash, err := hashing.Struct(rpc)
