@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/henriqueleite42/anvil/cli/internal/formatter"
-	"github.com/henriqueleite42/anvil/cli/internal/hashing"
+	"github.com/henriqueleite42/anvil/cli/formatter"
+	"github.com/henriqueleite42/anvil/cli/hashing"
 	"github.com/henriqueleite42/anvil/cli/schemas"
 )
 

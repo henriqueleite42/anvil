@@ -3,7 +3,7 @@ package parser
 import (
 	"fmt"
 
-	"github.com/henriqueleite42/anvil/cli/internal/hashing"
+	"github.com/henriqueleite42/anvil/cli/hashing"
 	"github.com/henriqueleite42/anvil/cli/schemas"
 )
 
