@@ -70,14 +70,16 @@ func (self *anvToAnvpParser) resolveEnum(i *resolveInput) (string, error) {
 			return "", fmt.Errorf("fail to parse \"%s.%s.Values.%s\" to `map[string]any`", i.path, i.k, valuesK)
 		}
 
-		var nameString *string = nil
+		var nameString string
 		nameAny, ok := valuesVMap["Name"]
 		if ok {
 			localNameString, ok := nameAny.(string)
 			if !ok {
 				return "", fmt.Errorf("fail to parse \"%s.%s.Values.%s.Name\" to `string`", i.path, i.k, valuesK)
 			}
-			nameString = &localNameString
+			nameString = localNameString
+		} else {
+			nameString = valuesK
 		}
 
 		valueString, ok := valuesVMap["Value"].(string)

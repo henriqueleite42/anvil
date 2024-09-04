@@ -99,8 +99,8 @@ var (
 )
 
 type EnumValue struct {
-	Name  *string `yaml:"Name,omitempty" json:"Name,omitempty"`
-	Value string  `yaml:"Value"`
+	Name  string `yaml:"Name"`
+	Value string `yaml:"Value"`
 }
 
 type Enum struct {
