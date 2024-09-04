@@ -65,7 +65,7 @@ func (self *hclFile) resolveTables(schema *schemas.Schema) error {
 
 			column := fmt.Sprintf(`	column "%s" {
 		type = %s
-%s%s%s	}`, vv.ColumnName, columnType, autoIncrement, nullable, defaultVal)
+%s%s%s	}`, vv.DbName, columnType, autoIncrement, nullable, defaultVal)
 
 			columnsArr = append(columnsArr, column)
 		}
@@ -79,7 +79,7 @@ func (self *hclFile) resolveTables(schema *schemas.Schema) error {
 				if !ok {
 					return fmt.Errorf("column \"%s\" not found for primary key of table \"%s\"", vv, v.Name)
 				}
-				primaryKeyColumnsArr = append(primaryKeyColumnsArr, "			column."+column.ColumnName)
+				primaryKeyColumnsArr = append(primaryKeyColumnsArr, "			column."+column.DbName)
 			}
 			primaryKeyColumns = strings.Join(primaryKeyColumnsArr, "\n")
 		}
@@ -94,7 +94,7 @@ func (self *hclFile) resolveTables(schema *schemas.Schema) error {
 					if !ok {
 						return fmt.Errorf("column \"%s\" not found for index of table \"%s\"", vvv, v.Name)
 					}
-					columnsArr = append(columnsArr, fmt.Sprintf("			column.%s", column.ColumnName))
+					columnsArr = append(columnsArr, fmt.Sprintf("			column.%s", column.DbName))
 				}
 				columns := strings.Join(columnsArr, "\n")
 
@@ -130,7 +130,7 @@ func (self *hclFile) resolveTables(schema *schemas.Schema) error {
 					if !ok {
 						return fmt.Errorf("column \"%s\" not found for index of table \"%s\"", vvv, v.Name)
 					}
-					columnsArr = append(columnsArr, fmt.Sprintf("			column.%s", column.ColumnName))
+					columnsArr = append(columnsArr, fmt.Sprintf("			column.%s", column.DbName))
 				}
 				columns := strings.Join(columnsArr, "\n")
 
@@ -140,7 +140,7 @@ func (self *hclFile) resolveTables(schema *schemas.Schema) error {
 					if !ok {
 						return fmt.Errorf("column \"%s\" not found for ref column of table \"%s\"", vvv, v.Name)
 					}
-					refColumnsArr = append(refColumnsArr, fmt.Sprintf("			table.%s.column.%s", refTable.TableName, column.ColumnName))
+					refColumnsArr = append(refColumnsArr, fmt.Sprintf("			table.%s.column.%s", refTable.DbName, column.DbName))
 				}
 				refColumns := strings.Join(refColumnsArr, "\n")
 
@@ -177,7 +177,7 @@ func (self *hclFile) resolveTables(schema *schemas.Schema) error {
 %s
 		]
 	}
-%s%s}`, v.TableName, dbSchema, columns, primaryKeyColumns, indexes, foreignKeys)
+%s%s}`, v.DbName, dbSchema, columns, primaryKeyColumns, indexes, foreignKeys)
 
 		tables = append(tables, table)
 	}

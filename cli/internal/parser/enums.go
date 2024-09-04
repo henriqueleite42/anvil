@@ -3,7 +3,6 @@ package parser
 import (
 	"fmt"
 
-	"github.com/henriqueleite42/anvil/cli/internal/formatter"
 	"github.com/henriqueleite42/anvil/cli/internal/hashing"
 	"github.com/henriqueleite42/anvil/cli/schemas"
 )
@@ -92,17 +91,7 @@ func (self *anvToAnvpParser) resolveEnum(i *resolveInput) (string, error) {
 		})
 	}
 
-	dbType := i.k + "Enum"
-	if self.schema.Entities != nil &&
-		self.schema.Entities.Metadata != nil &&
-		self.schema.Entities.Metadata.NamingCase != nil {
-		if *self.schema.Entities.Metadata.NamingCase == schemas.NamingCase_Camel {
-			dbType = formatter.PascalToCamel(dbType)
-		}
-		if *self.schema.Entities.Metadata.NamingCase == schemas.NamingCase_Snake {
-			dbType = formatter.PascalToSnake(dbType)
-		}
-	}
+	dbType := self.formatToEntitiesNamingCase(i.k + "Enum")
 
 	rootNode, err := getRootNode(i.path)
 	if err != nil {

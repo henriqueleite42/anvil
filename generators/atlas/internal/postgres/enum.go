@@ -30,12 +30,12 @@ func (self *hclFile) resolveEnum(
 	}
 	enumValues := strings.Join(enumValuesArr, ",\n")
 
-	self.enums[enum.Name] = fmt.Sprintf(`enum "%s" {
+	self.enums[enum.DbName] = fmt.Sprintf(`enum "%s" {
 	schema = %s
 	values = [
 %s
 	]
-}`, enum.Name, dbSchema, enumValues)
+}`, enum.DbName, dbSchema, enumValues)
 
-	return enum.Name, nil
+	return enum.DbName, nil
 }

@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/henriqueleite42/anvil/cli/internal/formatter"
 	"github.com/henriqueleite42/anvil/cli/internal/hashing"
+	"github.com/henriqueleite42/anvil/cli/schemas"
 )
 
 //	Add the state hash to all the properties
@@ -112,11 +114,6 @@ func (self *anvToAnvpParser) getRef(parentRef string, ref string) string {
 	}
 
 	return parentRef + "." + ref
-
-}
-
-func (self *anvToAnvpParser) getPath(path string) string {
-	return path
 }
 
 func getRootNode(path string) (string, error) {
@@ -125,4 +122,25 @@ func getRootNode(path string) (string, error) {
 		return "", fmt.Errorf("fail to get root node from \"%s\"", path)
 	}
 	return nodes[0], nil
+}
+
+func (self *anvToAnvpParser) formatToEntitiesNamingCase(str string) string {
+	if self.schema.Entities == nil {
+		return str
+	}
+	if self.schema.Entities.Metadata == nil {
+		return str
+	}
+	if self.schema.Entities.Metadata.NamingCase == nil {
+		return str
+	}
+
+	switch *self.schema.Entities.Metadata.NamingCase {
+	case schemas.NamingCase_Camel:
+		return formatter.PascalToCamel(str)
+	case schemas.NamingCase_Snake:
+		return formatter.PascalToSnake(str)
+	}
+
+	return str
 }

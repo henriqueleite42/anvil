@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 
@@ -21,13 +20,11 @@ func main() {
 	schema := &schemas.Schema{}
 	err := json.Unmarshal([]byte(schemaString), schema)
 	if err != nil {
-		fmt.Println(err.Error())
 		log.Fatal(err)
 	}
 
 	result, err := postgres.Parse(schema)
 	if err != nil {
-		fmt.Println(err.Error())
 		log.Fatal(err)
 	}
 
@@ -36,7 +33,6 @@ func main() {
 	if !slices.Contains(remainingArgs, "--silent") {
 		err := internal.WriteHclFile(schema, result)
 		if err != nil {
-			fmt.Println(err.Error())
 			log.Fatal(err)
 		}
 	}

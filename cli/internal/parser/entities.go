@@ -5,7 +5,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/henriqueleite42/anvil/cli/internal/formatter"
 	"github.com/henriqueleite42/anvil/cli/internal/hashing"
 	"github.com/henriqueleite42/anvil/cli/schemas"
 )
@@ -68,7 +67,8 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 		tableName = tableNameString
 	}
 	if tableName == "" {
-		tableName = i.k
+		// Pluralize and format
+		tableName = self.formatToEntitiesNamingCase(i.k + "s")
 	}
 
 	rootNode, err := getRootNode(i.path)
@@ -112,18 +112,8 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 				return "", fmt.Errorf("fail to parse \"%s.%s.Columns.%s.Name\" to `string`", i.path, i.k, kk)
 			}
 			columnName = columnNameString
-		} else if self.schema.Entities != nil &&
-			self.schema.Entities.Metadata != nil &&
-			self.schema.Entities.Metadata.NamingCase != nil {
-			if *self.schema.Entities.Metadata.NamingCase == schemas.NamingCase_Snake {
-				columnName = formatter.PascalToSnake(kk)
-			} else if *self.schema.Entities.Metadata.NamingCase == schemas.NamingCase_Camel {
-				columnName = formatter.PascalToCamel(kk)
-			} else {
-				columnName = kk
-			}
 		} else {
-			columnName = kk
+			columnName = self.formatToEntitiesNamingCase(kk)
 		}
 
 		columnPath := fmt.Sprintf("%s.%s.Columns.%s", i.path, i.k, kk)
