@@ -30,7 +30,12 @@ func (self *protoFile) toString() string {
 	})
 	var imports string
 	for _, v := range sortedImports {
-		imports += v + "\n"
+		imports += "\n" + v
+	}
+
+	service := self.service
+	if imports != "" {
+		service = "\n" + service
 	}
 
 	sortedEnums := []string{}
@@ -42,7 +47,7 @@ func (self *protoFile) toString() string {
 	})
 	var enums string
 	for _, v := range sortedEnums {
-		enums += v + "\n"
+		enums += "\n" + v
 	}
 
 	sortedMessages := []string{}
@@ -54,26 +59,23 @@ func (self *protoFile) toString() string {
 	})
 	var messages string
 	for _, v := range sortedMessages {
-		messages += v + "\n"
+		messages += "\n" + v
+	}
+
+	if enums != "" {
+		messages = "\n" + messages
 	}
 
 	return fmt.Sprintf(`syntax = "proto3";
-
 %s
-
 %s
-
-%s
-
-%s`, imports, self.service, enums, messages)
+%s%s`, imports, service, enums, messages)
 }
 
 func Parse(schema *schemas.Schema) (string, error) {
 	proto := &protoFile{
-		schema: schema,
-		imports: map[string]bool{
-			"	\"time\"": true,
-		},
+		schema:   schema,
+		imports:  map[string]bool{},
 		enums:    map[string]string{},
 		messages: map[string]string{},
 	}

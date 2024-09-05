@@ -133,6 +133,7 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 	}
 
 	var childTypesHashes []string = nil
+
 	propertiesAny, ok := vMap["Properties"]
 	if ok {
 		if typeType != schemas.TypeType_Map {
@@ -169,9 +170,48 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 			return typeRefI.Name < typeRefJ.Name
 		})
 
-		childTypesHashes = typesHashes
+		if childTypesHashes == nil {
+			childTypesHashes = typesHashes
+		} else {
+			childTypesHashes = append(childTypesHashes, typesHashes...)
+		}
 	} else if typeType == schemas.TypeType_Map {
 		return "", fmt.Errorf("Type \"%s.%s\" must have property \"Properties\". All types with map \"Type\" must.", i.path, i.k)
+	}
+
+	itemsAny, ok := vMap["Items"]
+	if ok {
+		if typeType != schemas.TypeType_List {
+			return "", fmt.Errorf("Type \"%s.%s\" cannot have property \"Items\". Only types with list \"Type\" can.", i.path, i.k)
+		}
+
+		itemsMap, ok := itemsAny.(map[string]any)
+		if !ok {
+			return "", fmt.Errorf("fail to parse \"%s.%s.Items\" to `map[string]any`", i.path, i.k)
+		}
+
+		kk := i.k + "Item"
+		typeHash, err := self.resolveType(&resolveInput{
+			path: fmt.Sprintf("%s.%s.Items", i.path, i.k),
+			ref:  ref,
+			k:    kk,
+			v:    itemsMap,
+		})
+		if err != nil {
+			return "", err
+		}
+		typeRef := self.schema.Types.Types[typeHash]
+		if typeRef == nil {
+			return "", fmt.Errorf("fail to find type \"%s.%s.Items.%s\"`", i.path, i.k, kk)
+		}
+
+		if childTypesHashes == nil {
+			childTypesHashes = []string{typeHash}
+		} else {
+			childTypesHashes = append(childTypesHashes, typeHash)
+		}
+	} else if typeType == schemas.TypeType_List {
+		return "", fmt.Errorf("Type \"%s.%s\" must have property \"Items\". All types with list \"Type\" must.", i.path, i.k)
 	}
 
 	var enumHash *string = nil

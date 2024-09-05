@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/henriqueleite42/anvil/cli/formatter"
@@ -17,14 +16,17 @@ func WriteHclFile(path string, schema *schemas.Schema, content string) error {
 	domainKebab := formatter.PascalToKebab(schema.Domain)
 
 	if path == "" {
-		path = myDir + "/" + domainKebab + ".hcl"
+		path = myDir
 	} else {
-		path = myDir + "/" + path + "/" + domainKebab + ".hcl"
+		path = myDir + "/" + path
 	}
 
-	fmt.Println(path)
+	err = os.MkdirAll(path, os.ModePerm)
+	if err != nil {
+		return err
+	}
 
-	err = os.WriteFile(path, []byte(content), 0644)
+	err = os.WriteFile(path+"/"+domainKebab+".hcl", []byte(content), 0644)
 	if err != nil {
 		return err
 	}

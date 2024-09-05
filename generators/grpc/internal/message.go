@@ -59,6 +59,7 @@ func (self *protoFile) resolveMsgPropType(sourceTypeRef string) (string, error) 
 	}
 	if refType.Type == schemas.TypeType_List {
 		if refType.ChildTypesHashes == nil {
+			fmt.Println(*refType)
 			return "", fmt.Errorf("type \"%s\" is missing prop \"ChildTypesHashes\"", sourceTypeRef)
 		}
 		if len(refType.ChildTypesHashes) != 1 {
@@ -70,7 +71,7 @@ func (self *protoFile) resolveMsgPropType(sourceTypeRef string) (string, error) 
 			return "", err
 		}
 
-		typeString = fmt.Sprintf("[]%s", typeName)
+		typeString = fmt.Sprintf("repeated %s", typeName)
 	}
 	if typeString == "" {
 		return "", fmt.Errorf("fail to find type for \"%s\"", refType.Type)

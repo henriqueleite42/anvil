@@ -14,11 +14,11 @@ func (self *protoFile) resolveEnum(e *schemas.Enum) string {
 
 	values := []string{}
 	for k, v := range e.Values {
-		values = append(values, fmt.Sprintf("%s = %d;", v.Value, k))
+		values = append(values, fmt.Sprintf("	%s = %d;", v.Value, k))
 	}
 
 	self.enums[e.Name] = fmt.Sprintf(`enum %s {
-	%s
+%s
 }`, e.Name, strings.Join(values, "\n"))
 
 	return e.Name

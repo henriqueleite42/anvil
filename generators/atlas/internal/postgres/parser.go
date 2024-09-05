@@ -24,13 +24,13 @@ func (self *hclFile) toString() string {
 	for _, v := range self.dbSchemas {
 		schemasArr = append(schemasArr, v)
 	}
-	schemas := strings.Join(schemasArr, "\n\n")
+	schemas := strings.Join(schemasArr, "\n")
 
 	enumsArr := []string{}
 	for _, v := range self.enums {
 		enumsArr = append(enumsArr, v)
 	}
-	enums := strings.Join(enumsArr, "\n\n")
+	enums := strings.Join(enumsArr, "\n")
 
 	return fmt.Sprintf(`%s
 
