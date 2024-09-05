@@ -11,8 +11,8 @@ import (
 
 type contractFile struct {
 	schema  *schemas.Schema
-	enums   map[string]string
-	types   map[string]string
+	enums   map[string]*ItemWithOrder
+	types   map[string]*ItemWithOrder
 	methods []string
 	imports map[string]bool
 }
@@ -20,6 +20,11 @@ type contractFile struct {
 type SortedByOrder struct {
 	Order int
 	Key   string
+}
+
+type ItemWithOrder struct {
+	Value string
+	Order int
 }
 
 func (self *contractFile) toString() string {
@@ -37,15 +42,35 @@ func (self *contractFile) toString() string {
 		imports += "\n" + v
 	}
 
+	sortedEnums := []*SortedByOrder{}
+	for k, v := range self.enums {
+		sortedEnums = append(sortedEnums, &SortedByOrder{
+			Order: v.Order,
+			Key:   k,
+		})
+	}
+	sort.Slice(sortedEnums, func(i, j int) bool {
+		return sortedEnums[i].Order < sortedEnums[j].Order
+	})
 	enumsTypes := []string{}
-	for _, v := range self.enums {
-		enumsTypes = append(enumsTypes, v)
+	for _, v := range sortedEnums {
+		enumsTypes = append(enumsTypes, self.enums[v.Key].Value)
 	}
 	enums := strings.Join(enumsTypes, "\n")
 
+	sortedTypes := []*SortedByOrder{}
+	for k, v := range self.types {
+		sortedTypes = append(sortedTypes, &SortedByOrder{
+			Order: v.Order,
+			Key:   k,
+		})
+	}
+	sort.Slice(sortedTypes, func(i, j int) bool {
+		return sortedTypes[i].Order < sortedTypes[j].Order
+	})
 	typesTypes := []string{}
-	for _, v := range self.types {
-		typesTypes = append(typesTypes, v)
+	for _, v := range sortedTypes {
+		typesTypes = append(typesTypes, self.types[v.Key].Value)
 	}
 	types := strings.Join(typesTypes, "\n")
 
@@ -53,8 +78,7 @@ func (self *contractFile) toString() string {
 
 	return fmt.Sprintf(`package %s
 
-import (
-%s
+import (%s
 )
 
 type ApiInput struct {
@@ -77,8 +101,8 @@ type %sApi interface {
 func Parse(schema *schemas.Schema) (string, error) {
 	contract := &contractFile{
 		schema:  schema,
-		enums:   map[string]string{},
-		types:   map[string]string{},
+		enums:   map[string]*ItemWithOrder{},
+		types:   map[string]*ItemWithOrder{},
 		methods: []string{},
 		imports: map[string]bool{
 			"	\"time\"": true,

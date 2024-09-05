@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/henriqueleite42/anvil/cli/hashing"
 	"github.com/henriqueleite42/anvil/cli/schemas"
@@ -155,8 +156,18 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 			if err != nil {
 				return "", err
 			}
+			typeRef := self.schema.Types.Types[typeHash]
+			if typeRef == nil {
+				return "", fmt.Errorf("fail to find type \"%s.%s.Properties.%s\"`", i.path, i.k, kk)
+			}
 			typesHashes = append(typesHashes, typeHash)
 		}
+		sort.Slice(typesHashes, func(i, j int) bool {
+			typeRefI := self.schema.Types.Types[typesHashes[i]]
+			typeRefJ := self.schema.Types.Types[typesHashes[j]]
+
+			return typeRefI.Name < typeRefJ.Name
+		})
 
 		childTypesHashes = typesHashes
 	} else if typeType == schemas.TypeType_Map {

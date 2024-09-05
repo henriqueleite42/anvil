@@ -15,6 +15,11 @@ type protoFile struct {
 	service  string
 }
 
+type SortedByOrder struct {
+	Order int
+	Key   string
+}
+
 func (self *protoFile) toString() string {
 	sortedImports := []string{}
 	for k := range self.imports {

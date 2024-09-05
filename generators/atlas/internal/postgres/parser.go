@@ -14,6 +14,11 @@ type hclFile struct {
 	tables    string
 }
 
+type SortedByOrder struct {
+	Order int
+	Key   string
+}
+
 func (self *hclFile) toString() string {
 	schemasArr := []string{}
 	for _, v := range self.dbSchemas {

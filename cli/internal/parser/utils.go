@@ -10,6 +10,11 @@ import (
 	"github.com/henriqueleite42/anvil/cli/schemas"
 )
 
+type SortedByOrder struct {
+	Order int
+	Key   string
+}
+
 //	Add the state hash to all the properties
 //
 // We do it separately instead of doing it in the parsers because

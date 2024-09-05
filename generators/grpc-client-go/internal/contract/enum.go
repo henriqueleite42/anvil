@@ -49,11 +49,14 @@ func (self *contractFile) resolveEnum(e *schemas.Enum) (string, error) {
 		typeEnum = "int"
 	}
 
-	self.enums[e.Name] = fmt.Sprintf(`type %s %s
+	self.enums[e.Name] = &ItemWithOrder{
+		Order: len(self.enums),
+		Value: fmt.Sprintf(`type %s %s
 
 const (
 %s
-)`, e.Name, typeEnum, strings.Join(values, "\n"))
+)`, e.Name, typeEnum, strings.Join(values, "\n")),
+	}
 
 	return e.Name, nil
 }

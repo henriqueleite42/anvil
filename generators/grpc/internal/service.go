@@ -6,11 +6,6 @@ import (
 	"strings"
 )
 
-type SortedByOrder struct {
-	Order int
-	Key   string
-}
-
 const EMPTY_TYPE = "google.protobuf.Empty"
 
 func (self *protoFile) resolveService() error {

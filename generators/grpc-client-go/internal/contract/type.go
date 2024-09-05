@@ -127,9 +127,12 @@ func (self *contractFile) resolveTypeMap(sourceTypeRef string, parentTypeName st
 		return "", err
 	}
 
-	self.types[parentTypeName+refType.Name] = fmt.Sprintf(`type %s struct {
+	self.types[parentTypeName+refType.Name] = &ItemWithOrder{
+		Order: len(self.types),
+		Value: fmt.Sprintf(`type %s struct {
 %s
-}`, refType.Name, strings.Join(props, "\n"))
+}`, refType.Name, strings.Join(props, "\n")),
+	}
 
 	return "*" + refType.Name, nil
 }

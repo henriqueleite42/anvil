@@ -2,6 +2,7 @@ package contract
 
 import (
 	"fmt"
+	"sort"
 )
 
 func (self *contractFile) parseApi() error {
@@ -24,7 +25,21 @@ func (self *contractFile) parseApi() error {
 		return fmt.Errorf("no usecases methods to deliver")
 	}
 
+	sortedRpcs := []*SortedByOrder{}
 	for k, v := range self.schema.Delivery.Grpc.Rpcs {
+		sortedRpcs = append(sortedRpcs, &SortedByOrder{
+			Order: v.Order,
+			Key:   k,
+		})
+	}
+	sort.Slice(sortedRpcs, func(i, j int) bool {
+		return sortedRpcs[i].Order < sortedRpcs[j].Order
+	})
+
+	for _, sortedRpc := range sortedRpcs {
+		k := sortedRpc.Key
+		v := self.schema.Delivery.Grpc.Rpcs[k]
+
 		if v.UsecaseMethodHash == "" {
 			return fmt.Errorf("missing \"UsecaseMethodHash\" for RPC \"%s\"", k)
 		}

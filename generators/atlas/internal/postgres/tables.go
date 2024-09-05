@@ -8,11 +8,6 @@ import (
 	"github.com/henriqueleite42/anvil/cli/schemas"
 )
 
-type SortedByOrder struct {
-	Order int
-	Key   string
-}
-
 func (self *hclFile) resolveTables(schema *schemas.Schema) error {
 	if schema.Domain == "" {
 		return fmt.Errorf("no domain specified")
