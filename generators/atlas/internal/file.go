@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/henriqueleite42/anvil/cli/formatter"
 	"github.com/henriqueleite42/anvil/cli/schemas"
 )
 
@@ -13,10 +14,12 @@ func WriteHclFile(path string, schema *schemas.Schema, content string) error {
 		return err
 	}
 
+	domainKebab := formatter.PascalToKebab(schema.Domain)
+
 	if path == "" {
-		path = myDir + "/" + schema.Domain + ".hcl"
+		path = myDir + "/" + domainKebab + ".hcl"
 	} else {
-		path = myDir + "/" + path + "/" + schema.Domain + ".hcl"
+		path = myDir + "/" + path + "/" + domainKebab + ".hcl"
 	}
 
 	fmt.Println(path)

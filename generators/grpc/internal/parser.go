@@ -2,7 +2,7 @@ package internal
 
 import (
 	"fmt"
-	"strings"
+	"sort"
 
 	"github.com/henriqueleite42/anvil/cli/schemas"
 )
@@ -16,23 +16,41 @@ type protoFile struct {
 }
 
 func (self *protoFile) toString() string {
-	importsPaths := []string{}
+	sortedImports := []string{}
 	for k := range self.imports {
-		importsPaths = append(importsPaths, k)
+		sortedImports = append(sortedImports, k)
 	}
-	imports := strings.Join(importsPaths, "\n")
+	sort.Slice(sortedImports, func(i, j int) bool {
+		return sortedImports[i] < sortedImports[j]
+	})
+	var imports string
+	for _, v := range sortedImports {
+		imports += v + "\n"
+	}
 
-	enumsTypes := []string{}
+	sortedEnums := []string{}
 	for _, v := range self.enums {
-		enumsTypes = append(enumsTypes, v)
+		sortedEnums = append(sortedEnums, v)
 	}
-	enums := strings.Join(enumsTypes, "\n\n")
+	sort.Slice(sortedEnums, func(i, j int) bool {
+		return sortedEnums[i] < sortedEnums[j]
+	})
+	var enums string
+	for _, v := range sortedEnums {
+		enums += v + "\n"
+	}
 
-	messagesTypes := []string{}
+	sortedMessages := []string{}
 	for _, v := range self.messages {
-		messagesTypes = append(messagesTypes, v)
+		sortedMessages = append(sortedMessages, v)
 	}
-	messages := strings.Join(messagesTypes, "\n\n")
+	sort.Slice(sortedMessages, func(i, j int) bool {
+		return sortedMessages[i] < sortedMessages[j]
+	})
+	var messages string
+	for _, v := range sortedMessages {
+		messages += v + "\n"
+	}
 
 	return fmt.Sprintf(`syntax = "proto3";
 
@@ -47,13 +65,15 @@ func (self *protoFile) toString() string {
 
 func Parse(schema *schemas.Schema) (string, error) {
 	proto := &protoFile{
-		schema:   schema,
-		imports:  map[string]bool{},
+		schema: schema,
+		imports: map[string]bool{
+			"	\"time\"": true,
+		},
 		enums:    map[string]string{},
 		messages: map[string]string{},
 	}
 
-	err := proto.resolveService(schema)
+	err := proto.resolveService()
 	if err != nil {
 		return "", err
 	}

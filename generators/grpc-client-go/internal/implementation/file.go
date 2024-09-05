@@ -1,4 +1,4 @@
-package internal
+package implementation
 
 import (
 	"os"
@@ -7,7 +7,7 @@ import (
 	"github.com/henriqueleite42/anvil/cli/schemas"
 )
 
-func WriteProtoFile(path string, schema *schemas.Schema, content string) error {
+func WriteImplementationFile(path string, schema *schemas.Schema, content string) error {
 	myDir, err := os.Getwd()
 	if err != nil {
 		return err
@@ -15,10 +15,12 @@ func WriteProtoFile(path string, schema *schemas.Schema, content string) error {
 
 	domainKebab := formatter.PascalToKebab(schema.Domain)
 
+	fileWithDir := "/" + domainKebab + "/implementation.go"
+
 	if path == "" {
-		path = myDir + "/" + domainKebab + ".hcl"
+		path = myDir + fileWithDir
 	} else {
-		path = myDir + "/" + path + "/" + domainKebab + ".hcl"
+		path = myDir + "/" + path + fileWithDir
 	}
 
 	err = os.WriteFile(path, []byte(content), 0644)

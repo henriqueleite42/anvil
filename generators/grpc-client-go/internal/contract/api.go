@@ -1,19 +1,10 @@
-package internal
+package contract
 
 import (
 	"fmt"
-	"sort"
-	"strings"
 )
 
-type SortedByOrder struct {
-	Order int
-	Key   string
-}
-
-const EMPTY_TYPE = "google.protobuf.Empty"
-
-func (self *protoFile) resolveService() error {
+func (self *contractFile) parseApi() error {
 	if self.schema.Domain == "" {
 		return fmt.Errorf("no domain specified")
 	}
@@ -33,22 +24,7 @@ func (self *protoFile) resolveService() error {
 		return fmt.Errorf("no usecases methods to deliver")
 	}
 
-	sortedRpcs := []*SortedByOrder{}
 	for k, v := range self.schema.Delivery.Grpc.Rpcs {
-		sortedRpcs = append(sortedRpcs, &SortedByOrder{
-			Order: v.Order,
-			Key:   k,
-		})
-	}
-	sort.Slice(sortedRpcs, func(i, j int) bool {
-		return sortedRpcs[i].Order < sortedRpcs[j].Order
-	})
-
-	methods := []string{}
-	for _, sortedRpc := range sortedRpcs {
-		k := sortedRpc.Key
-		v := self.schema.Delivery.Grpc.Rpcs[k]
-
 		if v.UsecaseMethodHash == "" {
 			return fmt.Errorf("missing \"UsecaseMethodHash\" for RPC \"%s\"", k)
 		}
@@ -58,36 +34,26 @@ func (self *protoFile) resolveService() error {
 			return fmt.Errorf("usecase method \"%s\" not found", v.UsecaseMethodHash)
 		}
 
-		input := EMPTY_TYPE
+		input := ""
 		if usecase.Input != nil && usecase.Input.TypeHash != "" {
-			uscType, err := self.resolveMsgPropType(usecase.Input.TypeHash)
+			uscType, err := self.resolveType(usecase.Input.TypeHash, "")
 			if err != nil {
 				return err
 			}
-			input = uscType
+			input = "i " + uscType
 		}
 
-		output := EMPTY_TYPE
+		output := " error"
 		if usecase.Output != nil && usecase.Output.TypeHash != "" {
-			uscType, err := self.resolveMsgPropType(usecase.Output.TypeHash)
+			uscType, err := self.resolveType(usecase.Output.TypeHash, "")
 			if err != nil {
 				return err
 			}
-			output = uscType
+			output = fmt.Sprintf(" (%s, error)", uscType)
 		}
 
-		if input == EMPTY_TYPE || output == EMPTY_TYPE {
-			self.imports["import \"google/protobuf/empty.proto\";"] = true
-		}
-
-		methods = append(methods, fmt.Sprintf("	%s(%s) returns (%s) {}", usecase.Name, input, output))
+		self.methods = append(self.methods, fmt.Sprintf("	%s(%s)%s", usecase.Name, input, output))
 	}
-
-	serviceString := fmt.Sprintf(`service %s {
-%s
-}`, self.schema.Domain, strings.Join(methods, "\n"))
-
-	self.service = serviceString
 
 	return nil
 }

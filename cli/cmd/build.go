@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
 
 	"github.com/henriqueleite42/anvil/cli/internal/files"
@@ -48,8 +49,10 @@ func addBuildCommand(rootCmd *cobra.Command) {
 			}
 
 			for _, v := range generators {
-				stdout, err := exec.Command(v, argsToGenerator...).Output()
-				fmt.Println(string(stdout))
+				cmd := exec.Command(v, argsToGenerator...)
+				cmd.Stdout = os.Stdout
+				cmd.Stderr = os.Stderr
+				err := cmd.Run()
 				if err != nil {
 					fmt.Println(err)
 				}
