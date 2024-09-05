@@ -15,7 +15,7 @@ func GetAnvpFilePath(anvFilePath string, createFolders bool) (string, error) {
 		return "", err
 	}
 
-	path := myDir + "/anvil"
+	path := myDir + "/anvil/.processed"
 
 	if createFolders {
 		err = os.MkdirAll(path, os.ModePerm)

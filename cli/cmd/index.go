@@ -17,7 +17,7 @@ var (
 
 	rootCmd = &cobra.Command{
 		Use:   "anvil",
-		Short: "God of micro-services generation",
+		Short: "Generate code from a common schema",
 		Long:  `anvil allows you to generate micro-services from schema definitions, helping you to standardize everything, avoiding human error, decreasing the learning curve and saving lots of time and money.`,
 	}
 )

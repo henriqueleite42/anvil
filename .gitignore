@@ -33,6 +33,7 @@ go.work
 *.anv
 *.anvp
 !/examples/**/*.anv
+/cli/anvil
 /anvil
 *.hcl
 *.proto
