@@ -30,6 +30,10 @@ func addParseCommand(rootCmd *cobra.Command) {
 		},
 	}
 
+	parseCmd.PersistentFlags().StringVar(&schemaFile, "schema", "", "config file")
+	parseCmd.MarkPersistentFlagRequired("schema")
+	viper.BindPFlag("schema", parseCmd.PersistentFlags().Lookup("schema"))
+
 	parseCmd.PersistentFlags().BoolVar(&silent, "silent", false, "if it should have an effect or only run it silently")
 	viper.BindPFlag("silent", rootCmd.PersistentFlags().Lookup("silent"))
 

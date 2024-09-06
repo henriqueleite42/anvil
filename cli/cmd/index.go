@@ -12,7 +12,7 @@ var (
 	// Used for flags.
 	schemaFile       string
 	silent           bool
-	generators       []string
+	generator        string
 	outputFolderPath string
 
 	rootCmd = &cobra.Command{
@@ -32,13 +32,10 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVar(&schemaFile, "schema", "", "config file")
-	rootCmd.MarkPersistentFlagRequired("schema")
-	viper.BindPFlag("schema", rootCmd.PersistentFlags().Lookup("schema"))
-
 	addVersionCommand(rootCmd)
 	addParseCommand(rootCmd)
 	addBuildCommand(rootCmd)
+	addInstallCommand(rootCmd)
 }
 
 func initConfig() {
