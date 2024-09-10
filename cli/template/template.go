@@ -23,7 +23,7 @@ func (self *templateManager) AddTemplate(name string, tmplData string) error {
 		return fmt.Errorf("template \"%s\" already registered", name)
 	}
 
-	templ, err := template.New(name).ParseGlob(tmplData)
+	templ, err := template.New(name).Parse(tmplData)
 	if err != nil {
 		return err
 	}
