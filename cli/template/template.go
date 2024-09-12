@@ -5,10 +5,6 @@ import (
 	"text/template"
 )
 
-type templateManager struct {
-	templates map[string]*template.Template
-}
-
 type localTmpl struct {
 	content string
 }
@@ -16,6 +12,10 @@ type localTmpl struct {
 func (self *localTmpl) Write(p []byte) (int, error) {
 	self.content += string(p)
 	return len(p), nil
+}
+
+type templateManager struct {
+	templates map[string]*template.Template
 }
 
 func (self *templateManager) AddTemplate(name string, tmplData string) error {

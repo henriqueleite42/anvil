@@ -7,7 +7,7 @@ import (
 	"github.com/henriqueleite42/anvil/cli/schemas"
 )
 
-func (self *protoFile) resolveMsgPropType(sourceTypeRef string) (string, error) {
+func (self *protoFile) resolveMsgPropType(parentType *schemas.Type, sourceTypeRef string) (string, error) {
 	refType := self.schema.Types.Types[sourceTypeRef]
 	if refType == nil {
 		return "", fmt.Errorf("type \"%s\" notfound", sourceTypeRef)
@@ -58,15 +58,18 @@ func (self *protoFile) resolveMsgPropType(sourceTypeRef string) (string, error) 
 		typeString = typeName
 	}
 	if refType.Type == schemas.TypeType_List {
-		if refType.ChildTypesHashes == nil {
-			fmt.Println(*refType)
-			return "", fmt.Errorf("type \"%s\" is missing prop \"ChildTypesHashes\"", sourceTypeRef)
-		}
-		if len(refType.ChildTypesHashes) != 1 {
-			return "", fmt.Errorf("type \"%s.ChildTypesHashes\" has more than 1 item in the list. It must have exactly one item.", sourceTypeRef)
+		if parentType != nil && parentType.Type == schemas.TypeType_List {
+			return "", fmt.Errorf("fail to parse \"%s\": grpc doesn't support lists of lists", refType.Name)
 		}
 
-		typeName, err := self.resolveMsgPropType(refType.ChildTypesHashes[0])
+		if refType.ChildTypesHashes == nil {
+			return "", fmt.Errorf("type \"%s\" is missing prop \"ChildTypesHashes\"", refType.Name)
+		}
+		if len(refType.ChildTypesHashes) != 1 {
+			return "", fmt.Errorf("type \"%s.ChildTypesHashes\" has more than 1 item in the list. It must have exactly one item.", refType.Name)
+		}
+
+		typeName, err := self.resolveMsgPropType(refType, refType.ChildTypesHashes[0])
 		if err != nil {
 			return "", err
 		}
@@ -97,7 +100,7 @@ func (self *protoFile) resolveMsg(sourceTypeRef string) (string, error) {
 	props := []string{}
 
 	for k, v := range refType.ChildTypesHashes {
-		propType, err := self.resolveMsgPropType(v)
+		propType, err := self.resolveMsgPropType(nil, v)
 		if err != nil {
 			return "", err
 		}
@@ -105,7 +108,7 @@ func (self *protoFile) resolveMsg(sourceTypeRef string) (string, error) {
 		typeType := self.schema.Types.Types[v]
 
 		var optional string
-		if typeType.Optional {
+		if typeType.Optional && typeType.Type != schemas.TypeType_List {
 			optional = "optional "
 		}
 
@@ -116,7 +119,7 @@ func (self *protoFile) resolveMsg(sourceTypeRef string) (string, error) {
 				optional,
 				propType,
 				typeType.Name,
-				k,
+				k+1,
 			),
 		)
 	}

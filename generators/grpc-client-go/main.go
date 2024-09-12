@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/henriqueleite42/anvil/cli/schemas"
-	"github.com/henriqueleite42/anvil/generators/grpc-client-go/internal/contract"
+	"github.com/henriqueleite42/anvil/generators/grpc-client-go/internal"
 )
 
 func main() {
@@ -55,15 +55,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	result, err := contract.Parse(schema)
+	err = internal.Parse(schema, silent, outputFolderPath)
 	if err != nil {
 		log.Fatal(err)
-	}
-
-	if !silent {
-		err := contract.WriteContractFile(outputFolderPath, schema, result)
-		if err != nil {
-			log.Fatal(err)
-		}
 	}
 }

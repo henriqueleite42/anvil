@@ -1,0 +1,282 @@
+# yaml-language-server: $schema=../../schemas/v1.0.0.json
+
+Domain: TestAll
+
+Metadata:
+  Description: |
+    Tests the most amount of features as possible
+  Servers:
+    Prod:
+      Url: https://example.com
+    Stg:
+      Url: https://staging.example.com
+
+Enums:
+  FooBar:
+    Type: String
+    Values:
+      Foo:
+        Value: FOO
+      Bar:
+        Value: BAR
+
+Usecase:
+  Methods:
+    TestAll:
+      Input:
+        Type: Map
+        Properties:
+          Strings:
+            Type: String
+          Int:
+            Type: Int
+          Float:
+            Type: Float
+          Bool:
+            Type: Bool
+          Timestamp:
+            Type: Timestamp
+          Enum:
+            Type: Enum
+            Values:
+              $ref: Enums.FooBar
+          Maps:
+            Type: Map
+            Properties:
+              Foo:
+                Type: String
+          # MapMap:
+          #   Type: Map
+          #   Properties:
+          #     Foo:
+          #       Type: Map
+          #       Properties:
+          #         Foo:
+          #           Type: String
+          # MapList:
+          #   Type: Map
+          #   Properties:
+          #     Foo:
+          #       Type: List
+          #       Items:
+          #         Type: String
+          List:
+            Type: List
+            Items:
+              Type: String
+          ListOfTimestamp:
+            Type: List
+            Items:
+              Type: Timestamp
+          ListOfEnum:
+            Type: List
+            Items:
+              Type: Enum
+              Values:
+                $ref: Enums.FooBar
+          # ListOfList:
+          #   Type: List
+          #   Items:
+          #     Type: List
+          #     Items:
+          #       Type: String
+          # ListOfMap:
+          #   Type: List
+          #   Items:
+          #     Type: Map
+          #     Properties:
+          #       Foo:
+          #         Type: String
+          StringsOptional:
+            Type: String
+            Optional: true
+          IntOptional:
+            Type: Int
+            Optional: true
+          FloatOptional:
+            Type: Float
+            Optional: true
+          BoolOptional:
+            Type: Bool
+            Optional: true
+          TimestampOptional:
+            Type: Timestamp
+            Optional: true
+          EnumOptional:
+            Type: Enum
+            Values:
+              $ref: Enums.FooBar
+            Optional: true
+          MapOptional:
+            Type: Map
+            Properties:
+              Foo:
+                Type: String
+            Optional: true
+          # MapMapOptional:
+          #   Type: Map
+          #   Properties:
+          #     Foo:
+          #       Type: Map
+          #       Properties:
+          #         Foo:
+          #           Type: String
+          #   Optional: true
+          # MapMapOptionalOptional:
+          #   Type: Map
+          #   Properties:
+          #     Foo:
+          #       Type: Map
+          #       Properties:
+          #         Foo:
+          #           Type: String
+          #       Optional: true
+          #   Optional: true
+          # ListOptional:
+          #   Type: List
+          #   Items:
+          #     Type: String
+          #   Optional: true
+          # ListWithOptionalProp:
+          #   Type: List
+          #   Items:
+          #     Type: String
+          #     Optional: true
+          # ListOptionalWithOptionalProp:
+          #   Type: List
+          #   Items:
+          #     Type: String
+          #     Optional: true
+          #   Optional: true
+      Output:
+        Type: Map
+        Properties:
+          Strings:
+            Type: String
+          Int:
+            Type: Int
+          Float:
+            Type: Float
+          Bool:
+            Type: Bool
+          Timestamp:
+            Type: Timestamp
+          Enum:
+            Type: Enum
+            Values:
+              $ref: Enums.FooBar
+          Maps:
+            Type: Map
+            Properties:
+              Foo:
+                Type: String
+          # MapMap:
+          #   Type: Map
+          #   Properties:
+          #     Foo:
+          #       Type: Map
+          #       Properties:
+          #         Foo:
+          #           Type: String
+          # MapList:
+          #   Type: Map
+          #   Properties:
+          #     Foo:
+          #       Type: List
+          #       Items:
+          #         Type: String
+          List:
+            Type: List
+            Items:
+              Type: String
+          ListOfTimestamp:
+            Type: List
+            Items:
+              Type: Timestamp
+          ListOfEnum:
+            Type: List
+            Items:
+              Type: Enum
+              Values:
+                $ref: Enums.FooBar
+          # ListOfList:
+          #   Type: List
+          #   Items:
+          #     Type: List
+          #     Items:
+          #       Type: String
+          # ListOfMap:
+          #   Type: List
+          #   Items:
+          #     Type: Map
+          #     Properties:
+          #       Foo:
+          #         Type: String
+          StringsOptional:
+            Type: String
+            Optional: true
+          IntOptional:
+            Type: Int
+            Optional: true
+          FloatOptional:
+            Type: Float
+            Optional: true
+          BoolOptional:
+            Type: Bool
+            Optional: true
+          TimestampOptional:
+            Type: Timestamp
+            Optional: true
+          EnumOptional:
+            Type: Enum
+            Values:
+              $ref: Enums.FooBar
+            Optional: true
+          MapOptional:
+            Type: Map
+            Properties:
+              Foo:
+                Type: String
+            Optional: true
+          # MapMapOptional:
+          #   Type: Map
+          #   Properties:
+          #     Foo:
+          #       Type: Map
+          #       Properties:
+          #         Foo:
+          #           Type: String
+          #   Optional: true
+          # MapMapOptionalOptional:
+          #   Type: Map
+          #   Properties:
+          #     Foo:
+          #       Type: Map
+          #       Properties:
+          #         Foo:
+          #           Type: String
+          #       Optional: true
+          #   Optional: true
+          # ListOptional:
+          #   Type: List
+          #   Items:
+          #     Type: String
+          #   Optional: true
+          # ListWithOptionalProp:
+          #   Type: List
+          #   Items:
+          #     Type: String
+          #     Optional: true
+          # ListOptionalWithOptionalProp:
+          #   Type: List
+          #   Items:
+          #     Type: String
+          #     Optional: true
+          #   Optional: true
+    FooBar: {}
+
+Delivery:
+  Grpc:
+    Rpcs:
+      - UsecaseMethod: TestAll
+      - UsecaseMethod: FooBar

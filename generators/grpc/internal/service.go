@@ -55,7 +55,7 @@ func (self *protoFile) resolveService() error {
 
 		input := EMPTY_TYPE
 		if usecase.Input != nil && usecase.Input.TypeHash != "" {
-			uscType, err := self.resolveMsgPropType(usecase.Input.TypeHash)
+			uscType, err := self.resolveMsgPropType(nil, usecase.Input.TypeHash)
 			if err != nil {
 				return err
 			}
@@ -64,7 +64,7 @@ func (self *protoFile) resolveService() error {
 
 		output := EMPTY_TYPE
 		if usecase.Output != nil && usecase.Output.TypeHash != "" {
-			uscType, err := self.resolveMsgPropType(usecase.Output.TypeHash)
+			uscType, err := self.resolveMsgPropType(nil, usecase.Output.TypeHash)
 			if err != nil {
 				return err
 			}
@@ -75,7 +75,7 @@ func (self *protoFile) resolveService() error {
 			self.imports["import \"google/protobuf/empty.proto\";"] = true
 		}
 
-		methods = append(methods, fmt.Sprintf("	%s(%s) returns (%s) {}", usecase.Name, input, output))
+		methods = append(methods, fmt.Sprintf("	rpc %s(%s) returns (%s) {}", usecase.Name, input, output))
 	}
 
 	serviceString := fmt.Sprintf(`service %s {
