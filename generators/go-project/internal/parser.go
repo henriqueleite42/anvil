@@ -13,9 +13,18 @@ import (
 )
 
 var templatesNamesValues = map[string]string{
-	"models":     templates.ModelsTempl,
-	"repository": templates.RepositoryTempl,
-	"usecase":    templates.UsecaseTempl,
+	"models":            templates.ModelsTempl,
+	"repository":        templates.RepositoryTempl,
+	"repository-struct": templates.RepositoryStructTempl,
+	"repository-method": templates.RepositoryMethodTempl,
+	"usecase":           templates.UsecaseTempl,
+	"usecase-struct":    templates.UsecaseStructTempl,
+	"usecase-method":    templates.UsecaseMethodTempl,
+}
+
+type File struct {
+	Name    string
+	Content string
 }
 
 func getImports(imports map[string]bool) []string {
@@ -49,7 +58,7 @@ func getImports(imports map[string]bool) []string {
 	return importsResolved
 }
 
-func Parse(schema *schemas.Schema) (string, string, string, error) {
+func Parse(schema *schemas.Schema) ([]*File, error) {
 	lenEnums := 0
 	if schema.Enums != nil && schema.Enums.Enums != nil {
 		lenEnums = len(schema.Enums.Enums)
@@ -89,12 +98,12 @@ func Parse(schema *schemas.Schema) (string, string, string, error) {
 		for _, v := range schema.Entities.Entities {
 			t, ok := schema.Types.Types[v.TypeHash]
 			if !ok {
-				return "", "", "", fmt.Errorf("type \"%s\" not found", v.Name)
+				return nil, fmt.Errorf("type \"%s\" not found", v.Name)
 			}
 
 			_, err := typeParser.ResolveMap(parser.Kind_Entity, t, "")
 			if err != nil {
-				return "", "", "", err
+				return nil, err
 			}
 		}
 	}
@@ -112,7 +121,7 @@ func Parse(schema *schemas.Schema) (string, string, string, error) {
 
 			err := typeParser.ResolveMethod(parser.Kind_Repository, v.Name, inputTypeHash, outputTypeHash)
 			if err != nil {
-				return "", "", "", err
+				return nil, err
 			}
 		}
 	}
@@ -130,7 +139,7 @@ func Parse(schema *schemas.Schema) (string, string, string, error) {
 
 			err := typeParser.ResolveMethod(parser.Kind_Usecase, v.Name, inputTypeHash, outputTypeHash)
 			if err != nil {
-				return "", "", "", err
+				return nil, err
 			}
 		}
 	}
@@ -173,34 +182,97 @@ func Parse(schema *schemas.Schema) (string, string, string, error) {
 	for k, v := range templatesNamesValues {
 		err := templateManager.AddTemplate(k, v)
 		if err != nil {
-			return "", "", "", err
+			return nil, err
 		}
 	}
 
-	var models string
+	files := []*File{}
+	domainKebab := formatter.PascalToKebab(schema.Domain)
+
 	if len(templInput.Enums) > 0 || len(templInput.Entities) > 0 {
-		modelsLocal, err := templateManager.Parse("models", templInput)
+		models, err := templateManager.Parse("models", templInput)
 		if err != nil {
-			return "", "", "", err
+			return nil, err
 		}
-		models = modelsLocal
+		files = append(files, &File{
+			Name:    "models/" + domainKebab + ".go",
+			Content: models,
+		})
 	}
-	var repository string
 	if len(templInput.MethodsRepository) > 0 {
-		repositoryLocal, err := templateManager.Parse("repository", templInput)
+		repository, err := templateManager.Parse("repository", templInput)
 		if err != nil {
-			return "", "", "", err
+			return nil, err
 		}
-		repository = repositoryLocal
+		files = append(files, &File{
+			Name:    fmt.Sprintf("repository/%s/%s.go", domainKebab, domainKebab),
+			Content: repository,
+		})
+
+		repositoryStruct, err := templateManager.Parse("repository-struct", templInput)
+		if err != nil {
+			return nil, err
+		}
+		files = append(files, &File{
+			Name:    fmt.Sprintf("repository/%s/implementation.go", domainKebab),
+			Content: repositoryStruct,
+		})
+
+		for _, v := range templInput.MethodsRepository {
+			repositoryMethod, err := templateManager.Parse("repository-method", &templates.RepositoryMethodTemplInput{
+				Domain:         templInput.Domain,
+				DomainSnake:    templInput.DomainSnake,
+				MethodName:     v.MethodName,
+				InputTypeName:  v.InputTypeName,
+				OutputTypeName: v.OutputTypeName,
+			})
+			if err != nil {
+				return nil, err
+			}
+			methodNameKebab := formatter.PascalToKebab(v.MethodName)
+			files = append(files, &File{
+				Name:    fmt.Sprintf("repository/%s/%s.go", domainKebab, methodNameKebab),
+				Content: repositoryMethod,
+			})
+		}
 	}
-	var usecase string
 	if len(templInput.MethodsUsecase) > 0 {
-		usecaseLocal, err := templateManager.Parse("usecase", templInput)
+		usecase, err := templateManager.Parse("usecase", templInput)
 		if err != nil {
-			return "", "", "", err
+			return nil, err
 		}
-		usecase = usecaseLocal
+		files = append(files, &File{
+			Name:    fmt.Sprintf("usecase/%s/%s.go", domainKebab, domainKebab),
+			Content: usecase,
+		})
+
+		usecaseStruct, err := templateManager.Parse("usecase-struct", templInput)
+		if err != nil {
+			return nil, err
+		}
+		files = append(files, &File{
+			Name:    fmt.Sprintf("usecase/%s/implementation.go", domainKebab),
+			Content: usecaseStruct,
+		})
+
+		for _, v := range templInput.MethodsUsecase {
+			usecaseMethod, err := templateManager.Parse("usecase-method", &templates.UsecaseMethodTemplInput{
+				Domain:         templInput.Domain,
+				DomainSnake:    templInput.DomainSnake,
+				MethodName:     v.MethodName,
+				InputTypeName:  v.InputTypeName,
+				OutputTypeName: v.OutputTypeName,
+			})
+			if err != nil {
+				return nil, err
+			}
+			methodNameKebab := formatter.PascalToKebab(v.MethodName)
+			files = append(files, &File{
+				Name:    fmt.Sprintf("usecase/%s/%s.go", domainKebab, methodNameKebab),
+				Content: usecaseMethod,
+			})
+		}
 	}
 
-	return models, repository, usecase, nil
+	return files, nil
 }

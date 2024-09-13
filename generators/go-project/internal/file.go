@@ -3,24 +3,24 @@ package internal
 import (
 	"fmt"
 	"os"
-
-	"github.com/henriqueleite42/anvil/cli/formatter"
-	"github.com/henriqueleite42/anvil/cli/schemas"
+	"strings"
 )
 
-func WriteFile(path string, kind string, schema *schemas.Schema, content string) error {
+func WriteFile(path string, fileNameWithPath string, content string) error {
 	myDir, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 
-	domainKebab := formatter.PascalToKebab(schema.Domain)
-	domainSnake := formatter.PascalToSnake(schema.Domain)
+	partsToFile := strings.Split(fileNameWithPath, "/")
+	fileName := partsToFile[len(partsToFile)-1]
+	partsToFile = partsToFile[:len(partsToFile)-1]
+	pathToFile := strings.Join(partsToFile, "/")
 
 	if path == "" {
-		path = fmt.Sprintf("%s/%s/%s", myDir, kind, domainSnake)
+		path = fmt.Sprintf("%s/%s", myDir, pathToFile)
 	} else {
-		path = fmt.Sprintf("%s/%s/%s/%s", myDir, path, kind, domainSnake)
+		path = fmt.Sprintf("%s/%s/%s", myDir, path, pathToFile)
 	}
 
 	err = os.MkdirAll(path, os.ModePerm)
@@ -28,7 +28,7 @@ func WriteFile(path string, kind string, schema *schemas.Schema, content string)
 		return err
 	}
 
-	err = os.WriteFile(path+"/"+domainKebab+".go", []byte(content), 0644)
+	err = os.WriteFile(path+"/"+fileName, []byte(content), 0644)
 	if err != nil {
 		return err
 	}

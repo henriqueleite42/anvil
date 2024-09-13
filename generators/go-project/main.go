@@ -55,7 +55,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	models, repository, usecase, err := internal.Parse(schema)
+	files, err := internal.Parse(schema)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -64,22 +64,8 @@ func main() {
 		return
 	}
 
-	if models != "" {
-		err = internal.WriteFile(outputFolderPath, "models", schema, models)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	if repository != "" {
-		err = internal.WriteFile(outputFolderPath, "repository", schema, repository)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	if usecase != "" {
-		err = internal.WriteFile(outputFolderPath, "usecase", schema, usecase)
+	for _, v := range files {
+		err = internal.WriteFile(outputFolderPath, v.Name, v.Content)
 		if err != nil {
 			log.Fatal(err)
 		}
