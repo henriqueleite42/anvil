@@ -30,7 +30,7 @@ func (self *Parser) resolveEnum(e *schemas.Enum) (*templates.TemplEnum, error) {
 		}
 	}
 
-	values := make([]*templates.TemplEnumValue, 0, len(e.Values))
+	values := make([]*templates.TemplEnumValue, len(e.Values), len(e.Values))
 	for k, v := range e.Values {
 		values[k] = &templates.TemplEnumValue{
 			Idx:     k,

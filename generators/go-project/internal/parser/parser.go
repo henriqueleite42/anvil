@@ -10,15 +10,17 @@ type Parser struct {
 	ModelsPkgName string
 	Schema        *schemas.Schema
 
-	ImportsModels     map[string]bool
-	ImportsRepository map[string]bool
-	ImportsUsecase    map[string]bool
-	Enums             map[string]*templates.TemplEnum
-	Entities          []*templates.TemplType
-	TypesRepository   []*templates.TemplType
-	TypesUsecase      []*templates.TemplType
-	MethodsRepository []*templates.TemplMethod
-	MethodsUsecase    []*templates.TemplMethod
+	ImportsModels                     map[string]bool
+	ImportsRepository                 map[string]bool
+	ImportsUsecase                    map[string]bool
+	Enums                             map[string]*templates.TemplEnum
+	Entities                          []*templates.TemplType
+	TypesRepository                   []*templates.TemplType
+	TypesRepositoryToAvoidDuplication map[string]*templates.TemplType
+	TypesUsecase                      []*templates.TemplType
+	TypesUsecaseToAvoidDuplication    map[string]*templates.TemplType
+	MethodsRepository                 []*templates.TemplMethod
+	MethodsUsecase                    []*templates.TemplMethod
 }
 
 type Kind string

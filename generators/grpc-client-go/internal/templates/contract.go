@@ -22,6 +22,7 @@ type {{ .Domain }}ApiInput struct {
 */}}
 {{ range $enum := .Enums }}
 type {{ $enum.Name }} {{ $enum.Type }}
+
 const (
 {{- range $enumVal := $enum.Values }}
 	{{ $enum.Name }}_{{ $enumVal.Name }}{{ $enumVal.Spacing }} {{ $enum.Name }} = {{ if eq $enum.Type "string" }}"{{ $enumVal.Value }}"{{ else }}{{ $enumVal.Value }}{{ end }}

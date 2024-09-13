@@ -20,21 +20,20 @@ import (
 {{ . }}
 {{- end }}
 )
-
 {{ range $enum := .Enums }}
 type {{ $enum.Name }} {{ $enum.Type }}
+
 const (
 {{- range $enumVal := $enum.Values }}
 	{{ $enum.Name }}_{{ $enumVal.Name }}{{ $enumVal.Spacing }} {{ $enum.Name }} = {{ if eq $enum.Type "string" }}"{{ $enumVal.Value }}"{{ else }}{{ $enumVal.Value }}{{ end }}
 {{- end }}
 )
-{{- end }}
-
-{{ range $entity := .Entities -}}
+{{ end -}}
+{{- range $entity := .Entities }}
 type {{ $entity.Name }} struct {
 {{- range $prop := $entity.Props }}
 	{{ $prop.Name }}{{ $prop.Spacing1 }} {{ $prop.Type }}{{ $prop.Spacing2 }} {{ $prop.Tags }}
 {{- end }}
 }
-{{- end }}
+{{ end -}}
 `

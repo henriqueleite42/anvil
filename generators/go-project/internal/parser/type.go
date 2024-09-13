@@ -45,6 +45,11 @@ func (self *Parser) resolveMapProp(kind Kind, t *schemas.Type, prefixForChildren
 			return nil, fmt.Errorf("enum \"%s\" of type \"%s\" not found", *t.EnumHash, t.Name)
 		}
 
+		e, err := self.resolveEnum(schemaEnum)
+		if err != nil {
+			return nil, err
+		}
+
 		if kind == Kind_Repository {
 			self.ImportsRepository[self.ModelsPath] = true
 		} else if kind == Kind_Usecase {
@@ -52,10 +57,10 @@ func (self *Parser) resolveMapProp(kind Kind, t *schemas.Type, prefixForChildren
 		}
 
 		if kind == Kind_Repository || kind == Kind_Usecase {
-			result.Type = fmt.Sprintf("%s.%s", self.ModelsPkgName, schemaEnum.Name)
+			result.Type = fmt.Sprintf("%s.%s", self.ModelsPkgName, e.Name)
 		} else {
 			// In models file
-			result.Type = schemaEnum.Name
+			result.Type = e.Name
 		}
 	}
 	if t.Type == schemas.TypeType_List {
@@ -104,14 +109,27 @@ func (self *Parser) resolveMapProp(kind Kind, t *schemas.Type, prefixForChildren
 }
 
 func (self *Parser) ResolveMap(kind Kind, t *schemas.Type, prefix string) (*templates.TemplType, error) {
+	if t == nil {
+		return nil, fmt.Errorf("type must be specified, received nil")
+	}
+
+	name := prefix + t.Name
+
+	if kind == Kind_Repository {
+		if existent, ok := self.TypesRepositoryToAvoidDuplication[name]; ok {
+			return existent, nil
+		}
+	} else if kind == Kind_Usecase {
+		if existent, ok := self.TypesUsecaseToAvoidDuplication[name]; ok {
+			return existent, nil
+		}
+	}
+
 	if self.Schema == nil {
 		return nil, fmt.Errorf("missing schema")
 	}
 	if self.Schema.Types == nil || self.Schema.Types.Types == nil {
 		return nil, fmt.Errorf("missing schema types")
-	}
-	if t == nil {
-		return nil, fmt.Errorf("type must be specified, received nil")
 	}
 	if t.Type != schemas.TypeType_Map {
 		return nil, fmt.Errorf("type \"%s\" must be a map, received \"%s\"", t.Name, t.Type)
@@ -125,7 +143,7 @@ func (self *Parser) ResolveMap(kind Kind, t *schemas.Type, prefix string) (*temp
 	}
 
 	result := &templates.TemplType{
-		Name:         prefix + t.Name,
+		Name:         name,
 		OriginalType: t.Type,
 		Props:        make([]*templates.TemplTypeProp, lenChildTypesHashes, lenChildTypesHashes),
 	}
@@ -164,8 +182,10 @@ func (self *Parser) ResolveMap(kind Kind, t *schemas.Type, prefix string) (*temp
 		self.Entities = append(self.Entities, result)
 	} else if kind == Kind_Repository {
 		self.TypesRepository = append(self.TypesRepository, result)
+		self.TypesRepositoryToAvoidDuplication[name] = result
 	} else if kind == Kind_Usecase {
 		self.TypesUsecase = append(self.TypesUsecase, result)
+		self.TypesUsecaseToAvoidDuplication[name] = result
 	}
 
 	return result, nil

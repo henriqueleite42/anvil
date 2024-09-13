@@ -72,15 +72,17 @@ func Parse(schema *schemas.Schema) (string, string, string, error) {
 		ModelsPkgName: "models",
 		Schema:        schema,
 
-		ImportsModels:     map[string]bool{},
-		ImportsRepository: map[string]bool{},
-		ImportsUsecase:    map[string]bool{},
-		Enums:             make(map[string]*templates.TemplEnum, lenEnums),
-		Entities:          make([]*templates.TemplType, 0, lenEntities),
-		TypesRepository:   []*templates.TemplType{},
-		TypesUsecase:      []*templates.TemplType{},
-		MethodsRepository: make([]*templates.TemplMethod, 0, lenRepository),
-		MethodsUsecase:    make([]*templates.TemplMethod, 0, lenUsecase),
+		ImportsModels:                     map[string]bool{},
+		ImportsRepository:                 map[string]bool{},
+		ImportsUsecase:                    map[string]bool{},
+		Enums:                             make(map[string]*templates.TemplEnum, lenEnums),
+		Entities:                          make([]*templates.TemplType, 0, lenEntities),
+		TypesRepository:                   []*templates.TemplType{},
+		TypesRepositoryToAvoidDuplication: map[string]*templates.TemplType{}, // TODO improve this, find a way to merge both
+		TypesUsecase:                      []*templates.TemplType{},
+		TypesUsecaseToAvoidDuplication:    map[string]*templates.TemplType{},
+		MethodsRepository:                 make([]*templates.TemplMethod, 0, lenRepository),
+		MethodsUsecase:                    make([]*templates.TemplMethod, 0, lenUsecase),
 	}
 
 	if lenEntities > 0 {
