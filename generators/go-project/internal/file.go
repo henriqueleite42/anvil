@@ -15,11 +15,12 @@ func WriteFile(path string, kind string, schema *schemas.Schema, content string)
 	}
 
 	domainKebab := formatter.PascalToKebab(schema.Domain)
+	domainSnake := formatter.PascalToSnake(schema.Domain)
 
 	if path == "" {
-		path = fmt.Sprintf("%s/%s", myDir, kind)
+		path = fmt.Sprintf("%s/%s/%s", myDir, kind, domainSnake)
 	} else {
-		path = fmt.Sprintf("%s/%s/%s", myDir, path, kind)
+		path = fmt.Sprintf("%s/%s/%s/%s", myDir, path, kind, domainSnake)
 	}
 
 	err = os.MkdirAll(path, os.ModePerm)

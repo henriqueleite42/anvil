@@ -1,6 +1,6 @@
 package templates
 
-const UsecaseTempl = `package {{ .DomainSnake }}_models
+const UsecaseTempl = `package {{ .DomainSnake }}_usecase
 
 import (
 {{- range .ImportsUsecase }}

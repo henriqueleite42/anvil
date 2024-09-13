@@ -1,6 +1,6 @@
 package templates
 
-const RepositoryTempl = `package {{ .DomainSnake }}_models
+const RepositoryTempl = `package {{ .DomainSnake }}_repository
 
 import (
 {{- range .ImportsRepository }}
