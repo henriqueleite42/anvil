@@ -36,8 +36,10 @@ type TemplMethodProp struct {
 type TemplMethod struct {
 	MethodName         string
 	MethodNameCamel    string
+	InputTypeName      string
 	Input              []*TemplMethodProp
 	InputPropsPrepare  []string
+	OutputTypeName     string
 	Output             []*TemplMethodProp
 	OutputPropsPrepare []string
 }

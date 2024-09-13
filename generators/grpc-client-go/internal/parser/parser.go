@@ -100,6 +100,7 @@ func Parse(schema *schemas.Schema) (string, string, error) {
 
 		var input []*templates.TemplMethodProp = nil
 		var inputPropsPrepare []string = nil
+		var inputTypeName string
 		if method.Input != nil {
 			if method.Input.TypeHash == "" {
 				return "", "", fmt.Errorf("missing \"TypeHash\" for usecase method \"%s\"", method.Name)
@@ -109,6 +110,8 @@ func Parse(schema *schemas.Schema) (string, string, error) {
 			if !ok {
 				return "", "", fmt.Errorf("type \"%s\" not found for usecase method \"%s\"", method.Input.TypeHash, method.Name)
 			}
+
+			inputTypeName = inputType.Name
 
 			props, propsPrepare, err := parser.toMethodInput(methodName, inputType)
 			if err != nil {
@@ -121,6 +124,7 @@ func Parse(schema *schemas.Schema) (string, string, error) {
 
 		var output []*templates.TemplMethodProp = nil
 		var outputPropsPrepare []string = nil
+		var outputTypeName string
 		if method.Output != nil {
 			if method.Output.TypeHash == "" {
 				return "", "", fmt.Errorf("missing \"TypeHash\" for usecase method \"%s\"", method.Name)
@@ -130,6 +134,8 @@ func Parse(schema *schemas.Schema) (string, string, error) {
 			if !ok {
 				return "", "", fmt.Errorf("type \"%s\" not found for usecase method \"%s\"", method.Output.TypeHash, method.Name)
 			}
+
+			outputTypeName = outputType.Name
 
 			props, propsPrepare, err := parser.toMethodOutput(outputType)
 			if err != nil {
@@ -143,8 +149,10 @@ func Parse(schema *schemas.Schema) (string, string, error) {
 		methods = append(methods, &templates.TemplMethod{
 			MethodName:         methodName,
 			MethodNameCamel:    formatter.PascalToCamel(method.Name),
+			InputTypeName:      inputTypeName,
 			Input:              input,
 			InputPropsPrepare:  inputPropsPrepare,
+			OutputTypeName:     outputTypeName,
 			Output:             output,
 			OutputPropsPrepare: outputPropsPrepare,
 		})

@@ -52,12 +52,14 @@ func addInstallCommand(rootCmd *cobra.Command) {
 				log.Fatal(err)
 			}
 
-			err = os.MkdirAll(config.ROOT_DIR+"/generators", os.ModePerm)
+			dir := config.GetConfigPath()
+
+			err = os.MkdirAll(dir+"/generators", os.ModePerm)
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			err = os.WriteFile(config.ROOT_DIR+"/generators/"+name, fileData, os.ModePerm)
+			err = os.WriteFile(dir+"/generators/"+name, fileData, os.ModePerm)
 			if err != nil {
 				log.Fatal(err)
 			}

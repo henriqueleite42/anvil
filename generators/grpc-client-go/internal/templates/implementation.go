@@ -46,13 +46,13 @@ func (self *{{ .Domain }}ApiImplementation) Close() error {
 		{{- if not $method.Input }}
 func (self *{{ $originalInput.Domain }}ApiImplementation) {{ $method.MethodName }}() error {
 		{{- else }}
-func (self *{{ $originalInput.Domain }}ApiImplementation) {{ $method.MethodName }}(i *{{ $method.MethodName }}Input) error {
+func (self *{{ $originalInput.Domain }}ApiImplementation) {{ $method.MethodName }}(i *{{ $method.InputTypeName }}) error {
 		{{- end }}
 	{{- else }}
 		{{- if not $method.Input }}
-func (self *{{ $originalInput.Domain }}ApiImplementation) {{ $method.MethodName }}() (*{{ $method.MethodName }}Output, error) {
+func (self *{{ $originalInput.Domain }}ApiImplementation) {{ $method.MethodName }}() (*{{ $method.OutputTypeName }}, error) {
 		{{- else }}
-func (self *{{ $originalInput.Domain }}ApiImplementation) {{ $method.MethodName }}(i *{{ $method.MethodName }}Input) (*{{ $method.MethodName }}Output, error) {
+func (self *{{ $originalInput.Domain }}ApiImplementation) {{ $method.MethodName }}(i *{{ $method.InputTypeName }}) (*{{ $method.OutputTypeName }}, error) {
 		{{- end }}
 	{{- end }}
 	{{- if $method.Input }}
@@ -69,7 +69,7 @@ func (self *{{ $originalInput.Domain }}ApiImplementation) {{ $method.MethodName 
 		{{- if not $method.Input }}
 	_, err := self.{{ $originalInput.DomainCamel }}Client.{{ $method.MethodName }}(ctx, nil)
 		{{- else }}
-	_, err := self.{{ $originalInput.DomainCamel }}Client.{{ $method.MethodName }}(ctx, &pb.{{ $method.MethodName }}Input{
+	_, err := self.{{ $originalInput.DomainCamel }}Client.{{ $method.MethodName }}(ctx, &pb.{{ $method.InputTypeName }}{
 		{{- range $input := $method.Input }}
 		{{ $input.Name }}:{{ $input.Spacing }} {{ $input.Value }},
 		{{- end }}
@@ -79,7 +79,7 @@ func (self *{{ $originalInput.Domain }}ApiImplementation) {{ $method.MethodName 
 		{{- if not $method.Input }}
 	result, err := self.{{ $originalInput.DomainCamel }}Client.{{ $method.MethodName }}(ctx, nil)
 		{{- else }}
-	result, err := self.{{ $originalInput.DomainCamel }}Client.{{ $method.MethodName }}(ctx, &pb.{{ $method.MethodName }}Input{
+	result, err := self.{{ $originalInput.DomainCamel }}Client.{{ $method.MethodName }}(ctx, &pb.{{ $method.InputTypeName }}{
 		{{- range $input := $method.Input }}
 		{{ $input.Name }}:{{ $input.Spacing }} {{ $input.Value }},
 		{{- end }}
@@ -90,7 +90,7 @@ func (self *{{ $originalInput.Domain }}ApiImplementation) {{ $method.MethodName 
 
 {{ $method.OutputPropsPrepare }}
 
-	return &{{ $method.MethodName }}Output{
+	return &{{ $method.OutputTypeName }}{
 		{{- range $output := $method.Output }}
 	{{ $output.Name }}:{{ $output.Spacing }} {{ $output.Value }},
 		{{- end }}

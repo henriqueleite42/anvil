@@ -1,4 +1,4 @@
-module github.com/henriqueleite42/anvil/generators/grpc
+module github.com/henriqueleite42/anvil/generators/go-project
 
 go 1.22.4
 

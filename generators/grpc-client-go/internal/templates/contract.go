@@ -12,7 +12,6 @@ type {{ .Domain }}ApiInput struct {
 	Addr    string
 	Timeout time.Duration
 }
-{{ range $enum := .Enums }}
 
 {{- /*
 ------------------
@@ -21,6 +20,7 @@ type {{ .Domain }}ApiInput struct {
 -
 ------------------
 */}}
+{{ range $enum := .Enums }}
 type {{ $enum.Name }} {{ $enum.Type }}
 const (
 {{- range $enumVal := $enum.Values }}
@@ -50,13 +50,13 @@ type {{ .Domain }}Api interface {
 	{{- if not $method.Input }}
 	{{ $method.MethodName }}() error
 	{{- else }}
-	{{ $method.MethodName }}(i *{{ $method.MethodName }}Input) error
+	{{ $method.MethodName }}(i *{{ $method.InputTypeName }}) error
 	{{- end }}
 {{- else }}
 	{{- if not $method.Input }}
-	{{ $method.MethodName }}() (*{{ $method.MethodName }}Output, error)
+	{{ $method.MethodName }}() (*{{ $method.OutputTypeName }}, error)
 	{{- else }}
-	{{ $method.MethodName }}(i *{{ $method.MethodName }}Input) (*{{ $method.MethodName }}Output, error)
+	{{ $method.MethodName }}(i *{{ $method.InputTypeName }}) (*{{ $method.OutputTypeName }}, error)
 	{{- end }}
 {{- end }}
 {{- end }}

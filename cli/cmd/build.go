@@ -49,7 +49,7 @@ func addBuildCommand(rootCmd *cobra.Command) {
 				argsToGenerator = append(argsToGenerator, "--outDir", outputFolderPath)
 			}
 
-			generatorPath := config.ROOT_DIR + "/generators/" + generator
+			generatorPath := config.GetConfigPath() + "/generators/" + generator
 
 			if _, err := os.Stat(generatorPath); errors.Is(err, os.ErrNotExist) {
 				log.Fatalf("generator \"%s\" isn't installed. Run `anvil install %s <generator download uri>` to install it and run the command again.", generator, generator)
