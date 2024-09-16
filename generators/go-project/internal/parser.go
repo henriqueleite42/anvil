@@ -96,12 +96,7 @@ func Parse(schema *schemas.Schema) ([]*File, error) {
 
 	if lenEntities > 0 {
 		for _, v := range schema.Entities.Entities {
-			t, ok := schema.Types.Types[v.TypeHash]
-			if !ok {
-				return nil, fmt.Errorf("type \"%s\" not found", v.Name)
-			}
-
-			_, err := typeParser.ResolveMap(parser.Kind_Entity, t, "")
+			err := typeParser.ResolveEntity(v)
 			if err != nil {
 				return nil, err
 			}

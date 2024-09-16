@@ -170,11 +170,7 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 			return typeRefI.Name < typeRefJ.Name
 		})
 
-		if childTypesHashes == nil {
-			childTypesHashes = typesHashes
-		} else {
-			childTypesHashes = append(childTypesHashes, typesHashes...)
-		}
+		childTypesHashes = typesHashes
 	} else if typeType == schemas.TypeType_Map {
 		return "", fmt.Errorf("Type \"%s.%s\" must have property \"Properties\". All types with map \"Type\" must.", i.path, i.k)
 	}

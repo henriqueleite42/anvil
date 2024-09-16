@@ -37,7 +37,7 @@ func (self *anvToAnvpParser) repository(file map[string]any) error {
 	}
 
 	// Necessary to keep some kind of order
-	keys := []string{}
+	keys := make([]string, 0, len(methodsMap))
 	for key := range methodsMap {
 		keys = append(keys, key)
 	}
@@ -74,7 +74,7 @@ func (self *anvToAnvpParser) repository(file map[string]any) error {
 			typeHash, err := self.resolveType(&resolveInput{
 				path: fmt.Sprintf("%s.Methods.%s", path, k),
 				ref:  self.getRef("", fmt.Sprintf("%s.%s", path, k)),
-				k:    "Input",
+				k:    k + "Input",
 				v:    inputMap,
 			})
 			if err != nil {
@@ -98,7 +98,7 @@ func (self *anvToAnvpParser) repository(file map[string]any) error {
 			typeHash, err := self.resolveType(&resolveInput{
 				path: fmt.Sprintf("%s.Methods.%s", path, k),
 				ref:  self.getRef("", fmt.Sprintf("%s.Methods.%s.%s", path, k, "Output")),
-				k:    "Output",
+				k:    k + "Output",
 				v:    outputMap,
 			})
 			if err != nil {

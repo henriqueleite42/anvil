@@ -10,7 +10,7 @@ import (
 {{ range $type := .TypesUsecase }}
 type {{ $type.Name }} struct {
 {{- range $prop := $type.Props }}
-	{{ $prop.Name }}{{ $prop.Spacing1 }} {{ $prop.Type }}{{ $prop.Spacing2 }} {{ $prop.Tags }}
+	{{ $prop.Name }}{{ $prop.Spacing1 }} {{ $prop.Type }}{{ if $prop.Tags }}{{ $prop.Spacing2 }} {{ $prop.Tags }}{{ end }}
 {{- end }}
 }
 {{- end }}

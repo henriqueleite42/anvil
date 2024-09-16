@@ -10,21 +10,21 @@ import (
 {{ range $type := .TypesRepository }}
 type {{ $type.Name }} struct {
 {{- range $prop := $type.Props }}
-	{{ $prop.Name }}{{ $prop.Spacing1 }} {{ $prop.Type }}{{ $prop.Spacing2 }} {{ $prop.Tags }}
+	{{ $prop.Name }}{{ $prop.Spacing1 }} {{ $prop.Type }}{{ if $prop.Tags }}{{ $prop.Spacing2 }} {{ $prop.Tags }}{{ end }}
 {{- end }}
 }
 {{- end }}
 
 type {{ .Domain }}Repository interface {
 {{- range $method := .MethodsRepository }}
-{{- if not $method.Output }}
-	{{- if not $method.Input }}
+{{- if not $method.OutputTypeName }}
+	{{- if not $method.InputTypeName }}
 	{{ $method.MethodName }}() error
 	{{- else }}
 	{{ $method.MethodName }}(i *{{ $method.InputTypeName }}) error
 	{{- end }}
 {{- else }}
-	{{- if not $method.Input }}
+	{{- if not $method.InputTypeName }}
 	{{ $method.MethodName }}() (*{{ $method.OutputTypeName }}, error)
 	{{- else }}
 	{{ $method.MethodName }}(i *{{ $method.InputTypeName }}) (*{{ $method.OutputTypeName }}, error)

@@ -8,41 +8,47 @@ import (
 	"github.com/henriqueleite42/anvil/generators/go-project/internal/templates"
 )
 
-func (self *Parser) resolveMapProp(kind Kind, t *schemas.Type, prefixForChildren string) (*templates.TemplTypeProp, error) {
+type ResolveMapPropInput struct {
+	Type              *schemas.Type
+	Kind              Kind
+	PrefixForChildren string
+	Tags              []string
+}
+
+func (self *Parser) ResolveMapProp(i *ResolveMapPropInput) (*templates.TemplTypeProp, error) {
 	result := &templates.TemplTypeProp{
-		Name: t.Name,
-		Tags: "``",
+		Name: i.Type.Name,
 	}
 
-	if t.Type == schemas.TypeType_String {
+	if i.Type.Type == schemas.TypeType_String {
 		result.Type = "string"
 	}
-	if t.Type == schemas.TypeType_Int {
+	if i.Type.Type == schemas.TypeType_Int {
 		result.Type = "int32"
 	}
-	if t.Type == schemas.TypeType_Float {
+	if i.Type.Type == schemas.TypeType_Float {
 		result.Type = "float32"
 	}
-	if t.Type == schemas.TypeType_Bool {
+	if i.Type.Type == schemas.TypeType_Bool {
 		result.Type = "bool"
 	}
-	if t.Type == schemas.TypeType_Timestamp {
-		if kind == Kind_Entity || kind == Kind_Event {
+	if i.Type.Type == schemas.TypeType_Timestamp {
+		if i.Kind == Kind_Entity || i.Kind == Kind_Event {
 			self.ImportsModels["time"] = true
-		} else if kind == Kind_Repository {
+		} else if i.Kind == Kind_Repository {
 			self.ImportsRepository["time"] = true
-		} else if kind == Kind_Usecase {
+		} else if i.Kind == Kind_Usecase {
 			self.ImportsUsecase["time"] = true
 		}
 		result.Type = "time.Time"
 	}
-	if t.Type == schemas.TypeType_Enum {
-		if t.EnumHash == nil {
-			return nil, fmt.Errorf("enum for type \"%s\" not found", t.Name)
+	if i.Type.Type == schemas.TypeType_Enum {
+		if i.Type.EnumHash == nil {
+			return nil, fmt.Errorf("enum for type \"%s\" not found", i.Type.Name)
 		}
-		schemaEnum, ok := self.Schema.Enums.Enums[*t.EnumHash]
+		schemaEnum, ok := self.Schema.Enums.Enums[*i.Type.EnumHash]
 		if !ok {
-			return nil, fmt.Errorf("enum \"%s\" of type \"%s\" not found", *t.EnumHash, t.Name)
+			return nil, fmt.Errorf("enum \"%s\" of type \"%s\" not found", *i.Type.EnumHash, i.Type.Name)
 		}
 
 		e, err := self.resolveEnum(schemaEnum)
@@ -50,41 +56,45 @@ func (self *Parser) resolveMapProp(kind Kind, t *schemas.Type, prefixForChildren
 			return nil, err
 		}
 
-		if kind == Kind_Repository {
+		if i.Kind == Kind_Repository {
 			self.ImportsRepository[self.ModelsPath] = true
-		} else if kind == Kind_Usecase {
+		} else if i.Kind == Kind_Usecase {
 			self.ImportsUsecase[self.ModelsPath] = true
 		}
 
-		if kind == Kind_Repository || kind == Kind_Usecase {
+		if i.Kind == Kind_Repository || i.Kind == Kind_Usecase {
 			result.Type = fmt.Sprintf("%s.%s", self.ModelsPkgName, e.Name)
 		} else {
 			// In models file
 			result.Type = e.Name
 		}
 	}
-	if t.Type == schemas.TypeType_List {
-		if t.ChildTypesHashes == nil {
-			return nil, fmt.Errorf("ChildTypesHashes for \"%s\" not found", t.Name)
+	if i.Type.Type == schemas.TypeType_List {
+		if i.Type.ChildTypesHashes == nil {
+			return nil, fmt.Errorf("ChildTypesHashes for \"%s\" not found", i.Type.Name)
 		}
-		if len(t.ChildTypesHashes) != 1 {
-			return nil, fmt.Errorf("ChildTypesHashes for \"%s\" must have exactly one item", t.Name)
+		if len(i.Type.ChildTypesHashes) != 1 {
+			return nil, fmt.Errorf("ChildTypesHashes for \"%s\" must have exactly one item", i.Type.Name)
 		}
 
-		childType, ok := self.Schema.Types.Types[t.ChildTypesHashes[0]]
+		childType, ok := self.Schema.Types.Types[i.Type.ChildTypesHashes[0]]
 		if !ok {
-			return nil, fmt.Errorf("type \"%s\" not found", t.ChildTypesHashes[0])
+			return nil, fmt.Errorf("type \"%s\" not found", i.Type.ChildTypesHashes[0])
 		}
 
 		if childType.Type == schemas.TypeType_Map {
-			resolvedChildType, err := self.ResolveMap(kind, childType, prefixForChildren)
+			resolvedChildType, err := self.ResolveMap(i.Kind, childType, i.PrefixForChildren)
 			if err != nil {
 				return nil, err
 			}
 
 			result.Type = "[]*" + resolvedChildType.Name
 		} else {
-			resolvedChildType, err := self.resolveMapProp(kind, childType, prefixForChildren)
+			resolvedChildType, err := self.ResolveMapProp(&ResolveMapPropInput{
+				Kind:              i.Kind,
+				Type:              childType,
+				PrefixForChildren: i.PrefixForChildren,
+			})
 			if err != nil {
 				return nil, err
 			}
@@ -92,8 +102,8 @@ func (self *Parser) resolveMapProp(kind Kind, t *schemas.Type, prefixForChildren
 			result.Type = "[]" + resolvedChildType.Type
 		}
 	}
-	if t.Type == schemas.TypeType_Map {
-		resolvedChildType, err := self.ResolveMap(kind, t, prefixForChildren)
+	if i.Type.Type == schemas.TypeType_Map {
+		resolvedChildType, err := self.ResolveMap(i.Kind, i.Type, i.PrefixForChildren)
 		if err != nil {
 			return nil, err
 		}
@@ -101,8 +111,16 @@ func (self *Parser) resolveMapProp(kind Kind, t *schemas.Type, prefixForChildren
 		result.Type = "*" + resolvedChildType.Name
 	}
 
-	if t.Optional && t.Type != schemas.TypeType_Map && t.Type != schemas.TypeType_List {
+	if i.Type.Optional && i.Type.Type != schemas.TypeType_Map && i.Type.Type != schemas.TypeType_List {
 		result.Type = "*" + result.Type
+	}
+
+	if i.Kind == Kind_Usecase && len(i.Type.Validate) > 0 {
+		i.Tags = append(i.Tags, fmt.Sprintf("validate:\"%s\"", strings.Join(i.Type.Validate, ",")))
+	}
+
+	if len(i.Tags) > 0 {
+		result.Tags = fmt.Sprintf("`%s`", strings.Join(i.Tags, " "))
 	}
 
 	return result, nil
@@ -154,12 +172,16 @@ func (self *Parser) ResolveMap(kind Kind, t *schemas.Type, prefix string) (*temp
 			return nil, fmt.Errorf("child type \"%s\" of type \"%s\" not found", v, t.Name)
 		}
 
-		foo, err := self.resolveMapProp(kind, childTypeRef, result.Name)
+		resolvedProp, err := self.ResolveMapProp(&ResolveMapPropInput{
+			Kind:              kind,
+			Type:              childTypeRef,
+			PrefixForChildren: result.Name,
+		})
 		if err != nil {
 			return nil, err
 		}
 
-		result.Props[k] = foo
+		result.Props[k] = resolvedProp
 	}
 
 	biggestPropName := 0

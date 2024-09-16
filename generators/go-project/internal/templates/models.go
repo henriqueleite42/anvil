@@ -32,7 +32,7 @@ const (
 {{- range $entity := .Entities }}
 type {{ $entity.Name }} struct {
 {{- range $prop := $entity.Props }}
-	{{ $prop.Name }}{{ $prop.Spacing1 }} {{ $prop.Type }}{{ $prop.Spacing2 }} {{ $prop.Tags }}
+	{{ $prop.Name }}{{ $prop.Spacing1 }} {{ $prop.Type }}{{ if $prop.Tags }}{{ $prop.Spacing2 }} {{ $prop.Tags }}{{ end }}
 {{- end }}
 }
 {{ end -}}
