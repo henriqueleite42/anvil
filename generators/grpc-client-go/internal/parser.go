@@ -1,8 +1,8 @@
 package internal
 
 import (
-	"github.com/henriqueleite42/anvil/cli/schemas"
 	"github.com/henriqueleite42/anvil/generators/grpc-client-go/internal/parser"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
 func Parse(schema *schemas.Schema, silent bool, outputFolderPath string) error {

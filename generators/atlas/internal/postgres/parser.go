@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/henriqueleite42/anvil/cli/schemas"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
 type hclFile struct {

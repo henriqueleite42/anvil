@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/henriqueleite42/anvil/cli/formatter"
-	"github.com/henriqueleite42/anvil/cli/schemas"
 	"github.com/henriqueleite42/anvil/generators/grpc-client-go/internal/templates"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
 func (self *parserManager) toMethodInput(methodName string, t *schemas.Type) ([]*templates.TemplMethodProp, []string, error) {
@@ -14,7 +14,7 @@ func (self *parserManager) toMethodInput(methodName string, t *schemas.Type) ([]
 		return nil, nil, fmt.Errorf("inputs for grpc must be Map Type")
 	}
 
-	_, err := self.toType(t)
+	_, err := self.toGoType(t)
 	if err != nil {
 		return nil, nil, err
 	}

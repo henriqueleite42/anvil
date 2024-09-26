@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/henriqueleite42/anvil/cli/schemas"
 	"github.com/henriqueleite42/anvil/generators/grpc-client-go/internal/templates"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
-func (self *parserManager) toType(t *schemas.Type) (*templates.TemplType, error) {
+func (self *parserManager) toGoType(t *schemas.Type) (*templates.TemplType, error) {
 	if existentType, ok := self.types[t.Name]; ok {
 		return existentType, nil
 	}
@@ -59,7 +59,7 @@ func (self *parserManager) toType(t *schemas.Type) (*templates.TemplType, error)
 			return nil, fmt.Errorf("type \"%s\" not found", t.ChildTypesHashes[0])
 		}
 
-		resolvedChildType, err := self.toType(childType)
+		resolvedChildType, err := self.toGoType(childType)
 		if err != nil {
 			return nil, err
 		}
@@ -89,7 +89,7 @@ func (self *parserManager) toType(t *schemas.Type) (*templates.TemplType, error)
 		for _, v := range types {
 			targetLen := biggest - len(v.Name)
 
-			propType, err := self.toType(v)
+			propType, err := self.toGoType(v)
 			if err != nil {
 				return nil, err
 			}

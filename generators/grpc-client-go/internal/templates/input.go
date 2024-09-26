@@ -1,6 +1,6 @@
 package templates
 
-import "github.com/henriqueleite42/anvil/cli/schemas"
+import "github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 
 type TemplEnumValue struct {
 	Idx     int

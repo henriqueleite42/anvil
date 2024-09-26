@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/henriqueleite42/anvil/cli/schemas"
 	"github.com/henriqueleite42/anvil/generators/grpc-client-go/internal"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
 func main() {

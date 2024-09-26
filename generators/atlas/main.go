@@ -7,9 +7,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/henriqueleite42/anvil/cli/schemas"
 	"github.com/henriqueleite42/anvil/generators/atlas/internal"
 	"github.com/henriqueleite42/anvil/generators/atlas/internal/postgres"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
 func main() {

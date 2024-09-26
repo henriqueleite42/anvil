@@ -3,8 +3,8 @@ package internal
 import (
 	"os"
 
-	"github.com/henriqueleite42/anvil/cli/formatter"
-	"github.com/henriqueleite42/anvil/cli/schemas"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/formatter"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
 func WriteHclFile(path string, schema *schemas.Schema, content string) error {

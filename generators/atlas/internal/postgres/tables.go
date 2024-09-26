@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/henriqueleite42/anvil/cli/schemas"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
 func (self *hclFile) resolveTables(schema *schemas.Schema) error {

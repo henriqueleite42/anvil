@@ -3,8 +3,8 @@ package parser
 import (
 	"strings"
 
-	"github.com/henriqueleite42/anvil/cli/schemas"
 	"github.com/henriqueleite42/anvil/generators/grpc-client-go/internal/templates"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
 func (self *parserManager) toEnum(e *schemas.Enum) (*templates.TemplEnum, error) {

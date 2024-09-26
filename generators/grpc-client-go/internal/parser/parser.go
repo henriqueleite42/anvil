@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/henriqueleite42/anvil/cli/formatter"
-	"github.com/henriqueleite42/anvil/cli/schemas"
 	"github.com/henriqueleite42/anvil/cli/template"
 	"github.com/henriqueleite42/anvil/generators/grpc-client-go/internal/templates"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
 type parserManager struct {
