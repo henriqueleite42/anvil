@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/henriqueleite42/anvil/cli/formatter"
-	"github.com/henriqueleite42/anvil/cli/hashing"
-	"github.com/henriqueleite42/anvil/cli/schemas"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/formatter"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/hashing"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
 type SortedByOrder struct {

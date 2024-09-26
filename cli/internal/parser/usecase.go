@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/henriqueleite42/anvil/cli/hashing"
-	"github.com/henriqueleite42/anvil/cli/schemas"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/hashing"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
 func (self *anvToAnvpParser) usecase(file map[string]any) error {

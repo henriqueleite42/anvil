@@ -3,8 +3,8 @@ package parser
 import (
 	"fmt"
 
-	"github.com/henriqueleite42/anvil/cli/hashing"
-	"github.com/henriqueleite42/anvil/cli/schemas"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/hashing"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
 func (self *anvToAnvpParser) delivery(file map[string]any) error {
@@ -59,7 +59,7 @@ func (self *anvToAnvpParser) delivery(file map[string]any) error {
 			}
 			usecaseMethodString, ok := usecaseMethodAny.(string)
 			if !ok {
-				return fmt.Errorf("fail to parse \"%s.Grpc.Rpcs.%d\" to `string`", path, k)
+				return fmt.Errorf("fail to parse \"%s.Grpc.Rpcs.%d.UsecaseMethod\" to `string`", path, k)
 			}
 
 			// TODO parse examples
@@ -70,12 +70,29 @@ func (self *anvToAnvpParser) delivery(file map[string]any) error {
 			usecaseMethod := self.getRef("Usecase", usecaseMethodString)
 			usecaseMethodHash := hashing.String(usecaseMethod)
 
+			var name string
+			nameAny, ok := vMap["Name"]
+			if ok {
+				nameString, ok := nameAny.(string)
+				if !ok {
+					return fmt.Errorf("fail to parse \"%s.Grpc.Rpcs.%d.Name\" to `string`", path, k)
+				}
+				name = nameString
+			} else {
+				usecase, ok := self.schema.Usecase.Methods.Methods[usecaseMethodHash]
+				if !ok {
+					return fmt.Errorf("fail to find usecase \"%s\" for rpc \"%s.Grpc.Rpcs.%d\"", usecaseMethodHash, path, k)
+				}
+				name = usecase.Name
+			}
+
 			originalPath := fmt.Sprintf("%s.Grpc.Rpcs.%d", path, k)
 			ref := hashing.String(originalPath)
 
 			rpc := &schemas.DeliveryGrpcRpc{
 				Ref:               ref,
 				OriginalPath:      originalPath,
+				Name:              name,
 				UsecaseMethodHash: usecaseMethodHash,
 				Order:             k,
 			}

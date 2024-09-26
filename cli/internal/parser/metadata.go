@@ -3,7 +3,7 @@ package parser
 import (
 	"fmt"
 
-	"github.com/henriqueleite42/anvil/cli/schemas"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
 func (self *anvToAnvpParser) metadata(file map[string]any) error {

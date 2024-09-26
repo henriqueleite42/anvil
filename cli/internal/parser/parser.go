@@ -2,7 +2,7 @@ package parser
 
 import (
 	"github.com/henriqueleite42/anvil/cli/internal/files"
-	"github.com/henriqueleite42/anvil/cli/schemas"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
 type anvToAnvpParser struct {

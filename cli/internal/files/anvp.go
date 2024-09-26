@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/henriqueleite42/anvil/cli/schemas"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 	"gopkg.in/yaml.v3"
 )
 
