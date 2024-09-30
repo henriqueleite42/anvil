@@ -2,6 +2,7 @@ package types_parser
 
 import (
 	"fmt"
+	"slices"
 	"sort"
 	"strings"
 
@@ -11,12 +12,14 @@ import (
 type typeParser struct {
 	schema *schemas.Schema
 
-	types   map[string]*Type
-	enums   map[string]*Enum
-	imports map[string]bool
+	typesToAvoidDuplication map[string]*Type
+	enumsToAvoidDuplication map[string]*Enum
+	types                   []*Type
+	enums                   []*Enum
+	imports                 map[string]bool
 }
 
-func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
+func (self *typeParser) ParseType(t *schemas.Type, opt *ParseTypeOpt) (*Type, error) {
 	var result *Type
 
 	// ----------------------
@@ -63,10 +66,6 @@ func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
 	//
 	// ----------------------
 
-	if existentType, ok := self.types[t.Name]; ok {
-		return existentType, nil
-	}
-
 	if t.Type == schemas.TypeType_Enum {
 		if t.EnumHash == nil {
 			return nil, fmt.Errorf("enum \"%s\" not found", *t.EnumHash)
@@ -78,8 +77,16 @@ func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
 			return nil, err
 		}
 
+		var golangType string
+		if opt != nil && opt.PrefixForEnums != "" {
+			golangType = fmt.Sprintf("%s.%s", opt.PrefixForEnums, enum.GolangName)
+		} else {
+			// In models file
+			golangType = enum.GolangName
+		}
+
 		result = &Type{
-			GolangType: enum.GolangName,
+			GolangType: golangType,
 			AnvilType:  "Enum",
 		}
 	}
@@ -96,7 +103,7 @@ func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
 			return nil, fmt.Errorf("type \"%s\" not found", t.ChildTypesHashes[0])
 		}
 
-		resolvedChildType, err := self.ParseType(childType)
+		resolvedChildType, err := self.ParseType(childType, opt)
 		if err != nil {
 			return nil, err
 		}
@@ -106,7 +113,18 @@ func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
 			AnvilType:  "List",
 		}
 	}
+
+	// ----------------------
+	//
+	// Maps (child types)
+	//
+	// ----------------------
+
 	if t.Type == schemas.TypeType_Map {
+		if existentType, ok := self.typesToAvoidDuplication[t.Name]; ok {
+			return existentType, nil
+		}
+
 		biggest := 0
 		types := make([]*schemas.Type, 0, len(t.ChildTypesHashes))
 		for _, v := range t.ChildTypesHashes {
@@ -128,7 +146,7 @@ func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
 		for k, v := range types {
 			targetLen := biggest - len(v.Name)
 
-			propType, err := self.ParseType(v)
+			propType, err := self.ParseType(v, opt)
 			if err != nil {
 				return nil, err
 			}
@@ -138,10 +156,43 @@ func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
 				resultPropType = "*" + resultPropType
 			}
 
-			props[k] = &MapProp{
-				Name:    v.Name,
-				Spacing: strings.Repeat(" ", targetLen),
-				Type:    resultPropType,
+			prop := &MapProp{
+				Name:       v.Name,
+				Spacing1:   strings.Repeat(" ", targetLen),
+				GolangType: resultPropType,
+			}
+
+			if !v.Optional && !slices.Contains(v.Validate, "required") {
+				if prop.Tags == nil {
+					prop.Tags = []string{}
+				}
+
+				prop.Tags = append(prop.Tags, "required")
+			}
+
+			if len(v.Validate) > 0 {
+				if prop.Tags == nil {
+					prop.Tags = []string{}
+				}
+
+				prop.Tags = append(prop.Tags, fmt.Sprintf("validate:\"%s\"", strings.Join(v.Validate, ",")))
+			}
+
+			props[k] = prop
+		}
+
+		if len(props) > 0 {
+			biggestType := 0
+			for _, v := range props {
+				newLen := len(v.GolangType)
+				if newLen > biggestType {
+					biggestType = newLen
+				}
+			}
+
+			for _, v := range props {
+				targetLen := biggestType - len(v.GolangType)
+				v.Spacing2 = strings.Repeat(" ", targetLen)
 			}
 		}
 
@@ -151,7 +202,8 @@ func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
 			MapProps:   props,
 		}
 
-		self.types[t.Name] = result
+		self.typesToAvoidDuplication[t.Name] = result
+		self.types = append(self.types, result)
 	}
 
 	if t.Optional && t.Type != schemas.TypeType_Map && t.Type != schemas.TypeType_List {
@@ -162,7 +214,7 @@ func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
 }
 
 func (self *typeParser) ParseEnum(e *schemas.Enum) (*Enum, error) {
-	if existentEnum, ok := self.enums[e.Name]; ok {
+	if existentEnum, ok := self.enumsToAvoidDuplication[e.Name]; ok {
 		return existentEnum, nil
 	}
 
@@ -198,28 +250,55 @@ func (self *typeParser) ParseEnum(e *schemas.Enum) (*Enum, error) {
 		})
 	}
 
-	self.enums[e.Name] = enum
+	self.enumsToAvoidDuplication[e.Name] = enum
+	self.enums = append(self.enums, enum)
 
 	return enum, nil
 }
 
-func (self *typeParser) GetNecessaryImports() []string {
-	imports := make([]string, 0, len(self.imports))
+func (self *typeParser) AddImport(impt string) {
+	self.imports[impt] = true
+}
+
+func (self *typeParser) GetImports() [][]string {
+	// Imports from golang std library
+	importsStd := make([]string, 0, len(self.imports))
+	// Imports from external libraries
+	importsExt := make([]string, 0, len(self.imports))
+
 	for k := range self.imports {
-		imports = append(imports, k)
+		parts := strings.Split(k, "/")
+		if strings.Contains(parts[0], ".") {
+			importsExt = append(importsExt, k)
+		} else {
+			importsStd = append(importsStd, k)
+		}
 	}
-	return imports
+	sort.Slice(importsStd, func(i, j int) bool {
+		return importsStd[i] < importsStd[j]
+	})
+	sort.Slice(importsExt, func(i, j int) bool {
+		return importsExt[i] < importsExt[j]
+	})
+
+	importsResolved := make([][]string, 0, 2)
+
+	if len(importsStd) > 0 {
+		importsResolved = append(importsResolved, importsStd)
+	}
+	if len(importsExt) > 0 {
+		importsResolved = append(importsResolved, importsExt)
+	}
+
+	return importsResolved
+}
+
+func (self *typeParser) ResetImports() {
+	self.imports = map[string]bool{}
 }
 
 func (self *typeParser) GetMapTypes() []*Type {
-	types := make([]*Type, 0, len(self.types))
-	for _, v := range self.types {
-		types = append(types, v)
-	}
-	sort.Slice(types, func(i, j int) bool {
-		return types[i].GolangType < types[j].GolangType
-	})
-	return types
+	return self.types
 }
 
 func (self *typeParser) GetEnums() []*Enum {
@@ -237,7 +316,10 @@ func NewTypeParser(schema *schemas.Schema) (TypeParser, error) {
 	return &typeParser{
 		schema: schema,
 
-		types:   map[string]*Type{},
-		imports: map[string]bool{},
+		typesToAvoidDuplication: map[string]*Type{},
+		enumsToAvoidDuplication: map[string]*Enum{},
+		types:                   []*Type{},
+		enums:                   []*Enum{},
+		imports:                 map[string]bool{},
 	}, nil
 }
