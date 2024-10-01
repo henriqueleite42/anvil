@@ -3,11 +3,11 @@ package internal
 import (
 	"os"
 
-	"github.com/henriqueleite42/anvil/cli/formatter"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/formatter"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
-func WriteProtoFile(path string, schema *schemas.Schema, content string) error {
+func WriteFile(schema *schemas.Schema, outputFolderPath string, content string) error {
 	myDir, err := os.Getwd()
 	if err != nil {
 		return err
@@ -15,10 +15,9 @@ func WriteProtoFile(path string, schema *schemas.Schema, content string) error {
 
 	domainKebab := formatter.PascalToKebab(schema.Domain)
 
-	if path == "" {
-		path = myDir + "/"
-	} else {
-		path = myDir + "/" + path
+	path := myDir
+	if outputFolderPath != "" {
+		path = myDir + "/" + outputFolderPath
 	}
 
 	err = os.MkdirAll(path, os.ModePerm)

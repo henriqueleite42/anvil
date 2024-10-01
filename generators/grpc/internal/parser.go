@@ -4,86 +4,169 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/henriqueleite42/anvil/generators/grpc/internal/templates"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/template"
 )
 
-type protoFile struct {
-	schema   *schemas.Schema
-	imports  map[string]bool
-	enums    map[string]string
-	messages map[string]string
-	service  string
+type parser struct {
+	schema                  *schemas.Schema
+	imports                 map[string]bool
+	methods                 []*templates.ProtofileTemplInputMethod
+	enums                   map[string]*templates.ProtofileTemplInputEnum
+	typesToAvoidDuplication map[string]*templates.ProtofileTemplInputType
+	types                   []*templates.ProtofileTemplInputType
 }
 
-type SortedByOrder struct {
-	Order int
-	Key   string
+var templatesNamesValues = map[string]string{
+	"protofile": templates.ProtofileTempl,
 }
 
-func (self *protoFile) toString() string {
-	sortedImports := []string{}
-	for k := range self.imports {
-		sortedImports = append(sortedImports, k)
+func Parse(schema *schemas.Schema, silent bool, outputFolderPath string) error {
+	if schema.Domain == "" {
+		return fmt.Errorf("no domain specified")
 	}
-	sort.Slice(sortedImports, func(i, j int) bool {
-		return sortedImports[i] < sortedImports[j]
+	if schema.Delivery == nil {
+		return fmt.Errorf("no delivery specified")
+	}
+	if schema.Delivery.Grpc == nil {
+		return fmt.Errorf("no gRPC delivery specified")
+	}
+	if schema.Delivery.Grpc.Rpcs == nil {
+		return fmt.Errorf("no RPCs specified for gRPC delivery")
+	}
+	if schema.Usecase == nil {
+		return fmt.Errorf("no usecases to deliver")
+	}
+	if schema.Usecase.Methods == nil || schema.Usecase.Methods.Methods == nil {
+		return fmt.Errorf("no usecases methods to deliver")
+	}
+
+	rpcs := make([]*schemas.DeliveryGrpcRpc, 0, len(schema.Delivery.Grpc.Rpcs))
+	for _, v := range schema.Delivery.Grpc.Rpcs {
+		rpcs = append(rpcs, v)
+	}
+	sort.Slice(rpcs, func(i, j int) bool {
+		return rpcs[i].Order < rpcs[j].Order
 	})
-	var imports string
-	for _, v := range sortedImports {
-		imports += "\n" + v
+
+	templateManager := template.NewTemplateManager()
+	for k, v := range templatesNamesValues {
+		err := templateManager.AddTemplate(k, v)
+		if err != nil {
+			return err
+		}
 	}
 
-	service := self.service
-	if imports != "" {
-		service = "\n" + service
+	// -----------------------------
+	//
+	// Parse methods
+	//
+	// -----------------------------
+
+	parserInstance := &parser{
+		schema:                  schema,
+		imports:                 map[string]bool{},
+		methods:                 make([]*templates.ProtofileTemplInputMethod, 0, len(rpcs)),
+		enums:                   map[string]*templates.ProtofileTemplInputEnum{},
+		typesToAvoidDuplication: map[string]*templates.ProtofileTemplInputType{},
+		types:                   []*templates.ProtofileTemplInputType{},
 	}
 
-	sortedEnums := []string{}
-	for _, v := range self.enums {
-		sortedEnums = append(sortedEnums, v)
+	emptyMsg := "google.protobuf.Empty"
+
+	for _, v := range rpcs {
+		method, ok := schema.Usecase.Methods.Methods[v.UsecaseMethodHash]
+		if !ok {
+			return fmt.Errorf("usecase method \"%s\" not found", v.UsecaseMethodHash)
+		}
+
+		var input *string = nil
+		if method.Input != nil {
+			if method.Input.TypeHash == "" {
+				return fmt.Errorf("missing \"TypeHash\" for usecase method \"%s\"", method.Name)
+			}
+
+			inputType, ok := schema.Types.Types[method.Input.TypeHash]
+			if !ok {
+				return fmt.Errorf("type \"%s\" not found for usecase method \"%s\"", method.Input.TypeHash, method.Name)
+			}
+
+			inputTypeResolved, err := parserInstance.resolveType(inputType)
+			if err != nil {
+				return err
+			}
+
+			input = &inputTypeResolved.Name
+		} else {
+			parserInstance.imports["google/protobuf/empty.proto"] = true
+			input = &emptyMsg
+		}
+
+		var output *string = nil
+		if method.Output != nil {
+			if method.Output.TypeHash == "" {
+				return fmt.Errorf("missing \"TypeHash\" for usecase method \"%s\"", method.Name)
+			}
+
+			outputType, ok := schema.Types.Types[method.Output.TypeHash]
+			if !ok {
+				return fmt.Errorf("type \"%s\" not found for usecase method \"%s\"", method.Output.TypeHash, method.Name)
+			}
+
+			outputTypeResolved, err := parserInstance.resolveType(outputType)
+			if err != nil {
+				return err
+			}
+
+			output = &outputTypeResolved.Name
+		} else {
+			parserInstance.imports["google/protobuf/empty.proto"] = true
+			output = &emptyMsg
+		}
+
+		parserInstance.methods = append(parserInstance.methods, &templates.ProtofileTemplInputMethod{
+			Name:   method.Name,
+			Input:  input,
+			Output: output,
+		})
 	}
-	sort.Slice(sortedEnums, func(i, j int) bool {
-		return sortedEnums[i] < sortedEnums[j]
+
+	// -----------------------------
+	//
+	// Prepare template
+	//
+	// -----------------------------
+
+	templInput := &templates.ProtofileTemplInput{
+		Domain:  schema.Domain,
+		Imports: make([]string, 0, len(parserInstance.imports)),
+		Enums:   make([]*templates.ProtofileTemplInputEnum, 0, len(parserInstance.enums)),
+		Methods: parserInstance.methods,
+		Types:   parserInstance.types,
+	}
+	for k := range parserInstance.imports {
+		templInput.Imports = append(templInput.Imports, k)
+	}
+	sort.Slice(templInput.Imports, func(i, j int) bool {
+		return templInput.Imports[i] < templInput.Imports[j]
 	})
-	var enums string
-	for _, v := range sortedEnums {
-		enums += "\n" + v
+	for _, v := range parserInstance.enums {
+		templInput.Enums = append(templInput.Enums, v)
 	}
-
-	sortedMessages := []string{}
-	for _, v := range self.messages {
-		sortedMessages = append(sortedMessages, v)
-	}
-	sort.Slice(sortedMessages, func(i, j int) bool {
-		return sortedMessages[i] < sortedMessages[j]
+	sort.Slice(templInput.Enums, func(i, j int) bool {
+		return templInput.Enums[i].Name < templInput.Enums[j].Name
 	})
-	var messages string
-	for _, v := range sortedMessages {
-		messages += "\n" + v
-	}
 
-	if enums != "" {
-		messages = "\n" + messages
-	}
-
-	return fmt.Sprintf(`syntax = "proto3";
-%s
-%s
-%s%s`, imports, service, enums, messages)
-}
-
-func Parse(schema *schemas.Schema) (string, error) {
-	proto := &protoFile{
-		schema:   schema,
-		imports:  map[string]bool{},
-		enums:    map[string]string{},
-		messages: map[string]string{},
-	}
-
-	err := proto.resolveService()
+	protofile, err := templateManager.Parse("protofile", templInput)
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	return proto.toString(), nil
+	err = WriteFile(schema, outputFolderPath, protofile)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

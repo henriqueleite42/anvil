@@ -1,25 +1,39 @@
 package internal
 
 import (
-	"fmt"
 	"strings"
 
+	"github.com/henriqueleite42/anvil/generators/grpc/internal/templates"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
-func (self *protoFile) resolveEnum(e *schemas.Enum) string {
-	if _, ok := self.enums[e.Name]; ok {
-		return e.Name
+func (self *parser) resolveEnum(e *schemas.Enum) *templates.ProtofileTemplInputEnum {
+	if existentEnum, ok := self.enums[e.Name]; ok {
+		return existentEnum
 	}
 
-	values := []string{}
+	result := &templates.ProtofileTemplInputEnum{
+		Name:   e.Name,
+		Values: make([]*templates.ProtofileTemplInputEnumValue, 0, len(e.Values)),
+	}
+
+	biggest := 0
+	for _, v := range e.Values {
+		newLen := len(v.Name)
+		if newLen > biggest {
+			biggest = newLen
+		}
+	}
+
 	for k, v := range e.Values {
-		values = append(values, fmt.Sprintf("	%s = %d;", v.Value, k))
+		result.Values = append(result.Values, &templates.ProtofileTemplInputEnumValue{
+			Name:    v.Name,
+			Spacing: strings.Repeat(" ", biggest-len(v.Name)),
+			Idx:     k,
+		})
 	}
 
-	self.enums[e.Name] = fmt.Sprintf(`enum %s {
-%s
-}`, e.Name, strings.Join(values, "\n"))
+	self.enums[e.Name] = result
 
-	return e.Name
+	return result
 }

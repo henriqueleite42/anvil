@@ -55,15 +55,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	result, err := internal.Parse(schema)
+	err = internal.Parse(schema, silent, outputFolderPath)
 	if err != nil {
 		log.Fatal(err)
-	}
-
-	if !silent {
-		err := internal.WriteProtoFile(outputFolderPath, schema, result)
-		if err != nil {
-			log.Fatal(err)
-		}
 	}
 }
