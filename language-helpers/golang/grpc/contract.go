@@ -1,6 +1,8 @@
 package grpc
 
-import "github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
+import (
+	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
+)
 
 type Prop struct {
 	Name    string
@@ -21,6 +23,9 @@ type GoToProtoInput struct {
 }
 
 type ProtoToGoInput struct {
+	Type       *schemas.Type
+	MethodName string
+	Prefix     string
 }
 
 type GrpcParser interface {

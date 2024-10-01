@@ -70,7 +70,6 @@ func (self *typeParser) ParseType(t *schemas.Type, opt *ParseTypeOpt) (*Type, er
 		if opt != nil && opt.PrefixForEnums != "" {
 			golangType = fmt.Sprintf("%s.%s", opt.PrefixForEnums, enum.GolangName)
 		} else {
-			// In models file
 			golangType = enum.GolangName
 		}
 

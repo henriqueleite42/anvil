@@ -21,11 +21,6 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 		return nil, fmt.Errorf("inputs for grpc must be Map Type")
 	}
 
-	_, err := self.goTypeParser.ParseType(t, nil)
-	if err != nil {
-		return nil, err
-	}
-
 	result := &Type{
 		Name:         t.Name,
 		Props:        make([]*Prop, 0, len(t.ChildTypesHashes)),
