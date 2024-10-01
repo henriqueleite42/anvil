@@ -4,8 +4,10 @@ const ContractTempl = `package {{ .DomainSnake }}
 
 import (
 {{- range .ImportsContract }}
-{{ . }}
-{{- end }}
+	{{- range . }}
+	"{{ . }}"
+	{{- end }}
+{{ end -}}
 )
 
 type {{ .Domain }}ApiInput struct {
@@ -21,11 +23,11 @@ type {{ .Domain }}ApiInput struct {
 ------------------
 */}}
 {{ range $enum := .Enums }}
-type {{ $enum.Name }} {{ $enum.Type }}
+type {{ $enum.GolangName }} {{ $enum.GolangType }}
 
 const (
 {{- range $enumVal := $enum.Values }}
-	{{ $enum.Name }}_{{ $enumVal.Name }}{{ $enumVal.Spacing }} {{ $enum.Name }} = {{ if eq $enum.Type "string" }}"{{ $enumVal.Value }}"{{ else }}{{ $enumVal.Value }}{{ end }}
+	{{ $enum.GolangName }}_{{ $enumVal.Name }}{{ $enumVal.Spacing }} {{ $enum.GolangName }} = {{ if eq $enum.GolangType "string" }}"{{ $enumVal.Value }}"{{ else }}{{ $enumVal.Value }}{{ end }}
 {{- end }}
 )
 {{- end }}
@@ -37,9 +39,9 @@ const (
 	------------------
 */}}
 {{ range $type := .Types }}
-type {{ $type.Name }} struct {
-{{- range $prop := $type.Props }}
-	{{ $prop.Name }}{{ $prop.Spacing }} {{ $prop.Type }}
+type {{ $type.GolangType }} struct {
+{{- range $prop := $type.MapProps }}
+	{{ $prop.Name }}{{ $prop.Spacing1 }} {{ $prop.GolangType }}
 {{- end }}
 }
 {{- end }}
@@ -51,13 +53,13 @@ type {{ .Domain }}Api interface {
 	{{- if not $method.Input }}
 	{{ $method.MethodName }}() error
 	{{- else }}
-	{{ $method.MethodName }}(i *{{ $method.InputTypeName }}) error
+	{{ $method.MethodName }}(i *{{ $method.Input.Name }}) error
 	{{- end }}
 {{- else }}
 	{{- if not $method.Input }}
-	{{ $method.MethodName }}() (*{{ $method.OutputTypeName }}, error)
+	{{ $method.MethodName }}() (*{{ $method.Output.Name }}, error)
 	{{- else }}
-	{{ $method.MethodName }}(i *{{ $method.InputTypeName }}) (*{{ $method.OutputTypeName }}, error)
+	{{ $method.MethodName }}(i *{{ $method.Input.Name }}) (*{{ $method.Output.Name }}, error)
 	{{- end }}
 {{- end }}
 {{- end }}

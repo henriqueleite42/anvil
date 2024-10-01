@@ -4,8 +4,10 @@ const ImplementationTempl = `package {{ .DomainSnake }}
 
 import (
 {{- range .ImportsImplementation }}
-{{ . }}
-{{- end }}
+	{{- range . }}
+	"{{ . }}"
+	{{- end }}
+{{ end -}}
 )
 
 type {{ .Domain }}ApiImplementation struct {
@@ -16,23 +18,23 @@ type {{ .Domain }}ApiImplementation struct {
 	conn *grpc.ClientConn
 }
 {{ range $enum := .Enums }}
-func convert{{ $enum.Name }}ToPb(val {{ $enum.Name }}) pb.{{ $enum.Name }} {
+func convert{{ $enum.GolangName }}ToPb(val {{ $enum.GolangName }}) pb.{{ $enum.GolangName }} {
 	{{-  range $value := $enum.Values }}
-	if val == {{ $enum.Name }}_{{ $value.Name }} {
+	if val == {{ $enum.GolangName }}_{{ $value.Name }} {
 		return {{ $value.Idx }}
 	}
 	{{- end }}
 
 	return 0
 }
-func convertPbTo{{ $enum.Name }}(val pb.{{ $enum.Name }}) {{ $enum.Name }} {
+func convertPbTo{{ $enum.GolangName }}(val pb.{{ $enum.GolangName }}) {{ $enum.GolangName }} {
 	{{- range $value := $enum.Values }}
 	if val == {{ $value.Idx }} {
-		return {{ $enum.Name }}_{{ $value.Name }}
+		return {{ $enum.GolangName }}_{{ $value.Name }}
 	}
 	{{- end }}
 
-	return {{ $enum.Name }}_{{ with $firstEnum := index $enum.Values 0 }}{{ $firstEnum.Name }}{{ end }}
+	return {{ $enum.GolangName }}_{{ with $firstEnum := index $enum.Values 0 }}{{ $firstEnum.Name }}{{ end }}
 }
 {{- end }}
 
@@ -46,41 +48,45 @@ func (self *{{ .Domain }}ApiImplementation) Close() error {
 		{{- if not $method.Input }}
 func (self *{{ $originalInput.Domain }}ApiImplementation) {{ $method.MethodName }}() error {
 		{{- else }}
-func (self *{{ $originalInput.Domain }}ApiImplementation) {{ $method.MethodName }}(i *{{ $method.InputTypeName }}) error {
-		{{- end }}
-	{{- else }}
-		{{- if not $method.Input }}
-func (self *{{ $originalInput.Domain }}ApiImplementation) {{ $method.MethodName }}() (*{{ $method.OutputTypeName }}, error) {
-		{{- else }}
-func (self *{{ $originalInput.Domain }}ApiImplementation) {{ $method.MethodName }}(i *{{ $method.InputTypeName }}) (*{{ $method.OutputTypeName }}, error) {
-		{{- end }}
-	{{- end }}
-	{{- if $method.Input }}
+func (self *{{ $originalInput.Domain }}ApiImplementation) {{ $method.MethodName }}(i *{{ $method.Input.Name }}) error {
 	if i == nil {
 		return errors.New("input must not be nil")
 	}
-{{ range $method.InputPropsPrepare }}
+		{{- end }}
+	{{- else }}
+		{{- if not $method.Input }}
+func (self *{{ $originalInput.Domain }}ApiImplementation) {{ $method.MethodName }}() (*{{ $method.Output.Name }}, error) {
+		{{- else }}
+func (self *{{ $originalInput.Domain }}ApiImplementation) {{ $method.MethodName }}(i *{{ $method.Input.Name }}) (*{{ $method.Output.Name }}, error) {
+	if i == nil {
+		return nil, errors.New("input must not be nil")
+	}
+		{{- end }}
+	{{- end }}
+
+{{ if $method.Input -}}
+{{ range $method.Input.PropsPrepare -}}
 {{ . }}
+{{ end -}}
 {{- end }}
-{{ end }}{{/* NECESSARY IT TO BE THIS WAY!!!! */}}
 	ctx, cancel := context.WithTimeout(context.Background(), self.timeout)
 	defer cancel()
 	{{- if not $method.Output }}
 		{{- if not $method.Input }}
-	_, err := self.{{ $originalInput.DomainCamel }}Client.{{ $method.MethodName }}(ctx, nil)
+	_, err := self.{{ $originalInput.DomainCamel }}Client.{{ $method.MethodName }}(ctx, &emptypb.Empty{})
 		{{- else }}
-	_, err := self.{{ $originalInput.DomainCamel }}Client.{{ $method.MethodName }}(ctx, &pb.{{ $method.InputTypeName }}{
-		{{- range $input := $method.Input }}
+	_, err := self.{{ $originalInput.DomainCamel }}Client.{{ $method.MethodName }}(ctx, &pb.{{ $method.Input.Name }}{
+		{{- range $input := $method.Input.Props }}
 		{{ $input.Name }}:{{ $input.Spacing }} {{ $input.Value }},
 		{{- end }}
 	})
 		{{- end }}
 	{{- else }}
 		{{- if not $method.Input }}
-	result, err := self.{{ $originalInput.DomainCamel }}Client.{{ $method.MethodName }}(ctx, nil)
+	result, err := self.{{ $originalInput.DomainCamel }}Client.{{ $method.MethodName }}(ctx, &emptypb.Empty{})
 		{{- else }}
-	result, err := self.{{ $originalInput.DomainCamel }}Client.{{ $method.MethodName }}(ctx, &pb.{{ $method.InputTypeName }}{
-		{{- range $input := $method.Input }}
+	result, err := self.{{ $originalInput.DomainCamel }}Client.{{ $method.MethodName }}(ctx, &pb.{{ $method.Input.Name }}{
+		{{- range $input := $method.Input.Props }}
 		{{ $input.Name }}:{{ $input.Spacing }} {{ $input.Value }},
 		{{- end }}
 	})
@@ -88,10 +94,11 @@ func (self *{{ $originalInput.Domain }}ApiImplementation) {{ $method.MethodName 
 	{{- end }}
 	{{- if $method.Output }}
 
-{{ $method.OutputPropsPrepare }}
-
-	return &{{ $method.OutputTypeName }}{
-		{{- range $output := $method.Output }}
+{{ range $method.Output.PropsPrepare -}}
+{{ . }}
+{{ end }}
+	return &{{ $method.Output.Name }}{
+		{{- range $output := $method.Output.Props }}
 	{{ $output.Name }}:{{ $output.Spacing }} {{ $output.Value }},
 		{{- end }}
 	},err

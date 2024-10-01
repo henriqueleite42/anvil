@@ -3,7 +3,7 @@ package internal
 import (
 	"os"
 
-	"github.com/henriqueleite42/anvil/cli/formatter"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/formatter"
 )
 
 func WriteFile(domain string, path string, fileName string, content string) error {
