@@ -67,8 +67,8 @@ func (self *anvToAnvpParser) delivery(file map[string]any) error {
 			// Deliveries don't use ref or paths, since they should be absolute
 			// and not used by relationships
 
-			usecaseMethod := self.getRef("Usecase", usecaseMethodString)
-			usecaseMethodHash := hashing.String(usecaseMethod)
+			usecaseMethodRef := self.getRef("Usecase", usecaseMethodString)
+			usecaseMethodHash := hashing.String(usecaseMethodRef)
 
 			var name string
 			nameAny, ok := vMap["Name"]
@@ -83,6 +83,7 @@ func (self *anvToAnvpParser) delivery(file map[string]any) error {
 				if !ok {
 					return fmt.Errorf("fail to find usecase \"%s\" for rpc \"%s.Grpc.Rpcs.%d\"", usecaseMethodHash, path, k)
 				}
+
 				name = usecase.Name
 			}
 

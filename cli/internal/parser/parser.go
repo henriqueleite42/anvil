@@ -12,10 +12,12 @@ type anvToAnvpParser struct {
 }
 
 type resolveInput struct {
-	path string
-	ref  string
-	k    string
-	v    any
+	namePrefix string // Internal use. Correctly parse child map types with the prefix of their parent.
+
+	path string // Original path
+	ref  string // Ref until now
+	k    string // Key being resolved, usually the type name, but if it's an child type, it's only part of the type's name
+	v    any    // Value, type specification
 }
 
 func (self *anvToAnvpParser) parse(file map[string]any) error {

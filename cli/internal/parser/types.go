@@ -149,10 +149,11 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 
 		for kk, vv := range propertiesMap {
 			typeHash, err := self.resolveType(&resolveInput{
-				path: fmt.Sprintf("%s.%s.Properties", i.path, i.k),
-				ref:  ref,
-				k:    kk,
-				v:    vv,
+				namePrefix: i.k,
+				path:       fmt.Sprintf("%s.%s.Properties", i.path, i.k),
+				ref:        ref,
+				k:          kk,
+				v:          vv,
 			})
 			if err != nil {
 				return "", err
@@ -260,10 +261,15 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 		return "", err
 	}
 
+	name := i.k
+	if typeType == schemas.TypeType_Map {
+		name = i.namePrefix + i.k
+	}
+
 	schemaTypes := &schemas.Type{
 		Ref:              ref,
 		OriginalPath:     fmt.Sprintf("%s.%s", i.path, i.k),
-		Name:             i.k,
+		Name:             name,
 		RootNode:         rootNode,
 		Confidentiality:  confidentiality,
 		Optional:         optional,

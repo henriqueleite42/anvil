@@ -17,15 +17,20 @@ type Type struct {
 }
 
 type GoToProtoInput struct {
-	Type       *schemas.Type
-	MethodName string
-	Prefix     string
+	Type                    *schemas.Type
+	MethodName              string
+	VariableName            string
+	PrefixForVariableNaming string
+	HasOutput               bool
 }
 
 type ProtoToGoInput struct {
-	Type       *schemas.Type
-	MethodName string
-	Prefix     string
+	Type                    *schemas.Type
+	MethodName              string
+	VariableName            string
+	PrefixForVariableNaming string
+	PkgForEnums             string
+	HasOutput               bool
 }
 
 type GrpcParser interface {

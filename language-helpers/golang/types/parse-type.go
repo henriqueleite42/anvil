@@ -109,7 +109,7 @@ func (self *typeParser) ParseType(t *schemas.Type, opt *ParseTypeOpt) (*Type, er
 	// ----------------------
 
 	if t.Type == schemas.TypeType_Map {
-		if existentType, ok := self.typesToAvoidDuplication[t.Name]; ok {
+		if existentType, ok := self.typesToAvoidDuplication[t.Ref]; ok {
 			return existentType, nil
 		}
 
@@ -190,7 +190,7 @@ func (self *typeParser) ParseType(t *schemas.Type, opt *ParseTypeOpt) (*Type, er
 			MapProps:   props,
 		}
 
-		self.typesToAvoidDuplication[t.Name] = result
+		self.typesToAvoidDuplication[t.Ref] = result
 		self.types = append(self.types, result)
 	}
 
