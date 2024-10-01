@@ -785,6 +785,10 @@
 								"type": "object",
 								"description": "gRPC delivery configuration. By just including an empty `Grpc` on the delivery, the route will already be created.",
 								"properties": {
+									"Name": {
+										"type": "string",
+										"description": "Name for the RPC. If not specified, the Usecase method name will be used"
+									},
 									"UsecaseMethod": {
 										"type": "string",
 										"description": "Usecase method that will be delivered by this RPC"
