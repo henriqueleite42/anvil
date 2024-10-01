@@ -15,7 +15,7 @@ func (self *typeParser) ParseEnum(e *schemas.Enum) (*Enum, error) {
 	if e.Type == schemas.EnumType_String {
 		eType = "string"
 	} else {
-		eType = "int"
+		eType = "int32"
 	}
 
 	enum := &Enum{

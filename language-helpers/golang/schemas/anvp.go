@@ -185,6 +185,7 @@ type Type struct {
 	AutoIncrement   bool                `yaml:"AutoIncrement"`
 	Default         *string             `yaml:"Default,omitempty" json:"Default,omitempty"`
 	Type            TypeType            `yaml:"Type"`
+	DbName          *string             `yaml:"DbName,omitempty" json:"DbName,omitempty"`
 	DbType          *string             `yaml:"DbType,omitempty" json:"DbType,omitempty"`
 	// Used for Map and List (List will always only have 1 item inside the slice)
 	ChildTypesHashes []string `yaml:"ChildTypesHashes,omitempty" json:"ChildTypesHashes,omitempty"`
@@ -245,7 +246,6 @@ type EntityColumn struct {
 	OriginalPath string `yaml:"OriginalPath"`
 	Name         string `yaml:"Name"`
 	Order        int    `yaml:"Order"`
-	DbName       string `yaml:"DbName"`
 	StateHash    string `yaml:"StateHash"`
 	TypeHash     string `yaml:"TypeHash"`
 }

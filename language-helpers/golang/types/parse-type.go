@@ -166,6 +166,10 @@ func (self *typeParser) ParseType(t *schemas.Type, opt *ParseTypeOpt) (*Type, er
 				prop.Tags = append(prop.Tags, fmt.Sprintf("validate:\"%s\"", strings.Join(v.Validate, ",")))
 			}
 
+			if v.DbName != nil {
+				prop.Tags = append(prop.Tags, fmt.Sprintf("db:\"%s\"", *v.DbName))
+			}
+
 			props[k] = prop
 		}
 
