@@ -111,22 +111,6 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 
 	for columnOrder, kk := range keys {
 		vv := columnsMap[kk]
-		vvMap, ok := vv.(map[string]any)
-		if !ok {
-			return "", fmt.Errorf("fail to parse \"%s.%s.Columns.%s\" to `map[string]any`", i.path, i.k, kk)
-		}
-
-		var columnName string
-		columnNameAny, ok := vvMap["Name"]
-		if ok {
-			columnNameString, ok := columnNameAny.(string)
-			if !ok {
-				return "", fmt.Errorf("fail to parse \"%s.%s.Columns.%s.Name\" to `string`", i.path, i.k, kk)
-			}
-			columnName = columnNameString
-		} else {
-			columnName = self.formatToEntitiesNamingCase(kk)
-		}
 
 		columnPath := fmt.Sprintf("%s.%s.Columns.%s", i.path, i.k, kk)
 		columnRef := ref + "." + kk
@@ -148,7 +132,6 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 			OriginalPath: columnPath,
 			Order:        columnOrder,
 			Name:         kk,
-			DbName:       columnName,
 			TypeHash:     typeHash,
 		}
 
@@ -253,7 +236,14 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 					if !ok {
 						return "", fmt.Errorf("fail to find one of the columns to created database name for \"%s.%s.Indexes.%d\"", i.path, i.k, kk)
 					}
-					columnsToCreateName = append(columnsToCreateName, column.DbName)
+					cType, ok := self.schema.Types.Types[column.TypeHash]
+					if !ok {
+						return "", fmt.Errorf("fail to find one of the columns types to created database name for \"%s.%s.Indexes.%d\"", i.path, i.k, kk)
+					}
+					if cType.DbName == nil {
+						return "", fmt.Errorf("fail to find get DbName to created database name for \"%s.%s.Indexes.%d\"", i.path, i.k, kk)
+					}
+					columnsToCreateName = append(columnsToCreateName, *cType.DbName)
 				}
 				// TODO make it dynamic to match pattern specified in Entities.NamingCase (maybe create a Entities.ConstraintCase?)
 				name = strings.Join(columnsToCreateName, "_") + "_idx"
@@ -323,13 +313,20 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 				columnRef := fmt.Sprintf("Entities.%s.%s", i.k, vvvString)
 				hash := hashing.String(columnRef)
 
-				column := columns[hash]
-
-				if column == nil {
+				column, ok := columns[hash]
+				if !ok {
 					return "", fmt.Errorf("fail to find column \"%s\" for \"%s.%s.ForeignKeys.%d.Columns.%d\"", vvvString, i.path, i.k, kk, kkk)
 				}
 
-				columnsNamesForFkName = append(columnsNamesForFkName, column.DbName)
+				cType, ok := self.schema.Types.Types[column.TypeHash]
+				if !ok {
+					return "", fmt.Errorf("fail to find one of the columns types to created database name for \"%s.%s.Indexes.%d\"", i.path, i.k, kk)
+				}
+				if cType.DbName == nil {
+					return "", fmt.Errorf("fail to find get DbName to created database name for \"%s.%s.Indexes.%d\"", i.path, i.k, kk)
+				}
+
+				columnsNamesForFkName = append(columnsNamesForFkName, *cType.DbName)
 				columnsHashes = append(columnsHashes, hash)
 			}
 

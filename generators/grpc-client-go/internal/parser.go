@@ -110,7 +110,7 @@ func Parse(schema *schemas.Schema, silent bool, outputFolderPath string) error {
 				MethodName:              methodName,
 				VariableName:            "i",
 				PrefixForVariableNaming: "Input",
-				HasOutput:               true,
+				HasOutput:               method.Output != nil,
 			})
 			if err != nil {
 				return err

@@ -151,11 +151,7 @@ func (self *typeParser) ParseType(t *schemas.Type, opt *ParseTypeOpt) (*Type, er
 			}
 
 			if !v.Optional && !slices.Contains(v.Validate, "required") {
-				if prop.Tags == nil {
-					prop.Tags = []string{}
-				}
-
-				prop.Tags = append(prop.Tags, "required")
+				v.Validate = append(v.Validate, "required")
 			}
 
 			if len(v.Validate) > 0 {

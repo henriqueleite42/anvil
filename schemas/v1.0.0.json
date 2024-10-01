@@ -78,6 +78,10 @@
 					"type": "string",
 					"description": "If the values is encoded/encrypted/formatted/transformed in any way, like a string json object, base64 image, RFC3339 timestamp, bcrypt password."
 				},
+				"DbName": {
+					"type": "string",
+					"description": "Column name in the database"
+				},
 				"DbType": {
 					"type": "string",
 					"description": "The raw database type, used when generating migrations."

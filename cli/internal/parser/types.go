@@ -34,6 +34,11 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 		return refHash, nil
 	}
 
+	rootNode, err := getRootNode(i.path)
+	if err != nil {
+		return "", err
+	}
+
 	vMap, ok := i.v.(map[string]any)
 	if !ok {
 		return "", fmt.Errorf("fail to parse \"%s.%s\" to `map[string]any`", i.path, i.k)
@@ -234,6 +239,19 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 		return "", fmt.Errorf("Type \"%s.%s\" must have property \"Values\". All types with enum \"Type\" must.", i.path, i.k)
 	}
 
+	var dbName *string = nil
+	dbNameAny, ok := vMap["DbName"]
+	if ok {
+		dbNameString, ok := dbNameAny.(string)
+		if !ok {
+			return "", fmt.Errorf("fail to parse \"%s.%s.DbName\" to `string`", i.path, i.k)
+		}
+		dbName = &dbNameString
+	} else if rootNode == "Entities" {
+		r := self.formatToEntitiesNamingCase(i.k)
+		dbName = &r
+	}
+
 	var dbType *string = nil
 	dbTypeAny, ok := vMap["DbType"]
 	if ok {
@@ -256,11 +274,6 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 		dbType = &enum.DbType
 	}
 
-	rootNode, err := getRootNode(i.path)
-	if err != nil {
-		return "", err
-	}
-
 	name := i.k
 	if typeType == schemas.TypeType_Map {
 		name = i.namePrefix + i.k
@@ -278,6 +291,7 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 		AutoIncrement:    autoIncrement,
 		Default:          defaultV,
 		Type:             typeType,
+		DbName:           dbName,
 		DbType:           dbType,
 		ChildTypesHashes: childTypesHashes,
 		EnumHash:         enumHash,

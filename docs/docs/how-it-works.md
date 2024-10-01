@@ -16,7 +16,7 @@ Think about the `.anv` files like a `schemas.prisma` or an OpenApi spec, and fro
 
 `.anvilconfig` is the configuration file for Anvil, where you put information like the plugins that you are using, the things that you want to generate, and any other configuration that Anvil CLI or the plugins may need.
 
-It is written in [TOML](https://toml.io/en/).
+It is written in [INI](https://en.wikipedia.org/wiki/INI_file).
 
 ## CLI
 

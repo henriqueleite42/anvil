@@ -1,6 +1,10 @@
 package types_parser
 
-import "github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
+import (
+	"strings"
+
+	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
+)
 
 type MapProp struct {
 	Name       string
@@ -8,6 +12,10 @@ type MapProp struct {
 	GolangType string
 	Spacing2   string // Spacing between type and tags
 	Tags       []string
+}
+
+func (self *MapProp) GetTagsString() string {
+	return strings.Join(self.Tags, " ")
 }
 
 type Type struct {

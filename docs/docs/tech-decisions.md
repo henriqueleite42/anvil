@@ -12,7 +12,7 @@ Because [Henrique Leite](https://henriqueleite42.com), the initial main contribu
 
 ### Why YAML?
 
-The options that we have are: YAML, JSON and TOML. YAML is the best between the three for long nested configuration. TOML doesn't look good and can be extremely repetitive when dealing with these things, and JSON doesn't support comments.
+The options that we have are: YAML, JSON, TOML and INI. YAML is the best between the three for long nested configuration. TOML doesn't look good and can be extremely repetitive when dealing with these things, JSON doesn't support comments and INI is more focused in configuration, not specification.
 
 ### Why does Anvil have some hidden behavior?
 
