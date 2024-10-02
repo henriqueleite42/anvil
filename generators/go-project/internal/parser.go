@@ -2,60 +2,30 @@ package internal
 
 import (
 	"fmt"
-	"sort"
 	"strings"
 
-	"github.com/henriqueleite42/anvil/cli/formatter"
-	"github.com/henriqueleite42/anvil/cli/schemas"
-	"github.com/henriqueleite42/anvil/cli/template"
 	"github.com/henriqueleite42/anvil/generators/go-project/internal/parser"
 	"github.com/henriqueleite42/anvil/generators/go-project/internal/templates"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/formatter"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/template"
+	types_parser "github.com/henriqueleite42/anvil/language-helpers/golang/types"
 )
 
 var templatesNamesValues = map[string]string{
-	"models":            templates.ModelsTempl,
-	"repository":        templates.RepositoryTempl,
-	"repository-struct": templates.RepositoryStructTempl,
-	"repository-method": templates.RepositoryMethodTempl,
-	"usecase":           templates.UsecaseTempl,
-	"usecase-struct":    templates.UsecaseStructTempl,
-	"usecase-method":    templates.UsecaseMethodTempl,
+	"models":               templates.ModelsTempl,
+	"repository":           templates.RepositoryTempl,
+	"repository-struct":    templates.RepositoryStructTempl,
+	"repository-method":    templates.RepositoryMethodTempl,
+	"usecase":              templates.UsecaseTempl,
+	"usecase-struct":       templates.UsecaseStructTempl,
+	"usecase-method":       templates.UsecaseMethodTempl,
+	"grpc-delivery-module": templates.GrpcDeliveryModuleTempl,
 }
 
 type File struct {
 	Name    string
 	Content string
-}
-
-func getImports(imports map[string]bool) []string {
-	importsStd := make([]string, 0, len(imports))
-	importsExt := make([]string, 0, len(imports))
-	for k := range imports {
-		impt := fmt.Sprintf("	\"%s\"", k)
-		parts := strings.Split(k, "/")
-		if strings.Contains(parts[0], ".") {
-			importsExt = append(importsExt, impt)
-		} else {
-			importsStd = append(importsStd, impt)
-		}
-	}
-	sort.Slice(importsStd, func(i, j int) bool {
-		return importsStd[i] < importsStd[j]
-	})
-	sort.Slice(importsExt, func(i, j int) bool {
-		return importsExt[i] < importsExt[j]
-	})
-	importsResolved := make([]string, 0, len(imports)+1)
-	if len(importsStd) > 0 {
-		importsResolved = append(importsResolved, importsStd...)
-	}
-	if len(importsStd) > 0 && len(importsExt) > 0 {
-		importsResolved = append(importsResolved, "")
-	}
-	if len(importsExt) > 0 {
-		importsResolved = append(importsResolved, importsExt...)
-	}
-	return importsResolved
 }
 
 func Parse(schema *schemas.Schema) ([]*File, error) {
@@ -75,23 +45,53 @@ func Parse(schema *schemas.Schema) ([]*File, error) {
 	if schema.Usecase != nil && schema.Usecase.Methods != nil && schema.Usecase.Methods.Methods != nil {
 		lenUsecase = len(schema.Usecase.Methods.Methods)
 	}
+	lenGrpcDelivery := 0
+	if schema.Delivery != nil &&
+		schema.Delivery.Grpc != nil &&
+		schema.Delivery.Grpc.Rpcs != nil &&
+		schema.Usecase != nil &&
+		schema.Usecase.Methods != nil &&
+		schema.Usecase.Methods.Methods != nil {
+		lenGrpcDelivery = len(schema.Delivery.Grpc.Rpcs)
+	}
+
+	goTypesParserModels, err := types_parser.NewTypeParser(schema)
+	if err != nil {
+		return nil, err
+	}
+	goTypesParserRepository, err := types_parser.NewTypeParser(schema)
+	if err != nil {
+		return nil, err
+	}
+	goTypesParserUsecase, err := types_parser.NewTypeParser(schema)
+	if err != nil {
+		return nil, err
+	}
+
+	goTypesParserRepository.AddImport("context")
 
 	typeParser := &parser.Parser{
-		ModelsPath:    "foo/models",
-		ModelsPkgName: "models",
-		Schema:        schema,
+		ModelsPath: "foo/models",
+		Schema:     schema,
 
-		ImportsModels:                     map[string]bool{},
-		ImportsRepository:                 map[string]bool{},
-		ImportsUsecase:                    map[string]bool{},
-		Enums:                             make(map[string]*templates.TemplEnum, lenEnums),
-		Entities:                          make([]*templates.TemplType, 0, lenEntities),
-		TypesRepository:                   []*templates.TemplType{},
-		TypesRepositoryToAvoidDuplication: map[string]*templates.TemplType{}, // TODO improve this, find a way to merge both
-		TypesUsecase:                      []*templates.TemplType{},
-		TypesUsecaseToAvoidDuplication:    map[string]*templates.TemplType{},
-		MethodsRepository:                 make([]*templates.TemplMethod, 0, lenRepository),
-		MethodsUsecase:                    make([]*templates.TemplMethod, 0, lenUsecase),
+		GoTypesParserModels:     goTypesParserModels,
+		GoTypesParserRepository: goTypesParserRepository,
+		GoTypesParserUsecase:    goTypesParserUsecase,
+
+		MethodsUsecaseToAvoidDuplication: map[string]bool{},
+
+		MethodsRepository:   make([]*templates.TemplMethod, 0, lenRepository),
+		MethodsUsecase:      make([]*templates.TemplMethod, 0, lenUsecase),
+		MethodsGrpcDelivery: make([]*templates.TemplMethodDelivery, 0, lenGrpcDelivery),
+	}
+
+	if lenEnums > 0 {
+		for _, v := range schema.Enums.Enums {
+			_, err := goTypesParserModels.ParseEnum(v)
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
 
 	if lenEntities > 0 {
@@ -105,72 +105,68 @@ func Parse(schema *schemas.Schema) ([]*File, error) {
 
 	if lenRepository > 0 {
 		for _, v := range schema.Repository.Methods.Methods {
-			var inputTypeHash string
-			if v.Input != nil {
-				inputTypeHash = v.Input.TypeHash
-			}
-			var outputTypeHash string
-			if v.Output != nil {
-				outputTypeHash = v.Output.TypeHash
-			}
-
-			err := typeParser.ResolveMethod(parser.Kind_Repository, v.Name, inputTypeHash, outputTypeHash)
+			err := typeParser.ResolveRepositoryMethod(v)
 			if err != nil {
 				return nil, err
 			}
 		}
 	}
 
+	// As the usecase is used by all the deliveries,
+	// we reuse the type parsing for all of them,
+	// but reset the imports to be sure to import the right things
+	var importsUsecase [][]string = nil
 	if lenUsecase > 0 {
 		for _, v := range schema.Usecase.Methods.Methods {
-			var inputTypeHash string
-			if v.Input != nil {
-				inputTypeHash = v.Input.TypeHash
-			}
-			var outputTypeHash string
-			if v.Output != nil {
-				outputTypeHash = v.Output.TypeHash
-			}
-
-			err := typeParser.ResolveMethod(parser.Kind_Usecase, v.Name, inputTypeHash, outputTypeHash)
+			err := typeParser.ResolveUsecaseMethod(v)
 			if err != nil {
 				return nil, err
 			}
 		}
+
+		goTypesParserUsecase.AddImport("context")
+		importsUsecase = goTypesParserUsecase.GetImports()
+		goTypesParserUsecase.ResetImports()
 	}
 
-	importsModels := getImports(typeParser.ImportsModels)
-	importsRepository := getImports(typeParser.ImportsRepository)
-	importsUsecase := getImports(typeParser.ImportsUsecase)
+	var importsGrpcDelivery [][]string = nil
+	if lenGrpcDelivery > 0 {
+		for _, v := range schema.Delivery.Grpc.Rpcs {
+			err := typeParser.ResolveGrpcDelivery(v)
+			if err != nil {
+				return nil, err
+			}
+		}
 
-	enums := make([]*templates.TemplEnum, 0, len(typeParser.Enums))
-	for _, v := range typeParser.Enums {
-		enums = append(enums, v)
+		goTypesParserUsecase.AddImport("context")
+		importsGrpcDelivery = goTypesParserUsecase.GetImports()
+		goTypesParserUsecase.ResetImports()
 	}
-	sort.Slice(enums, func(i, j int) bool {
-		return enums[i].Name < enums[j].Name
-	})
 
-	entities := make([]*templates.TemplType, 0, len(typeParser.Entities))
-	for _, v := range typeParser.Entities {
-		entities = append(entities, v)
-	}
-	sort.Slice(entities, func(i, j int) bool {
-		return entities[i].Name < entities[j].Name
-	})
+	importsModels := goTypesParserModels.GetImports()
+	importsRepository := goTypesParserRepository.GetImports()
+
+	enums := goTypesParserModels.GetEnums()
+	entities := goTypesParserModels.GetMapTypes()
+	typesRepository := goTypesParserRepository.GetMapTypes()
+	typesUsecase := goTypesParserUsecase.GetMapTypes()
 
 	templInput := &templates.TemplInput{
-		Domain:            schema.Domain,
-		DomainSnake:       formatter.PascalToSnake(schema.Domain),
-		ImportsModels:     importsModels,
-		ImportsRepository: importsRepository,
-		ImportsUsecase:    importsUsecase,
-		Enums:             enums,
-		Entities:          entities,
-		TypesRepository:   typeParser.TypesRepository,
-		TypesUsecase:      typeParser.TypesUsecase,
-		MethodsRepository: typeParser.MethodsRepository,
-		MethodsUsecase:    typeParser.MethodsUsecase,
+		Domain:                      schema.Domain,
+		DomainSnake:                 formatter.PascalToSnake(schema.Domain),
+		DomainCamel:                 formatter.PascalToCamel(schema.Domain),
+		SpacingRelativeToDomainName: strings.Repeat(" ", len(schema.Domain)),
+		ImportsModels:               importsModels,
+		ImportsRepository:           importsRepository,
+		ImportsUsecase:              importsUsecase,
+		ImportsGrpcDelivery:         importsGrpcDelivery,
+		Enums:                       enums,
+		Entities:                    entities,
+		TypesRepository:             typesRepository,
+		TypesUsecase:                typesUsecase,
+		MethodsRepository:           typeParser.MethodsRepository,
+		MethodsUsecase:              typeParser.MethodsUsecase,
+		MethodsGrpcDelivery:         typeParser.MethodsGrpcDelivery,
 	}
 
 	templateManager := template.NewTemplateManager()
@@ -267,6 +263,16 @@ func Parse(schema *schemas.Schema) ([]*File, error) {
 				Content: usecaseMethod,
 			})
 		}
+	}
+	if len(templInput.MethodsGrpcDelivery) > 0 {
+		grpcModule, err := templateManager.Parse("grpc-delivery-module", templInput)
+		if err != nil {
+			return nil, err
+		}
+		files = append(files, &File{
+			Name:    fmt.Sprintf("delivery/grpc/%s/%s.go", templInput.DomainSnake, domainKebab),
+			Content: grpcModule,
+		})
 	}
 
 	return files, nil

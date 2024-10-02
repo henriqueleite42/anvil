@@ -75,6 +75,12 @@ func Parse(schema *schemas.Schema, silent bool, outputFolderPath string) error {
 
 	emptyMsg := "google.protobuf.Empty"
 
+	if schema.Enums != nil && schema.Enums.Enums != nil {
+		for _, v := range schema.Enums.Enums {
+			parserInstance.resolveEnum(v)
+		}
+	}
+
 	for _, v := range rpcs {
 		method, ok := schema.Usecase.Methods.Methods[v.UsecaseMethodHash]
 		if !ok {

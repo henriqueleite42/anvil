@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"log/slog"
 	"os"
 	"strings"
 
-	"github.com/henriqueleite42/anvil/cli/schemas"
 	"github.com/henriqueleite42/anvil/generators/go-project/internal"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
 func main() {
@@ -67,7 +68,11 @@ func main() {
 	for _, v := range files {
 		err = internal.WriteFile(outputFolderPath, v.Name, v.Content)
 		if err != nil {
-			log.Fatal(err)
+			if strings.Contains(err.Error(), "already exists") {
+				slog.Warn(err.Error())
+			} else {
+				log.Fatal(err)
+			}
 		}
 	}
 }

@@ -6,6 +6,14 @@ import (
 	"strings"
 )
 
+func fileExists(path string) bool {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return false
+	}
+
+	return true
+}
+
 func WriteFile(path string, fileNameWithPath string, content string) error {
 	myDir, err := os.Getwd()
 	if err != nil {
@@ -28,7 +36,13 @@ func WriteFile(path string, fileNameWithPath string, content string) error {
 		return err
 	}
 
-	err = os.WriteFile(path+"/"+fileName, []byte(content), 0644)
+	finalPath := path + "/" + fileName
+
+	if fileExists(finalPath) {
+		return fmt.Errorf("file \"%s\" already exists, generator \"go-project\" is unable to overwrite files without losing data", finalPath)
+	}
+
+	err = os.WriteFile(finalPath, []byte(content), 0644)
 	if err != nil {
 		return err
 	}

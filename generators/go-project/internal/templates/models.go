@@ -13,26 +13,28 @@ type TemplEnum struct {
 	Values []*TemplEnumValue
 }
 
-const ModelsTempl = `package {{ .DomainSnake }}_models
+const ModelsTempl = `package models
 
 import (
 {{- range .ImportsModels }}
-{{ . }}
-{{- end }}
+	{{- range . }}
+	"{{ . }}"
+	{{- end }}
+{{ end -}}
 )
 {{ range $enum := .Enums }}
-type {{ $enum.Name }} {{ $enum.Type }}
+type {{ $enum.GolangName }} {{ $enum.GolangType }}
 
 const (
 {{- range $enumVal := $enum.Values }}
-	{{ $enum.Name }}_{{ $enumVal.Name }}{{ $enumVal.Spacing }} {{ $enum.Name }} = {{ if eq $enum.Type "string" }}"{{ $enumVal.Value }}"{{ else }}{{ $enumVal.Value }}{{ end }}
+	{{ $enum.GolangName }}_{{ $enumVal.Name }}{{ $enumVal.Spacing }} {{ $enum.GolangName }} = {{ if eq $enum.GolangType "string" }}"{{ $enumVal.Value }}"{{ else }}{{ $enumVal.Value }}{{ end }}
 {{- end }}
 )
 {{ end -}}
 {{- range $entity := .Entities }}
-type {{ $entity.Name }} struct {
-{{- range $prop := $entity.Props }}
-	{{ $prop.Name }}{{ $prop.Spacing1 }} {{ $prop.Type }}{{ if $prop.Tags }}{{ $prop.Spacing2 }} {{ $prop.Tags }}{{ end }}
+type {{ $entity.GolangType }} struct {
+{{- range $prop := $entity.MapProps }}
+	{{ $prop.Name }}{{ $prop.Spacing1 }} {{ $prop.GolangType }}{{ if $prop.Tags }}{{ $prop.Spacing2 }} ` + "`{{ $prop.GetTagsString }}`" + `{{ end }}
 {{- end }}
 }
 {{ end -}}

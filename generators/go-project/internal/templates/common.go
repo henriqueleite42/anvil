@@ -1,19 +1,17 @@
 package templates
 
-import "github.com/henriqueleite42/anvil/cli/schemas"
+import (
+	"github.com/henriqueleite42/anvil/language-helpers/golang/grpc"
+	types_parser "github.com/henriqueleite42/anvil/language-helpers/golang/types"
+)
 
-type TemplTypeProp struct {
-	Name     string
-	Type     string
-	Tags     string
-	Spacing1 string
-	Spacing2 string
-}
-
-type TemplType struct {
-	Name         string
-	OriginalType schemas.TypeType
-	Props        []*TemplTypeProp
+type TemplMethodDelivery struct {
+	Domain      string
+	DomainCamel string
+	DomainSnake string
+	MethodName  string
+	Input       *grpc.Type
+	Output      *grpc.Type
 }
 
 type TemplMethod struct {
@@ -23,15 +21,23 @@ type TemplMethod struct {
 }
 
 type TemplInput struct {
-	Domain            string
-	DomainSnake       string
-	ImportsModels     []string
-	ImportsRepository []string
-	ImportsUsecase    []string
-	Enums             []*TemplEnum
-	Entities          []*TemplType
-	TypesRepository   []*TemplType
-	TypesUsecase      []*TemplType
-	MethodsRepository []*TemplMethod
-	MethodsUsecase    []*TemplMethod
+	Domain                      string
+	DomainCamel                 string
+	DomainSnake                 string
+	SpacingRelativeToDomainName string
+
+	ImportsModels       [][]string
+	ImportsRepository   [][]string
+	ImportsUsecase      [][]string
+	ImportsGrpcDelivery [][]string
+
+	Enums    []*types_parser.Enum
+	Entities []*types_parser.Type
+
+	TypesRepository []*types_parser.Type
+	TypesUsecase    []*types_parser.Type
+
+	MethodsRepository   []*TemplMethod
+	MethodsUsecase      []*TemplMethod
+	MethodsGrpcDelivery []*TemplMethodDelivery
 }

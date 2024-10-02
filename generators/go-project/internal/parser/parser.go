@@ -1,33 +1,22 @@
 package parser
 
 import (
-	"github.com/henriqueleite42/anvil/cli/schemas"
 	"github.com/henriqueleite42/anvil/generators/go-project/internal/templates"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
+	types_parser "github.com/henriqueleite42/anvil/language-helpers/golang/types"
 )
 
 type Parser struct {
-	ModelsPath    string
-	ModelsPkgName string
-	Schema        *schemas.Schema
+	ModelsPath string
 
-	ImportsModels                     map[string]bool
-	ImportsRepository                 map[string]bool
-	ImportsUsecase                    map[string]bool
-	Enums                             map[string]*templates.TemplEnum
-	Entities                          []*templates.TemplType
-	TypesRepository                   []*templates.TemplType
-	TypesRepositoryToAvoidDuplication map[string]*templates.TemplType
-	TypesUsecase                      []*templates.TemplType
-	TypesUsecaseToAvoidDuplication    map[string]*templates.TemplType
-	MethodsRepository                 []*templates.TemplMethod
-	MethodsUsecase                    []*templates.TemplMethod
+	Schema *schemas.Schema
+
+	GoTypesParserModels     types_parser.TypeParser
+	GoTypesParserRepository types_parser.TypeParser
+	GoTypesParserUsecase    types_parser.TypeParser
+
+	MethodsRepository                []*templates.TemplMethod
+	MethodsUsecaseToAvoidDuplication map[string]bool
+	MethodsUsecase                   []*templates.TemplMethod
+	MethodsGrpcDelivery              []*templates.TemplMethodDelivery
 }
-
-type Kind string
-
-const (
-	Kind_Entity     Kind = "ENTITY"
-	Kind_Event      Kind = "EVENT"
-	Kind_Repository Kind = "REPOSITORY"
-	Kind_Usecase    Kind = "USECASE"
-)

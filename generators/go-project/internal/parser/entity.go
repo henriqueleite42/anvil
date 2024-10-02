@@ -2,11 +2,8 @@ package parser
 
 import (
 	"fmt"
-	"sort"
-	"strings"
 
-	"github.com/henriqueleite42/anvil/cli/schemas"
-	"github.com/henriqueleite42/anvil/generators/go-project/internal/templates"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
 func (self *Parser) ResolveEntity(e *schemas.Entity) error {
@@ -34,53 +31,7 @@ func (self *Parser) ResolveEntity(e *schemas.Entity) error {
 		return fmt.Errorf("type \"%s\" for entity \"%s\" not found", e.TypeHash, e.Name)
 	}
 
-	result := &templates.TemplType{
-		Name:         e.Name,
-		OriginalType: t.Type,
-		Props:        make([]*templates.TemplTypeProp, 0, lenColumns),
-	}
-
-	for _, v := range e.Columns {
-		childTypeRef, ok := self.Schema.Types.Types[v.TypeHash]
-		if !ok {
-			return fmt.Errorf("child type \"%s\" of type \"%s\" not found", v.TypeHash, t.Name)
-		}
-
-		resolvedProp, err := self.ResolveMapProp(&ResolveMapPropInput{
-			Kind:              Kind_Entity,
-			Type:              childTypeRef,
-			PrefixForChildren: result.Name,
-			Tags: []string{
-				fmt.Sprintf("db:\"%s\"", v.DbName),
-			},
-		})
-		if err != nil {
-			return err
-		}
-
-		result.Props = append(result.Props, resolvedProp)
-	}
-	sort.Slice(result.Props, func(i, j int) bool {
-		return result.Props[i].Name < result.Props[j].Name
-	})
-
-	biggestPropName := 0
-	biggestPropType := 0
-	for _, v := range result.Props {
-		if len(v.Name) > biggestPropName {
-			biggestPropName = len(v.Name)
-		}
-		if len(v.Type) > biggestPropType {
-			biggestPropType = len(v.Type)
-		}
-	}
-
-	for _, v := range result.Props {
-		v.Spacing1 = strings.Repeat(" ", biggestPropName-len(v.Name))
-		v.Spacing2 = strings.Repeat(" ", biggestPropType-len(v.Type))
-	}
-
-	self.Entities = append(self.Entities, result)
+	self.GoTypesParserModels.ParseType(t, nil)
 
 	return nil
 }
