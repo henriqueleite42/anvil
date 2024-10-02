@@ -67,8 +67,7 @@ enum {{ .Name }} {
 	{{ .Name }}{{ .Spacing }} = {{ .Idx }};
 	{{- end }}
 }
-{{- end }}
-
+{{ end }}
 {{ range .Types -}}
 message {{ .Name }} {
 	{{- range .Props }}
