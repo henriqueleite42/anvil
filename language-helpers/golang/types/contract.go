@@ -7,11 +7,11 @@ import (
 )
 
 type MapProp struct {
-	Name       string
-	Spacing1   string // Spacing between name and type
-	GolangType string
-	Spacing2   string // Spacing between type and tags
-	Tags       []string
+	Name     string
+	Spacing1 string // Spacing between name and type
+	Type     *Type
+	Spacing2 string // Spacing between type and tags
+	Tags     []string
 }
 
 func (self *MapProp) GetTagsString() string {
@@ -19,9 +19,31 @@ func (self *MapProp) GetTagsString() string {
 }
 
 type Type struct {
+	GolangPkg  *string // Only Maps and Enums have a pkg
 	GolangType string
 	AnvilType  schemas.TypeType
+	Optional   bool
 	MapProps   []*MapProp
+}
+
+func (self *Type) GetFullTypeName(curPkg string) string {
+	typeName := self.GolangType
+
+	if self.GolangPkg != nil && *self.GolangPkg != curPkg {
+		typeName = *self.GolangPkg + "." + typeName
+	}
+
+	if self.AnvilType == schemas.TypeType_Map {
+		typeName = "*" + typeName
+	}
+
+	if self.Optional &&
+		self.AnvilType != schemas.TypeType_Map &&
+		self.AnvilType != schemas.TypeType_List {
+		typeName = "*" + typeName
+	}
+
+	return typeName
 }
 
 type EnumValue struct {
@@ -32,13 +54,24 @@ type EnumValue struct {
 }
 
 type Enum struct {
+	GolangPkg  string
 	GolangName string
 	GolangType string
 	Values     []*EnumValue
 }
 
+func (self *Enum) GetFullEnumName(curPkg string) string {
+	enumName := self.GolangName
+
+	if self.GolangPkg != curPkg {
+		enumName = self.GolangPkg + "." + enumName
+	}
+
+	return enumName
+}
+
 type ParseTypeOpt struct {
-	PrefixForEnums string
+	prefixForChildren string // Internal use, for maps of maps
 }
 
 type TypeParser interface {
@@ -54,8 +87,16 @@ type TypeParser interface {
 	// Remove all imports from list
 	ResetImports()
 
-	// Returns all parsed map types, sorted by parse order
-	GetMapTypes() []*Type
 	// Returns all parsed enums, sorted alphabetically
 	GetEnums() []*Enum
+	// Returns all parsed types, sorted by parse order
+	GetTypes() []*Type
+	// Returns all parsed events, sorted by parse order
+	GetEvents() []*Type
+	// Returns all parsed entities, sorted by parse order
+	GetEntities() []*Type
+	// Returns all parsed repository types, sorted by parse order
+	GetRepository() []*Type
+	// Returns all parsed usecase types, sorted by parse order
+	GetUsecase() []*Type
 }

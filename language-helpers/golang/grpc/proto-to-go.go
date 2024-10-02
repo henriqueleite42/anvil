@@ -94,10 +94,7 @@ func (self *goGrpcParser) ProtoToGo(i *ProtoToGoInput) (*Type, error) {
 			}
 
 			if propType.Optional {
-				eType := "*" + enum.GolangName
-				if i.PkgForEnums != "" {
-					eType = fmt.Sprintf("*%s.%s", i.PkgForEnums, enum.GolangName)
-				}
+				eType := "*" + enum.GetFullEnumName(i.CurPkg)
 
 				varName := formatter.PascalToCamel(i.PrefixForVariableNaming + *v.PropName)
 				prepareList, err := self.templateManager.Parse("input-prop-optional", &templates.InputPropOptionalTemplInput{
@@ -155,11 +152,7 @@ func (self *goGrpcParser) ProtoToGo(i *ProtoToGoInput) (*Type, error) {
 						return nil, err
 					}
 
-					if i.PkgForEnums != "" {
-						childTypeType = fmt.Sprintf("*%s.%s", i.PkgForEnums, enum.GolangName)
-					} else {
-						childTypeType = enum.GolangName
-					}
+					childTypeType = enum.GetFullEnumName(i.CurPkg)
 					childTypeToAppend = fmt.Sprintf("convertPbTo%s(v)", enum.GolangName)
 				}
 
@@ -267,8 +260,11 @@ func (self *goGrpcParser) ProtoToGo(i *ProtoToGoInput) (*Type, error) {
 				OriginalVariableName: propNameWithPrefix,
 				VarName:              varName,
 				TypePkg:              "pb",
-				Type:                 propTypeParsed.GolangType,
 				Props:                propsProps,
+				Type: strings.TrimPrefix(
+					propTypeParsed.GetFullTypeName(i.CurPkg),
+					"*",
+				),
 			})
 			if err != nil {
 				return nil, err

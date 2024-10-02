@@ -1,6 +1,8 @@
 package templates
 
-const ContractTempl = `package {{ .DomainSnake }}
+const ContractTempl = `
+{{- $dot := . -}}
+package {{ .DomainSnake }}
 
 import (
 {{- range .ImportsContract }}
@@ -41,7 +43,7 @@ const (
 {{ range $type := .Types }}
 type {{ $type.GolangType }} struct {
 {{- range $prop := $type.MapProps }}
-	{{ $prop.Name }}{{ $prop.Spacing1 }} {{ $prop.GolangType }}
+	{{ $prop.Name }}{{ $prop.Spacing1 }} {{ $prop.Type.GetFullTypeName $dot.DomainSnake }}
 {{- end }}
 }
 {{- end }}

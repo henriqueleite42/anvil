@@ -22,6 +22,7 @@ type GoToProtoInput struct {
 	VariableName            string
 	PrefixForVariableNaming string
 	HasOutput               bool
+	CurPkg                  string
 }
 
 type ProtoToGoInput struct {
@@ -29,8 +30,8 @@ type ProtoToGoInput struct {
 	MethodName              string
 	VariableName            string
 	PrefixForVariableNaming string
-	PkgForEnums             string
 	HasOutput               bool
+	CurPkg                  string
 }
 
 type GrpcParser interface {

@@ -20,32 +20,27 @@ func (self *typeParser) ParseType(t *schemas.Type, opt *ParseTypeOpt) (*Type, er
 	if t.Type == schemas.TypeType_String {
 		result = &Type{
 			GolangType: "string",
-			AnvilType:  schemas.TypeType_String,
 		}
 	}
 	if t.Type == schemas.TypeType_Int {
 		result = &Type{
 			GolangType: "int32",
-			AnvilType:  schemas.TypeType_Int,
 		}
 	}
 	if t.Type == schemas.TypeType_Float {
 		result = &Type{
 			GolangType: "float32",
-			AnvilType:  schemas.TypeType_Float,
 		}
 	}
 	if t.Type == schemas.TypeType_Bool {
 		result = &Type{
 			GolangType: "bool",
-			AnvilType:  schemas.TypeType_Bool,
 		}
 	}
 	if t.Type == schemas.TypeType_Timestamp {
 		self.imports["time"] = true
 		result = &Type{
 			GolangType: "time.Time",
-			AnvilType:  schemas.TypeType_Timestamp,
 		}
 	}
 
@@ -66,16 +61,9 @@ func (self *typeParser) ParseType(t *schemas.Type, opt *ParseTypeOpt) (*Type, er
 			return nil, err
 		}
 
-		var golangType string
-		if opt != nil && opt.PrefixForEnums != "" {
-			golangType = fmt.Sprintf("%s.%s", opt.PrefixForEnums, enum.GolangName)
-		} else {
-			golangType = enum.GolangName
-		}
-
 		result = &Type{
-			GolangType: golangType,
-			AnvilType:  "Enum",
+			GolangPkg:  &enum.GolangPkg,
+			GolangType: enum.GolangName,
 		}
 	}
 	if t.Type == schemas.TypeType_List {
@@ -98,7 +86,6 @@ func (self *typeParser) ParseType(t *schemas.Type, opt *ParseTypeOpt) (*Type, er
 
 		result = &Type{
 			GolangType: "[]" + resolvedChildType.GolangType,
-			AnvilType:  "List",
 		}
 	}
 
@@ -125,19 +112,20 @@ func (self *typeParser) ParseType(t *schemas.Type, opt *ParseTypeOpt) (*Type, er
 				return nil, fmt.Errorf("type \"%s\" not found", v.TypeHash)
 			}
 
-			propType, err := self.ParseType(childType, opt)
+			var childOpt *ParseTypeOpt = opt
+			if opt == nil {
+				childOpt = &ParseTypeOpt{}
+			}
+			childOpt.prefixForChildren = t.Name
+
+			propType, err := self.ParseType(childType, childOpt)
 			if err != nil {
 				return nil, err
 			}
 
-			resultPropType := propType.GolangType
-			if propType.AnvilType == schemas.TypeType_Map {
-				resultPropType = "*" + resultPropType
-			}
-
 			prop := &MapProp{
-				Name:       *v.PropName,
-				GolangType: resultPropType,
+				Name: *v.PropName,
+				Type: propType,
 			}
 
 			if !childType.Optional && !slices.Contains(childType.Validate, "required") {
@@ -168,7 +156,7 @@ func (self *typeParser) ParseType(t *schemas.Type, opt *ParseTypeOpt) (*Type, er
 					biggestName = newLenName
 				}
 
-				newLenType := len(v.GolangType)
+				newLenType := len(v.Type.GolangType)
 				if newLenType > biggestType {
 					biggestType = newLenType
 				}
@@ -178,24 +166,45 @@ func (self *typeParser) ParseType(t *schemas.Type, opt *ParseTypeOpt) (*Type, er
 				targetLenName := biggestName - len(v.Name)
 				v.Spacing1 = strings.Repeat(" ", targetLenName)
 
-				targetLenType := biggestType - len(v.GolangType)
+				targetLenType := biggestType - len(v.Type.GolangType)
 				v.Spacing2 = strings.Repeat(" ", targetLenType)
 			}
 		}
 
+		golangType := t.Name
+		if opt != nil {
+			golangType = opt.prefixForChildren + golangType
+		}
+
 		result = &Type{
-			GolangType: t.Name,
-			AnvilType:  schemas.TypeType_Map,
+			GolangType: golangType,
 			MapProps:   props,
 		}
 
+		if strings.HasPrefix(t.Ref, "Types") {
+			result.GolangPkg = &self.typesPkg
+			self.types = append(self.types, result)
+		} else if strings.HasPrefix(t.Ref, "Events") {
+			result.GolangPkg = &self.eventsPkg
+			self.events = append(self.events, result)
+		} else if strings.HasPrefix(t.Ref, "Entities") {
+			result.GolangPkg = &self.entitiesPkg
+			self.entities = append(self.entities, result)
+		} else if strings.HasPrefix(t.Ref, "Repository") {
+			result.GolangPkg = &self.repositoryPkg
+			self.repository = append(self.repository, result)
+		} else if strings.HasPrefix(t.Ref, "Usecase") {
+			result.GolangPkg = &self.usecasePkg
+			self.usecase = append(self.usecase, result)
+		} else {
+			return nil, fmt.Errorf("unable to get package for \"%s\"", t.Ref)
+		}
+
 		self.typesToAvoidDuplication[t.Ref] = result
-		self.types = append(self.types, result)
 	}
 
-	if t.Optional && t.Type != schemas.TypeType_Map && t.Type != schemas.TypeType_List {
-		result.GolangType = "*" + result.GolangType
-	}
+	result.AnvilType = t.Type
+	result.Optional = t.Optional
 
 	return result, nil
 }

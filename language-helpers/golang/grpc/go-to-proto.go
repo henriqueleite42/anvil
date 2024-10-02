@@ -260,8 +260,11 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 				OriginalVariableName: propNameWithPrefix,
 				TypePkg:              "pb",
 				VarName:              varName,
-				Type:                 propTypeParsed.GolangType,
 				Props:                propsProps,
+				Type: strings.TrimPrefix(
+					propTypeParsed.GetFullTypeName(i.CurPkg),
+					"*",
+				),
 			})
 			if err != nil {
 				return nil, err
