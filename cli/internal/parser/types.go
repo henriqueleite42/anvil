@@ -137,7 +137,7 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 		defaultV = &defaultVString
 	}
 
-	var childTypesHashes []string = nil
+	var childTypes []*schemas.TypeChild = nil
 
 	propertiesAny, ok := vMap["Properties"]
 	if ok {
@@ -150,7 +150,7 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 			return "", fmt.Errorf("fail to parse \"%s.%s.Properties\" to `map[string]any`", i.path, i.k)
 		}
 
-		typesHashes := []string{}
+		childTypes = make([]*schemas.TypeChild, 0, len(propertiesMap))
 
 		for kk, vv := range propertiesMap {
 			typeHash, err := self.resolveType(&resolveInput{
@@ -167,16 +167,17 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 			if typeRef == nil {
 				return "", fmt.Errorf("fail to find type \"%s.%s.Properties.%s\"`", i.path, i.k, kk)
 			}
-			typesHashes = append(typesHashes, typeHash)
+			childTypes = append(childTypes, &schemas.TypeChild{
+				PropName: &kk,
+				TypeHash: typeHash,
+			})
 		}
-		sort.Slice(typesHashes, func(i, j int) bool {
-			typeRefI := self.schema.Types.Types[typesHashes[i]]
-			typeRefJ := self.schema.Types.Types[typesHashes[j]]
+		sort.Slice(childTypes, func(i, j int) bool {
+			typeRefI := self.schema.Types.Types[childTypes[i].TypeHash]
+			typeRefJ := self.schema.Types.Types[childTypes[j].TypeHash]
 
 			return typeRefI.Name < typeRefJ.Name
 		})
-
-		childTypesHashes = typesHashes
 	} else if typeType == schemas.TypeType_Map {
 		return "", fmt.Errorf("Type \"%s.%s\" must have property \"Properties\". All types with map \"Type\" must.", i.path, i.k)
 	}
@@ -207,11 +208,13 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 			return "", fmt.Errorf("fail to find type \"%s.%s.Items.%s\"`", i.path, i.k, kk)
 		}
 
-		if childTypesHashes == nil {
-			childTypesHashes = []string{typeHash}
-		} else {
-			childTypesHashes = append(childTypesHashes, typeHash)
+		if childTypes == nil {
+			childTypes = make([]*schemas.TypeChild, 1, 1)
 		}
+
+		childTypes = append(childTypes, &schemas.TypeChild{
+			TypeHash: typeHash,
+		})
 	} else if typeType == schemas.TypeType_List {
 		return "", fmt.Errorf("Type \"%s.%s\" must have property \"Items\". All types with list \"Type\" must.", i.path, i.k)
 	}
@@ -280,21 +283,21 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 	}
 
 	schemaTypes := &schemas.Type{
-		Ref:              ref,
-		OriginalPath:     fmt.Sprintf("%s.%s", i.path, i.k),
-		Name:             name,
-		RootNode:         rootNode,
-		Confidentiality:  confidentiality,
-		Optional:         optional,
-		Format:           format,
-		Validate:         validate,
-		AutoIncrement:    autoIncrement,
-		Default:          defaultV,
-		Type:             typeType,
-		DbName:           dbName,
-		DbType:           dbType,
-		ChildTypesHashes: childTypesHashes,
-		EnumHash:         enumHash,
+		Ref:             ref,
+		OriginalPath:    fmt.Sprintf("%s.%s", i.path, i.k),
+		Name:            name,
+		RootNode:        rootNode,
+		Confidentiality: confidentiality,
+		Optional:        optional,
+		Format:          format,
+		Validate:        validate,
+		AutoIncrement:   autoIncrement,
+		Default:         defaultV,
+		Type:            typeType,
+		DbName:          dbName,
+		DbType:          dbType,
+		ChildTypes:      childTypes,
+		EnumHash:        enumHash,
 	}
 
 	stateHash, err := hashing.Struct(schemaTypes)
