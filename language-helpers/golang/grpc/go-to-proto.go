@@ -28,17 +28,17 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 
 	result := &Type{
 		Name:         t.Name,
-		Props:        make([]*Prop, 0, len(t.ChildTypesHashes)),
+		Props:        make([]*Prop, 0, len(t.ChildTypes)),
 		PropsPrepare: []string{},
 	}
 
 	biggest := 0
 	amountOfOptional := 0
 	types := []*schemas.Type{}
-	for _, v := range t.ChildTypesHashes {
-		propType, ok := self.schema.Types.Types[v]
+	for _, v := range t.ChildTypes {
+		propType, ok := self.schema.Types.Types[v.TypeHash]
 		if !ok {
-			return nil, fmt.Errorf("type \"%s\" not found", v)
+			return nil, fmt.Errorf("type \"%s\" not found", v.TypeHash)
 		}
 
 		types = append(types, propType)
@@ -119,16 +119,16 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 			if propType.Optional {
 				return nil, fmt.Errorf("unable to parse \"%s\": grpc-client-go currently doesn't support optional lists", propType.Name)
 			}
-			if propType.ChildTypesHashes == nil {
-				return nil, fmt.Errorf("ChildTypesHashes for \"%s\" not found", t.Name)
+			if propType.ChildTypes == nil {
+				return nil, fmt.Errorf("ChildTypes for \"%s\" not found", t.Name)
 			}
-			if len(propType.ChildTypesHashes) != 1 {
-				return nil, fmt.Errorf("ChildTypesHashes for \"%s\" must have exactly one item", t.Name)
+			if len(propType.ChildTypes) != 1 {
+				return nil, fmt.Errorf("ChildTypes for \"%s\" must have exactly one item", t.Name)
 			}
 
-			childType, ok := self.schema.Types.Types[propType.ChildTypesHashes[0]]
+			childType, ok := self.schema.Types.Types[propType.ChildTypes[0].TypeHash]
 			if !ok {
-				return nil, fmt.Errorf("type \"%s\" not found", propType.ChildTypesHashes[0])
+				return nil, fmt.Errorf("type \"%s\" not found", propType.ChildTypes[0].TypeHash)
 			}
 
 			if childType.Type == schemas.TypeType_String ||
@@ -184,67 +184,67 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 			}
 		}
 		if propType.Type == schemas.TypeType_Map {
-			if propType.ChildTypesHashes == nil {
-				return nil, fmt.Errorf("ChildTypesHashes for \"%s\" not found", t.Name)
+			if propType.ChildTypes == nil {
+				return nil, fmt.Errorf("ChildTypes for \"%s\" not found", t.Name)
 			}
 
 			childBiggest := 0
-			childTypes := []*schemas.Type{}
-			for _, v := range propType.ChildTypesHashes {
-				childPropType, ok := self.schema.Types.Types[v]
-				if !ok {
-					return nil, fmt.Errorf("type \"%s\" not found", v)
+			for k, v := range propType.ChildTypes {
+				if v.PropName == nil {
+					return nil, fmt.Errorf("ChildType \"%s.%d\" must have a PropName", t.Name, k)
 				}
 
-				if len(childPropType.Name) > childBiggest {
-					childBiggest = len(childPropType.Name)
+				if len(*v.PropName) > childBiggest {
+					childBiggest = len(*v.PropName)
 				}
-
-				childTypes = append(childTypes, childPropType)
 			}
 
 			propsProps := []*templates.InputPropMapTemplProp{}
+			for _, v := range propType.ChildTypes {
+				childPropType, ok := self.schema.Types.Types[v.TypeHash]
+				if !ok {
+					return nil, fmt.Errorf("type \"%s\" not found", v.TypeHash)
+				}
 
-			for _, childChildType := range childTypes {
 				var value string
-				if childChildType.Type == schemas.TypeType_String ||
-					childChildType.Type == schemas.TypeType_Int ||
-					childChildType.Type == schemas.TypeType_Float ||
-					childChildType.Type == schemas.TypeType_Bool {
-					value = fmt.Sprintf("%s.%s", propNameWithPrefix, childChildType.Name)
+				if childPropType.Type == schemas.TypeType_String ||
+					childPropType.Type == schemas.TypeType_Int ||
+					childPropType.Type == schemas.TypeType_Float ||
+					childPropType.Type == schemas.TypeType_Bool {
+					value = fmt.Sprintf("%s.%s", propNameWithPrefix, childPropType.Name)
 				}
-				if childChildType.Type == schemas.TypeType_Timestamp {
-					if childChildType.Optional {
+				if childPropType.Type == schemas.TypeType_Timestamp {
+					if childPropType.Optional {
 						return nil, fmt.Errorf("grpc-client-go doesn't support optional map child timestamp properties")
 					}
 
-					value = fmt.Sprintf("timestamppb.New(%s.%s)", propNameWithPrefix, childChildType.Name)
+					value = fmt.Sprintf("timestamppb.New(%s.%s)", propNameWithPrefix, childPropType.Name)
 				}
-				if childChildType.Type == schemas.TypeType_Enum {
-					if childChildType.Optional {
+				if childPropType.Type == schemas.TypeType_Enum {
+					if childPropType.Optional {
 						return nil, fmt.Errorf("grpc-client-go doesn't support optional map child timestamp properties")
 					}
 
-					if childChildType.EnumHash == nil {
-						return nil, fmt.Errorf("enum \"%s\" not found", *childChildType.EnumHash)
+					if childPropType.EnumHash == nil {
+						return nil, fmt.Errorf("enum \"%s\" not found", *childPropType.EnumHash)
 					}
 
-					schemaEnum := self.schema.Enums.Enums[*childChildType.EnumHash]
+					schemaEnum := self.schema.Enums.Enums[*childPropType.EnumHash]
 					enum, err := self.goTypeParser.ParseEnum(schemaEnum)
 					if err != nil {
 						return nil, err
 					}
 
-					value = fmt.Sprintf("convert%sToPb(%s.%s)", enum.GolangName, propNameWithPrefix, childChildType.Name)
+					value = fmt.Sprintf("convert%sToPb(%s.%s)", enum.GolangName, propNameWithPrefix, childPropType.Name)
 				}
 
 				if value == "" {
-					return nil, fmt.Errorf("unable to parse \"%s\": grpc-client-go currently doesn't support maps of lists and maps of maps", childChildType.Name)
+					return nil, fmt.Errorf("unable to parse \"%s\": grpc-client-go currently doesn't support maps of lists and maps of maps", childPropType.Name)
 				}
 
 				propsProps = append(propsProps, &templates.InputPropMapTemplProp{
-					Name:    childChildType.Name,
-					Spacing: strings.Repeat(" ", childBiggest-len(childChildType.Name)),
+					Name:    *v.PropName,
+					Spacing: strings.Repeat(" ", childBiggest-len(childPropType.Name)),
 					Value:   value,
 				})
 			}
