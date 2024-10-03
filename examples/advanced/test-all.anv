@@ -40,19 +40,92 @@ Usecase:
             Type: Enum
             Values:
               $ref: Enums.FooBar
-          Maps:
+          MapDeep1:
             Type: Map
             Properties:
               Foo:
                 Type: String
-          # MapMap:
-          #   Type: Map
-          #   Properties:
-          #     Foo:
-          #       Type: Map
-          #       Properties:
-          #         Foo:
-          #           Type: String
+          MapDeep2:
+            Type: Map
+            Properties:
+              Strings:
+                Type: String
+              Int:
+                Type: Int
+              Float:
+                Type: Float
+              Bool:
+                Type: Bool
+              Deep2:
+                Type: Map
+                Properties:
+                  Foo:
+                    Type: String
+          MapDeep3:
+            Type: Map
+            Properties:
+              Strings:
+                Type: String
+              Int:
+                Type: Int
+              Float:
+                Type: Float
+              Bool:
+                Type: Bool
+              Deep2:
+                Type: Map
+                Properties:
+                  Strings:
+                    Type: String
+                  Int:
+                    Type: Int
+                  Float:
+                    Type: Float
+                  Bool:
+                    Type: Bool
+                  Deep3:
+                    Type: Map
+                    Properties:
+                      Foo:
+                        Type: String
+          MapDeep4:
+            Type: Map
+            Properties:
+              Strings:
+                Type: String
+              Int:
+                Type: Int
+              Float:
+                Type: Float
+              Bool:
+                Type: Bool
+              Deep2:
+                Type: Map
+                Properties:
+                  Strings:
+                    Type: String
+                  Int:
+                    Type: Int
+                  Float:
+                    Type: Float
+                  Bool:
+                    Type: Bool
+                  Deep3:
+                    Type: Map
+                    Properties:
+                      Strings:
+                        Type: String
+                      Int:
+                        Type: Int
+                      Float:
+                        Type: Float
+                      Bool:
+                        Type: Bool
+                      Deep4:
+                        Type: Map
+                        Properties:
+                          Foo:
+                            Type: String
           # MapList:
           #   Type: Map
           #   Properties:
@@ -165,19 +238,92 @@ Usecase:
             Type: Enum
             Values:
               $ref: Enums.FooBar
-          Maps:
+          MapDeep1:
             Type: Map
             Properties:
               Foo:
                 Type: String
-          # MapMap:
-          #   Type: Map
-          #   Properties:
-          #     Foo:
-          #       Type: Map
-          #       Properties:
-          #         Foo:
-          #           Type: String
+          MapDeep2:
+            Type: Map
+            Properties:
+              Strings:
+                Type: String
+              Int:
+                Type: Int
+              Float:
+                Type: Float
+              Bool:
+                Type: Bool
+              Deep2:
+                Type: Map
+                Properties:
+                  Foo:
+                    Type: String
+          MapDeep3:
+            Type: Map
+            Properties:
+              Strings:
+                Type: String
+              Int:
+                Type: Int
+              Float:
+                Type: Float
+              Bool:
+                Type: Bool
+              Deep2:
+                Type: Map
+                Properties:
+                  Strings:
+                    Type: String
+                  Int:
+                    Type: Int
+                  Float:
+                    Type: Float
+                  Bool:
+                    Type: Bool
+                  Deep3:
+                    Type: Map
+                    Properties:
+                      Foo:
+                        Type: String
+          MapDeep4:
+            Type: Map
+            Properties:
+              Strings:
+                Type: String
+              Int:
+                Type: Int
+              Float:
+                Type: Float
+              Bool:
+                Type: Bool
+              Deep2:
+                Type: Map
+                Properties:
+                  Strings:
+                    Type: String
+                  Int:
+                    Type: Int
+                  Float:
+                    Type: Float
+                  Bool:
+                    Type: Bool
+                  Deep3:
+                    Type: Map
+                    Properties:
+                      Strings:
+                        Type: String
+                      Int:
+                        Type: Int
+                      Float:
+                        Type: Float
+                      Bool:
+                        Type: Bool
+                      Deep4:
+                        Type: Map
+                        Properties:
+                          Foo:
+                            Type: String
           # MapList:
           #   Type: Map
           #   Properties:
@@ -232,12 +378,12 @@ Usecase:
             Values:
               $ref: Enums.FooBar
             Optional: true
-          MapOptional:
-            Type: Map
-            Properties:
-              Foo:
-                Type: String
-            Optional: true
+          # MapOptional:
+          #   Type: Map
+          #   Properties:
+          #     Foo:
+          #       Type: String
+          #   Optional: true
           # MapMapOptional:
           #   Type: Map
           #   Properties:

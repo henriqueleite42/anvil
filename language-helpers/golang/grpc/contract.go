@@ -23,6 +23,8 @@ type GoToProtoInput struct {
 	PrefixForVariableNaming string
 	HasOutput               bool
 	CurPkg                  string
+
+	indentationLvl int // Internal use, used for child types
 }
 
 type ProtoToGoInput struct {
@@ -31,7 +33,8 @@ type ProtoToGoInput struct {
 	VariableName            string
 	PrefixForVariableNaming string
 	HasOutput               bool
-	CurPkg                  string
+
+	indentationLvl int // Internal use, used for child types
 }
 
 type GrpcParser interface {
