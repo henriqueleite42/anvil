@@ -141,6 +141,7 @@ func Parse(schema *schemas.Schema) ([]*File, error) {
 		goTypesParserUsecase.AddImport("context")
 		goTypesParserUsecase.AddImport("github.com/rs/xid")
 		goTypesParserUsecase.AddImport("github.com/rs/zerolog")
+		goTypesParserUsecase.AddImport("google.golang.org/grpc")
 		importsGrpcDelivery = goTypesParserUsecase.GetImports()
 		goTypesParserUsecase.ResetImports()
 	}

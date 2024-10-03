@@ -44,8 +44,8 @@ func (self *parser) resolveTypeProp(t *schemas.Type) (string, error) {
 		typeString = enumResolved.Name
 	}
 	if t.Type == schemas.TypeType_Map {
-		if t.ChildTypesHashes == nil {
-			return "", fmt.Errorf("type \"%s\" is missing prop \"ChildTypesHashes\"", t.Ref)
+		if t.ChildTypes == nil {
+			return "", fmt.Errorf("type \"%s\" is missing prop \"ChildTypes\"", t.Ref)
 		}
 
 		resolvedType, err := self.resolveType(t)
@@ -56,16 +56,16 @@ func (self *parser) resolveTypeProp(t *schemas.Type) (string, error) {
 		typeString = resolvedType.Name
 	}
 	if t.Type == schemas.TypeType_List {
-		if t.ChildTypesHashes == nil {
-			return "", fmt.Errorf("type \"%s\" is missing prop \"ChildTypesHashes\"", t.Name)
+		if t.ChildTypes == nil {
+			return "", fmt.Errorf("type \"%s\" is missing prop \"ChildTypes\"", t.Name)
 		}
-		if len(t.ChildTypesHashes) != 1 {
-			return "", fmt.Errorf("type \"%s.ChildTypesHashes\" has more than 1 item in the list. It must have exactly one item.", t.Name)
+		if len(t.ChildTypes) != 1 {
+			return "", fmt.Errorf("type \"%s.ChildTypes\" has more than 1 item in the list. It must have exactly one item.", t.Name)
 		}
 
-		childTypeRef := t.ChildTypesHashes[0]
+		childTypeRef := t.ChildTypes[0].TypeHash
 		if childTypeRef == "" {
-			return "", fmt.Errorf("type \"%s.ChildTypesHashes\" must have exactly one item.", t.Name)
+			return "", fmt.Errorf("type \"%s.ChildTypes\" must have exactly one item.", t.Name)
 		}
 
 		childType, ok := self.schema.Types.Types[childTypeRef]
@@ -102,13 +102,13 @@ func (self *parser) resolveType(t *schemas.Type) (*templates.ProtofileTemplInput
 
 	result := &templates.ProtofileTemplInputType{
 		Name:  t.Name,
-		Props: make([]*templates.ProtofileTemplInputTypeProp, 0, len(t.ChildTypesHashes)),
+		Props: make([]*templates.ProtofileTemplInputTypeProp, 0, len(t.ChildTypes)),
 	}
 
-	for k, v := range t.ChildTypesHashes {
-		childType, ok := self.schema.Types.Types[v]
+	for k, v := range t.ChildTypes {
+		childType, ok := self.schema.Types.Types[v.TypeHash]
 		if !ok {
-			return nil, fmt.Errorf("child type \"%s\" not found for type \"%s\"", v, t.Name)
+			return nil, fmt.Errorf("child type \"%s\" not found for type \"%s\"", v.TypeHash, t.Name)
 		}
 
 		propType, err := self.resolveTypeProp(childType)
@@ -117,7 +117,7 @@ func (self *parser) resolveType(t *schemas.Type) (*templates.ProtofileTemplInput
 		}
 
 		result.Props = append(result.Props, &templates.ProtofileTemplInputTypeProp{
-			Name: childType.Name,
+			Name: *v.PropName,
 			Type: propType,
 			Idx:  k + 1,
 		})

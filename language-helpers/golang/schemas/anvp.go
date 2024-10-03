@@ -172,10 +172,16 @@ func ToTypeConfidentiality(i string) (TypeConfidentiality, bool) {
 	return ft, slices.Contains(TypeConfidentialityArr, ft)
 }
 
+type TypeChild struct {
+	// Only present in Map parent types
+	PropName *string `yaml:"PropName,omitempty" json:"PropName,omitempty"`
+	TypeHash string  `yaml:"TypeHash"`
+}
+
 type Type struct {
 	Ref             string              `yaml:"Ref"`
 	OriginalPath    string              `yaml:"OriginalPath"`
-	Name            string              `yaml:"Name"`
+	Name            string              `yaml:"Name"` // This is the TYPE name, not the property name or variable name
 	RootNode        string              `yaml:"RootNode"`
 	StateHash       string              `yaml:"StateHash"`
 	Confidentiality TypeConfidentiality `yaml:"Confidentiality"`
@@ -188,7 +194,7 @@ type Type struct {
 	DbName          *string             `yaml:"DbName,omitempty" json:"DbName,omitempty"`
 	DbType          *string             `yaml:"DbType,omitempty" json:"DbType,omitempty"`
 	// Used for Map and List (List will always only have 1 item inside the slice)
-	ChildTypesHashes []string `yaml:"ChildTypesHashes,omitempty" json:"ChildTypesHashes,omitempty"`
+	ChildTypes []*TypeChild `yaml:"ChildTypes,omitempty" json:"ChildTypes,omitempty"`
 	// Used for Enum
 	EnumHash *string `yaml:"EnumHash,omitempty" json:"EnumHash,omitempty"`
 }

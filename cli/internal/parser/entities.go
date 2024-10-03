@@ -79,14 +79,13 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 
 	// Also create a type for the entity, not only for the columns
 	entityType := &schemas.Type{
-		Ref:              ref,
-		OriginalPath:     path,
-		Name:             i.k,
-		RootNode:         rootNode,
-		ChildTypesHashes: []string{},
-		Type:             schemas.TypeType_Map,
-		// TODO Implement metadata to control this
-		// or tell by the columns: If one is medium, them set to medium, etc
+		Ref:          ref,
+		OriginalPath: path,
+		Name:         i.k,
+		RootNode:     rootNode,
+		ChildTypes:   []*schemas.TypeChild{},
+		Type:         schemas.TypeType_Map,
+		// Entities does not have Confidentiality levels, only their fields
 		Confidentiality: schemas.TypeConfidentiality_Low,
 	}
 
@@ -142,7 +141,10 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 		column.StateHash = stateHash
 
 		columns[columnRefHash] = column
-		entityType.ChildTypesHashes = append(entityType.ChildTypesHashes, columnRefHash)
+		entityType.ChildTypes = append(entityType.ChildTypes, &schemas.TypeChild{
+			PropName: &kk,
+			TypeHash: columnRefHash,
+		})
 
 		columnOrder++
 	}

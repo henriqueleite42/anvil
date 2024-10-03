@@ -79,16 +79,16 @@ func (self *typeParser) ParseType(t *schemas.Type, opt *ParseTypeOpt) (*Type, er
 		}
 	}
 	if t.Type == schemas.TypeType_List {
-		if t.ChildTypesHashes == nil {
-			return nil, fmt.Errorf("ChildTypesHashes for \"%s\" not found", t.Name)
+		if t.ChildTypes == nil {
+			return nil, fmt.Errorf("ChildTypes for \"%s\" not found", t.Name)
 		}
-		if len(t.ChildTypesHashes) != 1 {
-			return nil, fmt.Errorf("ChildTypesHashes for \"%s\" must have exactly one item", t.Name)
+		if len(t.ChildTypes) != 1 {
+			return nil, fmt.Errorf("ChildTypes for \"%s\" must have exactly one item", t.Name)
 		}
 
-		childType, ok := self.schema.Types.Types[t.ChildTypesHashes[0]]
+		childType, ok := self.schema.Types.Types[t.ChildTypes[0].TypeHash]
 		if !ok {
-			return nil, fmt.Errorf("type \"%s\" not found", t.ChildTypesHashes[0])
+			return nil, fmt.Errorf("type \"%s\" not found", t.ChildTypes[0].TypeHash)
 		}
 
 		resolvedChildType, err := self.ParseType(childType, opt)
@@ -113,28 +113,19 @@ func (self *typeParser) ParseType(t *schemas.Type, opt *ParseTypeOpt) (*Type, er
 			return existentType, nil
 		}
 
-		biggest := 0
-		types := make([]*schemas.Type, 0, len(t.ChildTypesHashes))
-		for _, v := range t.ChildTypesHashes {
-			sType, ok := self.schema.Types.Types[v]
+		props := make([]*MapProp, len(t.ChildTypes), len(t.ChildTypes))
+
+		for k, v := range t.ChildTypes {
+			if v.PropName == nil {
+				return nil, fmt.Errorf("ChildType \"%s.%d\" must have a PropName", t.Name, k)
+			}
+
+			childType, ok := self.schema.Types.Types[v.TypeHash]
 			if !ok {
-				return nil, fmt.Errorf("type \"%s\" not found", v)
+				return nil, fmt.Errorf("type \"%s\" not found", v.TypeHash)
 			}
 
-			types = append(types, sType)
-
-			newLen := len(sType.Name)
-			if newLen > biggest {
-				biggest = newLen
-			}
-		}
-
-		props := make([]*MapProp, len(types), len(types))
-
-		for k, v := range types {
-			targetLen := biggest - len(v.Name)
-
-			propType, err := self.ParseType(v, opt)
+			propType, err := self.ParseType(childType, opt)
 			if err != nil {
 				return nil, err
 			}
@@ -145,42 +136,50 @@ func (self *typeParser) ParseType(t *schemas.Type, opt *ParseTypeOpt) (*Type, er
 			}
 
 			prop := &MapProp{
-				Name:       v.Name,
-				Spacing1:   strings.Repeat(" ", targetLen),
+				Name:       *v.PropName,
 				GolangType: resultPropType,
 			}
 
-			if !v.Optional && !slices.Contains(v.Validate, "required") {
-				v.Validate = append(v.Validate, "required")
+			if !childType.Optional && !slices.Contains(childType.Validate, "required") {
+				childType.Validate = append(childType.Validate, "required")
 			}
 
-			if len(v.Validate) > 0 {
+			if len(childType.Validate) > 0 {
 				if prop.Tags == nil {
 					prop.Tags = []string{}
 				}
 
-				prop.Tags = append(prop.Tags, fmt.Sprintf("validate:\"%s\"", strings.Join(v.Validate, ",")))
+				prop.Tags = append(prop.Tags, fmt.Sprintf("validate:\"%s\"", strings.Join(childType.Validate, ",")))
 			}
 
-			if v.DbName != nil {
-				prop.Tags = append(prop.Tags, fmt.Sprintf("db:\"%s\"", *v.DbName))
+			if childType.DbName != nil {
+				prop.Tags = append(prop.Tags, fmt.Sprintf("db:\"%s\"", *childType.DbName))
 			}
 
 			props[k] = prop
 		}
 
 		if len(props) > 0 {
+			biggestName := 0
 			biggestType := 0
 			for _, v := range props {
-				newLen := len(v.GolangType)
-				if newLen > biggestType {
-					biggestType = newLen
+				newLenName := len(v.Name)
+				if newLenName > biggestName {
+					biggestName = newLenName
+				}
+
+				newLenType := len(v.GolangType)
+				if newLenType > biggestType {
+					biggestType = newLenType
 				}
 			}
 
 			for _, v := range props {
-				targetLen := biggestType - len(v.GolangType)
-				v.Spacing2 = strings.Repeat(" ", targetLen)
+				targetLenName := biggestName - len(v.Name)
+				v.Spacing1 = strings.Repeat(" ", targetLenName)
+
+				targetLenType := biggestType - len(v.GolangType)
+				v.Spacing2 = strings.Repeat(" ", targetLenType)
 			}
 		}
 
