@@ -32,32 +32,28 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 		PropsPrepare: []string{},
 	}
 
-	biggest := 0
-	amountOfOptional := 0
-	types := []*schemas.Type{}
+	biggestName := 0
+	for k, v := range t.ChildTypes {
+		if v.PropName == nil {
+			return nil, fmt.Errorf("ChildType \"%s.%d\" must have a PropName", t.Name, k)
+		}
+
+		if len(*v.PropName) > biggestName {
+			biggestName = len(*v.PropName)
+		}
+	}
+
 	for _, v := range t.ChildTypes {
 		propType, ok := self.schema.Types.Types[v.TypeHash]
 		if !ok {
 			return nil, fmt.Errorf("type \"%s\" not found", v.TypeHash)
 		}
 
-		types = append(types, propType)
-
-		if len(propType.Name) > biggest {
-			biggest = len(propType.Name)
-		}
-
-		if propType.Optional {
-			amountOfOptional++
-		}
-	}
-
-	for _, propType := range types {
 		var value string
 
-		propNameWithPrefix := propType.Name
+		propNameWithPrefix := *v.PropName
 		if i.VariableName != "" {
-			propNameWithPrefix = fmt.Sprintf("%s.%s", i.VariableName, propType.Name)
+			propNameWithPrefix = fmt.Sprintf("%s.%s", i.VariableName, *v.PropName)
 		}
 
 		if propType.Type == schemas.TypeType_String ||
@@ -70,7 +66,7 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 			self.goTypeParser.AddImport("google.golang.org/protobuf/types/known/timestamppb")
 
 			if propType.Optional {
-				varName := formatter.PascalToCamel(i.PrefixForVariableNaming + propType.Name)
+				varName := formatter.PascalToCamel(i.PrefixForVariableNaming + *v.PropName)
 				prepareList, err := self.templateManager.Parse("input-prop-optional", &templates.InputPropOptionalTemplInput{
 					VarName:              varName,
 					OriginalVariableName: propNameWithPrefix,
@@ -98,7 +94,7 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 			}
 
 			if propType.Optional {
-				varName := formatter.PascalToCamel(i.PrefixForVariableNaming + propType.Name)
+				varName := formatter.PascalToCamel(i.PrefixForVariableNaming + *v.PropName)
 				prepareList, err := self.templateManager.Parse("input-prop-optional", &templates.InputPropOptionalTemplInput{
 					VarName:              varName,
 					OriginalVariableName: propNameWithPrefix,
@@ -117,7 +113,7 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 		}
 		if propType.Type == schemas.TypeType_List {
 			if propType.Optional {
-				return nil, fmt.Errorf("unable to parse \"%s\": grpc-client-go currently doesn't support optional lists", propType.Name)
+				return nil, fmt.Errorf("unable to parse \"%s\": grpc-client-go currently doesn't support optional lists", *v.PropName)
 			}
 			if propType.ChildTypes == nil {
 				return nil, fmt.Errorf("ChildTypes for \"%s\" not found", t.Name)
@@ -160,10 +156,10 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 				}
 
 				if childTypeType == "" {
-					return nil, fmt.Errorf("unable to parse \"%s\": grpc-client-go currently doesn't support lists of lists and lists of maps", childType.Name)
+					return nil, fmt.Errorf("unable to parse \"%s\": grpc-client-go currently doesn't support lists of lists and lists of maps", *v.PropName)
 				}
 
-				varName := formatter.PascalToCamel(i.PrefixForVariableNaming + propType.Name)
+				varName := formatter.PascalToCamel(i.PrefixForVariableNaming + *v.PropName)
 
 				prepareList, err := self.templateManager.Parse("input-prop-list", &templates.InputPropListTemplInput{
 					MethodName:           i.MethodName,
@@ -211,14 +207,15 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 					childPropType.Type == schemas.TypeType_Int ||
 					childPropType.Type == schemas.TypeType_Float ||
 					childPropType.Type == schemas.TypeType_Bool {
-					value = fmt.Sprintf("%s.%s", propNameWithPrefix, childPropType.Name)
+					value = fmt.Sprintf("%s.%s", propNameWithPrefix, *v.PropName)
 				}
 				if childPropType.Type == schemas.TypeType_Timestamp {
 					if childPropType.Optional {
 						return nil, fmt.Errorf("grpc-client-go doesn't support optional map child timestamp properties")
 					}
 
-					value = fmt.Sprintf("timestamppb.New(%s.%s)", propNameWithPrefix, childPropType.Name)
+					self.goTypeParser.AddImport("google.golang.org/protobuf/types/known/timestamppb")
+					value = fmt.Sprintf("timestamppb.New(%s.%s)", propNameWithPrefix, *v.PropName)
 				}
 				if childPropType.Type == schemas.TypeType_Enum {
 					if childPropType.Optional {
@@ -235,21 +232,21 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 						return nil, err
 					}
 
-					value = fmt.Sprintf("convert%sToPb(%s.%s)", enum.GolangName, propNameWithPrefix, childPropType.Name)
+					value = fmt.Sprintf("convert%sToPb(%s.%s)", enum.GolangName, propNameWithPrefix, *v.PropName)
 				}
 
 				if value == "" {
-					return nil, fmt.Errorf("unable to parse \"%s\": grpc-client-go currently doesn't support maps of lists and maps of maps", childPropType.Name)
+					return nil, fmt.Errorf("unable to parse \"%s\": language-helper golang grpc currently doesn't support maps of lists and maps of maps", *v.PropName)
 				}
 
 				propsProps = append(propsProps, &templates.InputPropMapTemplProp{
 					Name:    *v.PropName,
-					Spacing: strings.Repeat(" ", childBiggest-len(childPropType.Name)),
+					Spacing: strings.Repeat(" ", childBiggest-len(*v.PropName)),
 					Value:   value,
 				})
 			}
 
-			varName := formatter.PascalToCamel(i.PrefixForVariableNaming + propType.Name)
+			varName := formatter.PascalToCamel(i.PrefixForVariableNaming + *v.PropName)
 
 			propTypeParsed, err := self.goTypeParser.ParseType(propType, nil)
 			if err != nil {
@@ -275,8 +272,8 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 		}
 
 		result.Props = append(result.Props, &Prop{
-			Name:    propType.Name,
-			Spacing: strings.Repeat(" ", biggest-len(propType.Name)),
+			Name:    *v.PropName,
+			Spacing: strings.Repeat(" ", biggestName-len(*v.PropName)),
 			Value:   value,
 		})
 	}

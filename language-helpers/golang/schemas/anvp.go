@@ -181,7 +181,7 @@ type TypeChild struct {
 type Type struct {
 	Ref             string              `yaml:"Ref"`
 	OriginalPath    string              `yaml:"OriginalPath"`
-	Name            string              `yaml:"Name"`
+	Name            string              `yaml:"Name"` // This is the TYPE name, not the property name or variable name
 	RootNode        string              `yaml:"RootNode"`
 	StateHash       string              `yaml:"StateHash"`
 	Confidentiality TypeConfidentiality `yaml:"Confidentiality"`

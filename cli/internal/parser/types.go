@@ -209,7 +209,7 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 		}
 
 		if childTypes == nil {
-			childTypes = make([]*schemas.TypeChild, 1, 1)
+			childTypes = make([]*schemas.TypeChild, 0, 1)
 		}
 
 		childTypes = append(childTypes, &schemas.TypeChild{
