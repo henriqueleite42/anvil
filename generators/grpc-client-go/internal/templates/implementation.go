@@ -99,7 +99,7 @@ func (self *{{ $originalInput.Domain }}ApiImplementation) {{ $method.MethodName 
 {{ end }}
 	return &{{ $method.Output.Name }}{
 		{{- range $output := $method.Output.Props }}
-	{{ $output.Name }}:{{ $output.Spacing }} {{ $output.Value }},
+		{{ $output.Name }}:{{ $output.Spacing }} {{ $output.Value }},
 		{{- end }}
 	},err
 	{{- else }}

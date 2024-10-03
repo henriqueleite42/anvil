@@ -1,40 +1,15 @@
 package templates
 
 const GrpcDeliveryModuleTempl = `
-{{- define "method" }}
-func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context, _ *emptypb.Empty) (*emptypb.Empty, error) {
-	logger := self.logger.With().
-		Str("dmn", "Account").
-		Str("mtd", "EditBanner").
+{{- define "logger" }}	logger := self.logger.With().
+		Str("dmn", "{{ .Domain }}").
+		Str("mtd", "{{ .MethodName }}").
 		Str("reqId", xid.New().String()).
 		Logger()
 	logger.Trace().Msg("start")
+{{- end -}}
 
-	logger.Trace().Msg("create reqCtx")
-	reqCtx := context.WithValue(ctx, "logger", logger)
-
-	logger.Trace().Msg("call usecase")
-	result, err := self.{{ .DomainCamel }}Usecase.{{ .MethodName }}(reqCtx)
-	if err != nil {
-		logger.Warn().Err(err).Msg("usecase err")
-		return nil, err
-	}
-
-	logger.Trace().Msg("end")
-	return &emptypb.Empty{}, nil
-}
-{{ end -}}
-
-{{- define "method-with-input" }}
-func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context, i *pb.{{ .Input.Name }}) (*emptypb.Empty, error) {
-	logger := self.logger.With().
-		Str("dmn", "Account").
-		Str("mtd", "EditBanner").
-		Str("reqId", xid.New().String()).
-		Logger()
-	logger.Trace().Msg("start")
-
-	logger.Trace().Msg("check i == nil")
+{{- define "input" }}	logger.Trace().Msg("check i == nil")
 	if i == nil {
 		logger.Error().Msg("input is nil")
 		return nil, errors.New("input must not be nil")
@@ -50,7 +25,7 @@ func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context,
 {{ if .Input.PropsPrepare -}}
 	logger.Trace().Msg("start input props prepare")
 	{{- range .Input.PropsPrepare }}
-	{{ . }}
+{{ . }}
 	{{- end }}
 	logger.Trace().Msg("end input props prepare")
 {{- end }}
@@ -62,6 +37,49 @@ func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context,
 		{{- end }}
 	}
 	logger.Debug().Interface("uscI", uscI).Msg("usecase input")
+{{- end -}}
+
+{{- define "output" }}	logger.Debug().Interface("result", result).Msg("usecase output")
+{{ if .Output.PropsPrepare }}
+	logger.Trace().Msg("start output props prepare")
+	{{- range .Output.PropsPrepare }}
+{{ . }}
+	{{- end }}
+	logger.Trace().Msg("end output props prepare")
+{{- end }}
+
+	logger.Trace().Msg("end")
+	return &pb.{{ .Output.Name }}{
+		{{- range $output := .Output.Props }}
+		{{ $output.Name }}:{{ $output.Spacing }} {{ $output.Value }},
+		{{- end }}
+	}, nil
+{{- end -}}
+
+{{- define "method" }}
+func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context, _ *emptypb.Empty) (*emptypb.Empty, error) {
+{{ template "logger" . }}
+
+	logger.Trace().Msg("create reqCtx")
+	reqCtx := context.WithValue(ctx, "logger", logger)
+
+	logger.Trace().Msg("call usecase")
+	_, err := self.{{ .DomainCamel }}Usecase.{{ .MethodName }}(reqCtx)
+	if err != nil {
+		logger.Warn().Err(err).Msg("usecase err")
+		return nil, err
+	}
+
+	logger.Trace().Msg("end")
+	return &emptypb.Empty{}, nil
+}
+{{- end -}}
+
+{{- define "method-with-input" }}
+func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context, i *pb.{{ .Input.Name }}) (*emptypb.Empty, error) {
+{{ template "logger" . }}
+
+{{ template "input" . }}
 
 	logger.Trace().Msg("create reqCtx")
 	reqCtx := context.WithValue(ctx, "logger", logger)
@@ -80,12 +98,7 @@ func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context,
 
 {{- define "method-with-output" }}
 func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context, _ *emptypb.Empty) (*pb.{{ .Output.Name }}, error) {
-	logger := self.logger.With().
-		Str("dmn", "Account").
-		Str("mtd", "EditBanner").
-		Str("reqId", xid.New().String()).
-		Logger()
-	logger.Trace().Msg("start")
+{{ template "logger" . }}
 
 	logger.Trace().Msg("create reqCtx")
 	reqCtx := context.WithValue(ctx, "logger", logger)
@@ -97,62 +110,15 @@ func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context,
 		return nil, err
 	}
 
-	logger.Debug().Interface("result", result).Msg("usecase output")
-
-{{ if .Output.PropsPrepare -}}
-	logger.Trace().Msg("start output props prepare")
-	{{- range .Output.PropsPrepare }}
-	{{ . }}
-	{{- end }}
-	logger.Trace().Msg("end output props prepare")
-{{- end }}
-
-	logger.Trace().Msg("end")
-	return &pb.{{ .Output.Name }}{
-		{{- range $output := .Output.Props }}
-		{{ $output.Name }}:{{ $output.Spacing }} {{ $output.Value }},
-		{{- end }}
-	}, nil
+{{ template "output" . }}
 }
 {{ end -}}
 
 {{- define "method-with-input-and-output" }}
 func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context, i *pb.{{ .Input.Name }}) (*pb.{{ .Output.Name }}, error) {
-	logger := self.logger.With().
-		Str("dmn", "Account").
-		Str("mtd", "EditBanner").
-		Str("reqId", xid.New().String()).
-		Logger()
-	logger.Trace().Msg("start")
+{{ template "logger" . }}
 
-	logger.Trace().Msg("check i == nil")
-	if i == nil {
-		logger.Error().Msg("input is nil")
-		return nil, errors.New("input must not be nil")
-	}
-
-	logger.Trace().Msg("validate i")
-	err := self.validator.Validate(i)
-	if err != nil {
-		logger.Info().Err(err).Msg("invalid i")
-		return nil, err
-	}
-
-{{ if .Input.PropsPrepare -}}
-	logger.Trace().Msg("start input props prepare")
-	{{- range .Input.PropsPrepare }}
-	{{ . }}
-	{{- end }}
-	logger.Trace().Msg("end input props prepare")
-{{- end }}
-
-	logger.Trace().Msg("build uscI")
-	uscI := &{{ .DomainSnake }}_usecase.{{ .Input.Name }}{
-		{{- range $input := .Input.Props }}
-		{{ $input.Name }}:{{ $input.Spacing }} {{ $input.Value }},
-		{{- end }}
-	}
-	logger.Debug().Interface("uscI", uscI).Msg("usecase input")
+{{ template "input" . }}
 
 	logger.Trace().Msg("create reqCtx")
 	reqCtx := context.WithValue(ctx, "logger", logger)
@@ -164,22 +130,7 @@ func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context,
 		return nil, err
 	}
 
-	logger.Debug().Interface("result", result).Msg("usecase output")
-
-{{ if .Output.PropsPrepare -}}
-	logger.Trace().Msg("start output props prepare")
-	{{- range .Output.PropsPrepare }}
-	{{ . }}
-	{{- end }}
-	logger.Trace().Msg("end output props prepare")
-{{- end }}
-
-	logger.Trace().Msg("end")
-	return &pb.{{ .Output.Name }}{
-		{{- range $output := .Output.Props }}
-		{{ $output.Name }}:{{ $output.Spacing }} {{ $output.Value }},
-		{{- end }}
-	}, nil
+{{ template "output" . }}
 }
 {{ end -}}
 
@@ -242,14 +193,14 @@ type Add{{ .Domain }}ControllerInput struct {
 	Server   {{ .SpacingRelativeToDomainName }}*grpc.Server
 	Logger   {{ .SpacingRelativeToDomainName }}zerolog.Logger
 	Validator{{ .SpacingRelativeToDomainName }}adapters.Validator
-	{{ .Domain }}Usecase   {{ .DomainSnake }}_usecase.{{ .Domain }}Usecase
+	{{ .Domain }}Usecase  {{ .DomainSnake }}_usecase.{{ .Domain }}Usecase
 }
 
 func Add{{ .Domain }}Controller(i *Add{{ .Domain }}ControllerInput) {
 	pb.Register{{ .Domain }}Server(i.Server, &{{ .DomainCamel }}Controller{
 		logger:   {{ .SpacingRelativeToDomainName }}i.Logger,
 		validator:{{ .SpacingRelativeToDomainName }}i.Validator,
-		{{ .DomainCamel }}Usecase:  i.{{ .Domain }}Usecase,
+		{{ .DomainCamel }}Usecase: i.{{ .Domain }}Usecase,
 	})
 }
 `
