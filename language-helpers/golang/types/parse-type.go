@@ -8,7 +8,7 @@ import (
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
-func (self *typeParser) ParseType(t *schemas.Type, opt *ParseTypeOpt) (*Type, error) {
+func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
 	var result *Type
 
 	// ----------------------
@@ -79,12 +79,13 @@ func (self *typeParser) ParseType(t *schemas.Type, opt *ParseTypeOpt) (*Type, er
 			return nil, fmt.Errorf("type \"%s\" not found", t.ChildTypes[0].TypeHash)
 		}
 
-		resolvedChildType, err := self.ParseType(childType, opt)
+		resolvedChildType, err := self.ParseType(childType)
 		if err != nil {
 			return nil, err
 		}
 
 		result = &Type{
+			GolangPkg:  resolvedChildType.GolangPkg,
 			GolangType: "[]" + resolvedChildType.GolangType,
 		}
 	}
@@ -112,13 +113,7 @@ func (self *typeParser) ParseType(t *schemas.Type, opt *ParseTypeOpt) (*Type, er
 				return nil, fmt.Errorf("type \"%s\" not found", v.TypeHash)
 			}
 
-			var childOpt *ParseTypeOpt = opt
-			if opt == nil {
-				childOpt = &ParseTypeOpt{}
-			}
-			childOpt.prefixForChildren = t.Name
-
-			propType, err := self.ParseType(childType, childOpt)
+			propType, err := self.ParseType(childType)
 			if err != nil {
 				return nil, err
 			}
@@ -171,13 +166,8 @@ func (self *typeParser) ParseType(t *schemas.Type, opt *ParseTypeOpt) (*Type, er
 			}
 		}
 
-		golangType := t.Name
-		if opt != nil {
-			golangType = opt.prefixForChildren + golangType
-		}
-
 		result = &Type{
-			GolangType: golangType,
+			GolangType: t.Name,
 			MapProps:   props,
 		}
 

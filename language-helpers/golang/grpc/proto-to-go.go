@@ -21,7 +21,7 @@ func (self *goGrpcParser) ProtoToGo(i *ProtoToGoInput) (*Type, error) {
 		return nil, fmt.Errorf("inputs for grpc must be Map Type")
 	}
 
-	_, err := self.goTypeParser.ParseType(t, nil)
+	_, err := self.goTypeParser.ParseType(t)
 	if err != nil {
 		return nil, err
 	}
@@ -248,9 +248,14 @@ func (self *goGrpcParser) ProtoToGo(i *ProtoToGoInput) (*Type, error) {
 
 			varName := formatter.PascalToCamel(i.PrefixForVariableNaming + *v.PropName)
 
-			propTypeParsed, err := self.goTypeParser.ParseType(propType, nil)
+			propTypeParsed, err := self.goTypeParser.ParseType(propType)
 			if err != nil {
 				return nil, err
+			}
+
+			var typePkg *string
+			if propTypeParsed.GolangPkg != nil && *propTypeParsed.GolangPkg != i.CurPkg {
+				typePkg = propTypeParsed.GolangPkg
 			}
 
 			prepareMap, err := self.templateManager.Parse("input-prop-map", &templates.InputPropMapTemplInput{
@@ -258,13 +263,10 @@ func (self *goGrpcParser) ProtoToGo(i *ProtoToGoInput) (*Type, error) {
 				Optional:             t.Optional,
 				HasOutput:            i.HasOutput,
 				OriginalVariableName: propNameWithPrefix,
+				TypePkg:              typePkg,
 				VarName:              varName,
-				TypePkg:              "pb",
 				Props:                propsProps,
-				Type: strings.TrimPrefix(
-					propTypeParsed.GetFullTypeName(i.CurPkg),
-					"*",
-				),
+				Type:                 propTypeParsed.GolangType,
 			})
 			if err != nil {
 				return nil, err

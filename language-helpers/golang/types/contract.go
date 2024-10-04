@@ -19,7 +19,7 @@ func (self *MapProp) GetTagsString() string {
 }
 
 type Type struct {
-	GolangPkg  *string // Only Maps and Enums have a pkg
+	GolangPkg  *string // Only Maps, Enums and Lists (because their children can be Maps or Enums) have a pkg
 	GolangType string
 	AnvilType  schemas.TypeType
 	Optional   bool
@@ -30,7 +30,16 @@ func (self *Type) GetFullTypeName(curPkg string) string {
 	typeName := self.GolangType
 
 	if self.GolangPkg != nil && *self.GolangPkg != curPkg {
-		typeName = *self.GolangPkg + "." + typeName
+		if self.AnvilType == schemas.TypeType_List {
+
+			trueType := strings.TrimPrefix(self.GolangType, "[]")
+			typeName = "[]" + *self.GolangPkg + "." + trueType
+
+		} else {
+
+			typeName = *self.GolangPkg + "." + typeName
+
+		}
 	}
 
 	if self.AnvilType == schemas.TypeType_Map {
@@ -70,13 +79,9 @@ func (self *Enum) GetFullEnumName(curPkg string) string {
 	return enumName
 }
 
-type ParseTypeOpt struct {
-	prefixForChildren string // Internal use, for maps of maps
-}
-
 type TypeParser interface {
 	// Parse a type and all it's children (if any), then adds them all to the list and returns the root parsed type
-	ParseType(t *schemas.Type, opt *ParseTypeOpt) (*Type, error)
+	ParseType(t *schemas.Type) (*Type, error)
 	// Parse an enum, then adds it to the list and returns the parsed enum
 	ParseEnum(e *schemas.Enum) (*Enum, error)
 
