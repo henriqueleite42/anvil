@@ -5,10 +5,9 @@ import (
 
 	"github.com/henriqueleite42/anvil/generators/go-project/internal/templates"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
-	types_parser "github.com/henriqueleite42/anvil/language-helpers/golang/types"
 )
 
-func (self *Parser) ResolveUsecaseMethod(usc *schemas.UsecaseMethod) error {
+func (self *Parser) ResolveUsecaseMethod(usc *schemas.UsecaseMethod, pkgName string) error {
 	_, ok := self.MethodsUsecaseToAvoidDuplication[usc.Ref]
 	if ok {
 		return nil
@@ -21,14 +20,12 @@ func (self *Parser) ResolveUsecaseMethod(usc *schemas.UsecaseMethod) error {
 			return fmt.Errorf("fail to find type for \"%s.Input\"", usc.Name)
 		}
 
-		tParsed, err := self.GoTypesParserUsecase.ParseType(t, &types_parser.ParseTypeOpt{
-			PrefixForEnums: "models",
-		})
+		tParsed, err := self.GoTypesParserUsecase.ParseType(t)
 		if err != nil {
 			return err
 		}
 
-		inputTypeName = tParsed.GolangType
+		inputTypeName = tParsed.GetFullTypeName(pkgName)
 	}
 
 	var outputTypeName string
@@ -38,14 +35,12 @@ func (self *Parser) ResolveUsecaseMethod(usc *schemas.UsecaseMethod) error {
 			return fmt.Errorf("fail to find type for \"%s.Output\"", usc.Name)
 		}
 
-		tParsed, err := self.GoTypesParserUsecase.ParseType(t, &types_parser.ParseTypeOpt{
-			PrefixForEnums: "models",
-		})
+		tParsed, err := self.GoTypesParserUsecase.ParseType(t)
 		if err != nil {
 			return err
 		}
 
-		outputTypeName = tParsed.GolangType
+		outputTypeName = tParsed.GetFullTypeName(pkgName)
 	}
 
 	self.MethodsUsecase = append(self.MethodsUsecase, &templates.TemplMethod{

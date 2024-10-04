@@ -55,15 +55,41 @@ func Parse(schema *schemas.Schema) ([]*File, error) {
 		lenGrpcDelivery = len(schema.Delivery.Grpc.Rpcs)
 	}
 
-	goTypesParserModels, err := types_parser.NewTypeParser(schema)
+	domainSnake := formatter.PascalToSnake(schema.Domain)
+
+	goTypesParserModels, err := types_parser.NewTypeParser(&types_parser.NewTypeParserInput{
+		Schema:        schema,
+		EnumsPkg:      "models",
+		TypesPkg:      "models",
+		EventsPkg:     "models",
+		EntitiesPkg:   "models",
+		RepositoryPkg: domainSnake + "_repository",
+		UsecasePkg:    domainSnake + "_usecase",
+	})
 	if err != nil {
 		return nil, err
 	}
-	goTypesParserRepository, err := types_parser.NewTypeParser(schema)
+	goTypesParserRepository, err := types_parser.NewTypeParser(&types_parser.NewTypeParserInput{
+		Schema:        schema,
+		EnumsPkg:      "models",
+		TypesPkg:      domainSnake + "_repository",
+		EventsPkg:     "models",
+		EntitiesPkg:   "models",
+		RepositoryPkg: domainSnake + "_repository",
+		UsecasePkg:    domainSnake + "_usecase",
+	})
 	if err != nil {
 		return nil, err
 	}
-	goTypesParserUsecase, err := types_parser.NewTypeParser(schema)
+	goTypesParserUsecase, err := types_parser.NewTypeParser(&types_parser.NewTypeParserInput{
+		Schema:        schema,
+		EnumsPkg:      "models",
+		TypesPkg:      domainSnake + "_usecase",
+		EventsPkg:     "models",
+		EntitiesPkg:   "models",
+		RepositoryPkg: domainSnake + "_repository",
+		UsecasePkg:    domainSnake + "_usecase",
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +131,7 @@ func Parse(schema *schemas.Schema) ([]*File, error) {
 
 	if lenRepository > 0 {
 		for _, v := range schema.Repository.Methods.Methods {
-			err := typeParser.ResolveRepositoryMethod(v)
+			err := typeParser.ResolveRepositoryMethod(v, domainSnake+"_repository")
 			if err != nil {
 				return nil, err
 			}
@@ -118,7 +144,7 @@ func Parse(schema *schemas.Schema) ([]*File, error) {
 	var importsUsecase [][]string = nil
 	if lenUsecase > 0 {
 		for _, v := range schema.Usecase.Methods.Methods {
-			err := typeParser.ResolveUsecaseMethod(v)
+			err := typeParser.ResolveUsecaseMethod(v, domainSnake+"_usecase")
 			if err != nil {
 				return nil, err
 			}
@@ -150,13 +176,15 @@ func Parse(schema *schemas.Schema) ([]*File, error) {
 	importsRepository := goTypesParserRepository.GetImports()
 
 	enums := goTypesParserModels.GetEnums()
-	entities := goTypesParserModels.GetMapTypes()
-	typesRepository := goTypesParserRepository.GetMapTypes()
-	typesUsecase := goTypesParserUsecase.GetMapTypes()
+	entities := goTypesParserModels.GetEntities()
+	typesRepository := goTypesParserRepository.GetRepository()
+	typesRepository = append(typesRepository, goTypesParserRepository.GetTypes()...)
+	typesUsecase := goTypesParserUsecase.GetUsecase()
+	typesUsecase = append(typesUsecase, goTypesParserUsecase.GetTypes()...)
 
 	templInput := &templates.TemplInput{
 		Domain:                      schema.Domain,
-		DomainSnake:                 formatter.PascalToSnake(schema.Domain),
+		DomainSnake:                 domainSnake,
 		DomainCamel:                 formatter.PascalToCamel(schema.Domain),
 		SpacingRelativeToDomainName: strings.Repeat(" ", len(schema.Domain)),
 		ImportsModels:               importsModels,

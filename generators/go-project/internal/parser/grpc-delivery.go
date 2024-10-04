@@ -43,7 +43,6 @@ func (self *Parser) ResolveGrpcDelivery(dlv *schemas.DeliveryGrpcRpc) error {
 			MethodName:              methodName,
 			VariableName:            "i",
 			PrefixForVariableNaming: "Input",
-			PkgForEnums:             "models",
 			HasOutput:               outputTypeHash != "",
 		})
 		if err != nil {

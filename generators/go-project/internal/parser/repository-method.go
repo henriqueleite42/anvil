@@ -5,10 +5,9 @@ import (
 
 	"github.com/henriqueleite42/anvil/generators/go-project/internal/templates"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
-	types_parser "github.com/henriqueleite42/anvil/language-helpers/golang/types"
 )
 
-func (self *Parser) ResolveRepositoryMethod(usc *schemas.RepositoryMethod) error {
+func (self *Parser) ResolveRepositoryMethod(usc *schemas.RepositoryMethod, pkgName string) error {
 	var inputTypeName string
 	if usc.Input != nil && usc.Input.TypeHash != "" {
 		t, ok := self.Schema.Types.Types[usc.Input.TypeHash]
@@ -16,14 +15,12 @@ func (self *Parser) ResolveRepositoryMethod(usc *schemas.RepositoryMethod) error
 			return fmt.Errorf("fail to find type for \"%s.Input\"", usc.Name)
 		}
 
-		tParsed, err := self.GoTypesParserUsecase.ParseType(t, &types_parser.ParseTypeOpt{
-			PrefixForEnums: "models",
-		})
+		tParsed, err := self.GoTypesParserUsecase.ParseType(t)
 		if err != nil {
 			return err
 		}
 
-		inputTypeName = tParsed.GolangType
+		inputTypeName = tParsed.GetFullTypeName(pkgName)
 	}
 
 	var outputTypeName string
@@ -33,14 +30,12 @@ func (self *Parser) ResolveRepositoryMethod(usc *schemas.RepositoryMethod) error
 			return fmt.Errorf("fail to find type for \"%s.Output\"", usc.Name)
 		}
 
-		tParsed, err := self.GoTypesParserUsecase.ParseType(t, &types_parser.ParseTypeOpt{
-			PrefixForEnums: "models",
-		})
+		tParsed, err := self.GoTypesParserUsecase.ParseType(t)
 		if err != nil {
 			return err
 		}
 
-		outputTypeName = tParsed.GolangType
+		outputTypeName = tParsed.GetFullTypeName(pkgName)
 	}
 
 	self.MethodsRepository = append(self.MethodsRepository, &templates.TemplMethod{

@@ -118,7 +118,7 @@ func Parse(schema *schemas.Schema, silent bool, outputFolderPath string) error {
 				return fmt.Errorf("type \"%s\" not found for usecase method \"%s\"", method.Input.TypeHash, method.Name)
 			}
 
-			_, err := contractGoTypesParser.ParseType(inputType, nil)
+			_, err := contractGoTypesParser.ParseType(inputType)
 			if err != nil {
 				return err
 			}
@@ -151,7 +151,7 @@ func Parse(schema *schemas.Schema, silent bool, outputFolderPath string) error {
 				return fmt.Errorf("type \"%s\" not found for usecase method \"%s\"", method.Output.TypeHash, method.Name)
 			}
 
-			_, err := contractGoTypesParser.ParseType(outputType, nil)
+			_, err := contractGoTypesParser.ParseType(outputType)
 			if err != nil {
 				return err
 			}
