@@ -24,7 +24,7 @@ func (self *{{ .Domain }}UsecaseImplementation) {{ .MethodName }}(ctx context.Co
 
 	{{- else -}}
 
-func (self *{{ .Domain }}UsecaseImplementation) {{ .MethodName }}(ctx context.Context, i *{{ .InputTypeName }}) error {
+func (self *{{ .Domain }}UsecaseImplementation) {{ .MethodName }}(ctx context.Context, i {{ .InputTypeName }}) error {
 	return errors.New("\"{{ .MethodName }}\": unimplemented")
 }
 
@@ -32,13 +32,13 @@ func (self *{{ .Domain }}UsecaseImplementation) {{ .MethodName }}(ctx context.Co
 {{- else -}}
 	{{- if not .InputTypeName -}}
 
-func (self *{{ .Domain }}UsecaseImplementation) {{ .MethodName }}(ctx context.Context) (*{{ .OutputTypeName }}, error) {
+func (self *{{ .Domain }}UsecaseImplementation) {{ .MethodName }}(ctx context.Context) ({{ .OutputTypeName }}, error) {
 	return nil, errors.New("\"{{ .MethodName }}\": unimplemented")
 }
 
 	{{- else -}}
 
-func (self *{{ .Domain }}UsecaseImplementation) {{ .MethodName }}(ctx context.Context, i *{{ .InputTypeName }}) (*{{ .OutputTypeName }}, error) {
+func (self *{{ .Domain }}UsecaseImplementation) {{ .MethodName }}(ctx context.Context, i {{ .InputTypeName }}) ({{ .OutputTypeName }}, error) {
 	return nil, errors.New("\"{{ .MethodName }}\": unimplemented")
 }
 

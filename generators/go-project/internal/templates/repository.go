@@ -1,6 +1,8 @@
 package templates
 
-const RepositoryTempl = `package {{ .DomainSnake }}_repository
+const RepositoryTempl = `
+{{- $pkg := print .DomainSnake "_repository" -}}
+package {{ $pkg }}
 
 import (
 {{- range .ImportsRepository }}
@@ -12,7 +14,7 @@ import (
 {{ range $type := .TypesRepository }}
 type {{ $type.GolangType }} struct {
 {{- range $prop := $type.MapProps }}
-	{{ $prop.Name }}{{ $prop.Spacing1 }} {{ $prop.GolangType }}{{ if $prop.Tags }}{{ $prop.Spacing2 }} ` + "`{{ $prop.GetTagsString }}`" + `{{ end }}
+	{{ $prop.Name }}{{ $prop.Spacing1 }} {{ $prop.GetFullTypeName $pkg }}{{ if $prop.Tags }}{{ $prop.Spacing2 }} ` + "`{{ $prop.GetTagsString }}`" + `{{ end }}
 {{- end }}
 }
 {{- end }}
@@ -23,13 +25,13 @@ type {{ .Domain }}Repository interface {
 	{{- if not $method.InputTypeName }}
 	{{ $method.MethodName }}(ctx context.Context) error
 	{{- else }}
-	{{ $method.MethodName }}(ctx context.Context, i *{{ $method.InputTypeName }}) error
+	{{ $method.MethodName }}(ctx context.Context, i {{ $method.InputTypeName }}) error
 	{{- end }}
 {{- else }}
 	{{- if not $method.InputTypeName }}
-	{{ $method.MethodName }}(ctx context.Context) (*{{ $method.OutputTypeName }}, error)
+	{{ $method.MethodName }}(ctx context.Context) ({{ $method.OutputTypeName }}, error)
 	{{- else }}
-	{{ $method.MethodName }}(ctx context.Context, i *{{ $method.InputTypeName }}) (*{{ $method.OutputTypeName }}, error)
+	{{ $method.MethodName }}(ctx context.Context, i {{ $method.InputTypeName }}) ({{ $method.OutputTypeName }}, error)
 	{{- end }}
 {{- end }}
 {{- end }}

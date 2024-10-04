@@ -64,7 +64,7 @@ func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context,
 	reqCtx := context.WithValue(ctx, "logger", logger)
 
 	logger.Trace().Msg("call usecase")
-	_, err := self.{{ .DomainCamel }}Usecase.{{ .MethodName }}(reqCtx)
+	err := self.{{ .DomainCamel }}Usecase.{{ .MethodName }}(reqCtx)
 	if err != nil {
 		logger.Warn().Err(err).Msg("usecase err")
 		return nil, err

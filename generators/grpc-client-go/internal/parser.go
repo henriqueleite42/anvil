@@ -38,6 +38,8 @@ func Parse(schema *schemas.Schema, silent bool, outputFolderPath string) error {
 		return fmt.Errorf("no usecases methods to deliver")
 	}
 
+	domainSnake := formatter.PascalToSnake(schema.Domain)
+
 	rpcs := make([]*schemas.DeliveryGrpcRpc, 0, len(schema.Delivery.Grpc.Rpcs))
 	for _, v := range schema.Delivery.Grpc.Rpcs {
 		rpcs = append(rpcs, v)
@@ -54,11 +56,27 @@ func Parse(schema *schemas.Schema, silent bool, outputFolderPath string) error {
 		}
 	}
 
-	contractGoTypesParser, err := types_parser.NewTypeParser(schema)
+	contractGoTypesParser, err := types_parser.NewTypeParser(&types_parser.NewTypeParserInput{
+		Schema:        schema,
+		EnumsPkg:      domainSnake,
+		TypesPkg:      domainSnake,
+		EventsPkg:     domainSnake,
+		EntitiesPkg:   domainSnake,
+		RepositoryPkg: domainSnake,
+		UsecasePkg:    domainSnake,
+	})
 	if err != nil {
 		return err
 	}
-	implementationGoTypesParser, err := types_parser.NewTypeParser(schema)
+	implementationGoTypesParser, err := types_parser.NewTypeParser(&types_parser.NewTypeParserInput{
+		Schema:        schema,
+		EnumsPkg:      domainSnake,
+		TypesPkg:      domainSnake,
+		EventsPkg:     domainSnake,
+		EntitiesPkg:   domainSnake,
+		RepositoryPkg: domainSnake,
+		UsecasePkg:    domainSnake,
+	})
 	if err != nil {
 		return err
 	}
@@ -100,7 +118,7 @@ func Parse(schema *schemas.Schema, silent bool, outputFolderPath string) error {
 				return fmt.Errorf("type \"%s\" not found for usecase method \"%s\"", method.Input.TypeHash, method.Name)
 			}
 
-			_, err := contractGoTypesParser.ParseType(inputType, nil)
+			_, err := contractGoTypesParser.ParseType(inputType)
 			if err != nil {
 				return err
 			}
@@ -111,6 +129,7 @@ func Parse(schema *schemas.Schema, silent bool, outputFolderPath string) error {
 				VariableName:            "i",
 				PrefixForVariableNaming: "Input",
 				HasOutput:               method.Output != nil,
+				CurPkg:                  domainSnake,
 			})
 			if err != nil {
 				return err
@@ -132,7 +151,7 @@ func Parse(schema *schemas.Schema, silent bool, outputFolderPath string) error {
 				return fmt.Errorf("type \"%s\" not found for usecase method \"%s\"", method.Output.TypeHash, method.Name)
 			}
 
-			_, err := contractGoTypesParser.ParseType(outputType, nil)
+			_, err := contractGoTypesParser.ParseType(outputType)
 			if err != nil {
 				return err
 			}
@@ -143,6 +162,7 @@ func Parse(schema *schemas.Schema, silent bool, outputFolderPath string) error {
 				VariableName:            "result",
 				PrefixForVariableNaming: "Output",
 				HasOutput:               true,
+				CurPkg:                  domainSnake,
 			})
 			if err != nil {
 				return err
@@ -173,7 +193,22 @@ func Parse(schema *schemas.Schema, silent bool, outputFolderPath string) error {
 	importsImplementation := implementationGoTypesParser.GetImports()
 
 	enums := contractGoTypesParser.GetEnums()
-	types := contractGoTypesParser.GetMapTypes()
+	types := contractGoTypesParser.GetTypes()
+	entities := contractGoTypesParser.GetEntities()
+	events := contractGoTypesParser.GetEvents()
+	repository := contractGoTypesParser.GetRepository()
+	usecase := contractGoTypesParser.GetUsecase()
+
+	allTypes := make(
+		[]*types_parser.Type,
+		0,
+		len(types)+len(entities)+len(events)+len(repository)+len(usecase),
+	)
+	allTypes = append(allTypes, types...)
+	allTypes = append(allTypes, entities...)
+	allTypes = append(allTypes, events...)
+	allTypes = append(allTypes, repository...)
+	allTypes = append(allTypes, usecase...)
 
 	// -----------------------------
 	//
@@ -184,12 +219,12 @@ func Parse(schema *schemas.Schema, silent bool, outputFolderPath string) error {
 	templInput := &templates.TemplInput{
 		Domain:                      schema.Domain,
 		DomainCamel:                 formatter.PascalToCamel(schema.Domain),
-		DomainSnake:                 formatter.PascalToSnake(schema.Domain),
+		DomainSnake:                 domainSnake,
 		SpacingRelativeToDomainName: strings.Repeat(" ", len(schema.Domain)),
 		ImportsContract:             importsContract,
 		ImportsImplementation:       importsImplementation,
 		Enums:                       enums,
-		Types:                       types,
+		Types:                       allTypes,
 		Methods:                     methods,
 	}
 

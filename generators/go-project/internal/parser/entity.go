@@ -31,7 +31,7 @@ func (self *Parser) ResolveEntity(e *schemas.Entity) error {
 		return fmt.Errorf("type \"%s\" for entity \"%s\" not found", e.TypeHash, e.Name)
 	}
 
-	self.GoTypesParserModels.ParseType(t, nil)
+	self.GoTypesParserModels.ParseType(t)
 
 	return nil
 }

@@ -8,7 +8,7 @@ type InputPropMapTemplProp struct {
 
 type InputPropMapTemplInput struct {
 	MethodName           string
-	TypePkg              string
+	TypePkg              *string
 	OriginalVariableName string
 	VarName              string
 	Type                 string
@@ -17,9 +17,9 @@ type InputPropMapTemplInput struct {
 	HasOutput            bool
 }
 
-const InputPropMapTempl = `	var {{ .VarName }} *{{ if ne .TypePkg "" }}{{ .TypePkg }}.{{ end }}{{ .Type }} = nil
+const InputPropMapTempl = `	var {{ .VarName }} *{{ if .TypePkg }}{{ .TypePkg }}.{{ end }}{{ .Type }} = nil
 	if {{ .OriginalVariableName }} != nil {
-		{{ .VarName }} = &{{ if ne .TypePkg "" }}{{ .TypePkg }}.{{ end }}{{ .Type }}{
+		{{ .VarName }} = &{{ if .TypePkg }}{{ .TypePkg }}.{{ end }}{{ .Type }}{
 			{{- range .Props }}
 		 	{{ .Name }}:{{ .Spacing }} {{ .Value }},
 			{{- end }}

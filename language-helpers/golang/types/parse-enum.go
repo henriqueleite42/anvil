@@ -19,6 +19,7 @@ func (self *typeParser) ParseEnum(e *schemas.Enum) (*Enum, error) {
 	}
 
 	enum := &Enum{
+		GolangPkg:  self.enumsPkg,
 		GolangName: e.Name,
 		GolangType: eType,
 		Values:     []*EnumValue{},

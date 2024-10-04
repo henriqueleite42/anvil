@@ -21,7 +21,7 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 		return nil, fmt.Errorf("inputs for grpc must be Map Type")
 	}
 
-	_, err := self.goTypeParser.ParseType(t, nil)
+	_, err := self.goTypeParser.ParseType(t)
 	if err != nil {
 		return nil, err
 	}
@@ -248,20 +248,21 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 
 			varName := formatter.PascalToCamel(i.PrefixForVariableNaming + *v.PropName)
 
-			propTypeParsed, err := self.goTypeParser.ParseType(propType, nil)
+			propTypeParsed, err := self.goTypeParser.ParseType(propType)
 			if err != nil {
 				return nil, err
 			}
 
+			pbTypePkg := "pb"
 			prepareMap, err := self.templateManager.Parse("input-prop-map", &templates.InputPropMapTemplInput{
 				MethodName:           i.MethodName,
 				Optional:             t.Optional,
 				HasOutput:            i.HasOutput,
 				OriginalVariableName: propNameWithPrefix,
-				TypePkg:              "pb",
+				TypePkg:              &pbTypePkg,
 				VarName:              varName,
-				Type:                 propTypeParsed.GolangType,
 				Props:                propsProps,
+				Type:                 propTypeParsed.GolangType,
 			})
 			if err != nil {
 				return nil, err

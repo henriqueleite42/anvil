@@ -21,7 +21,7 @@ func (self *goGrpcParser) ProtoToGo(i *ProtoToGoInput) (*Type, error) {
 		return nil, fmt.Errorf("inputs for grpc must be Map Type")
 	}
 
-	_, err := self.goTypeParser.ParseType(t, nil)
+	_, err := self.goTypeParser.ParseType(t)
 	if err != nil {
 		return nil, err
 	}
@@ -94,10 +94,7 @@ func (self *goGrpcParser) ProtoToGo(i *ProtoToGoInput) (*Type, error) {
 			}
 
 			if propType.Optional {
-				eType := "*" + enum.GolangName
-				if i.PkgForEnums != "" {
-					eType = fmt.Sprintf("*%s.%s", i.PkgForEnums, enum.GolangName)
-				}
+				eType := "*" + enum.GetFullEnumName(i.CurPkg)
 
 				varName := formatter.PascalToCamel(i.PrefixForVariableNaming + *v.PropName)
 				prepareList, err := self.templateManager.Parse("input-prop-optional", &templates.InputPropOptionalTemplInput{
@@ -155,11 +152,7 @@ func (self *goGrpcParser) ProtoToGo(i *ProtoToGoInput) (*Type, error) {
 						return nil, err
 					}
 
-					if i.PkgForEnums != "" {
-						childTypeType = fmt.Sprintf("*%s.%s", i.PkgForEnums, enum.GolangName)
-					} else {
-						childTypeType = enum.GolangName
-					}
+					childTypeType = enum.GetFullEnumName(i.CurPkg)
 					childTypeToAppend = fmt.Sprintf("convertPbTo%s(v)", enum.GolangName)
 				}
 
@@ -255,9 +248,14 @@ func (self *goGrpcParser) ProtoToGo(i *ProtoToGoInput) (*Type, error) {
 
 			varName := formatter.PascalToCamel(i.PrefixForVariableNaming + *v.PropName)
 
-			propTypeParsed, err := self.goTypeParser.ParseType(propType, nil)
+			propTypeParsed, err := self.goTypeParser.ParseType(propType)
 			if err != nil {
 				return nil, err
+			}
+
+			var typePkg *string
+			if propTypeParsed.GolangPkg != nil && *propTypeParsed.GolangPkg != i.CurPkg {
+				typePkg = propTypeParsed.GolangPkg
 			}
 
 			prepareMap, err := self.templateManager.Parse("input-prop-map", &templates.InputPropMapTemplInput{
@@ -265,10 +263,10 @@ func (self *goGrpcParser) ProtoToGo(i *ProtoToGoInput) (*Type, error) {
 				Optional:             t.Optional,
 				HasOutput:            i.HasOutput,
 				OriginalVariableName: propNameWithPrefix,
+				TypePkg:              typePkg,
 				VarName:              varName,
-				TypePkg:              "pb",
-				Type:                 propTypeParsed.GolangType,
 				Props:                propsProps,
+				Type:                 propTypeParsed.GolangType,
 			})
 			if err != nil {
 				return nil, err

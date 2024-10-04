@@ -22,7 +22,7 @@ Enums:
 
 Usecase:
   Methods:
-    TestAll:
+    TestAllTypes:
       Input:
         Type: Map
         Properties:
@@ -278,5 +278,5 @@ Usecase:
 Delivery:
   Grpc:
     Rpcs:
-      - UsecaseMethod: TestAll
+      - UsecaseMethod: TestAllTypes
       - UsecaseMethod: FooBar
