@@ -154,7 +154,7 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 
 		for kk, vv := range propertiesMap {
 			typeHash, err := self.resolveType(&resolveInput{
-				namePrefix: i.k,
+				namePrefix: i.namePrefix + i.k,
 				path:       fmt.Sprintf("%s.%s.Properties", i.path, i.k),
 				ref:        ref,
 				k:          kk,

@@ -1,5 +1,7 @@
 package templates
 
+import "strings"
+
 type InputPropMapTemplProp struct {
 	Name    string
 	Spacing string
@@ -7,9 +9,12 @@ type InputPropMapTemplProp struct {
 }
 
 type InputPropMapTemplInput struct {
+	IndentationLvl int // internal use, controls sub levels
+
 	MethodName           string
 	TypePkg              *string
 	OriginalVariableName string
+	Prepare              []string
 	VarName              string
 	Type                 string
 	Props                []*InputPropMapTemplProp
@@ -17,8 +22,17 @@ type InputPropMapTemplInput struct {
 	HasOutput            bool
 }
 
+func (self *InputPropMapTemplInput) Idt() string {
+	return strings.Repeat("	", self.IndentationLvl)
+}
+
 const InputPropMapTempl = `	var {{ .VarName }} *{{ if .TypePkg }}{{ .TypePkg }}.{{ end }}{{ .Type }} = nil
 	if {{ .OriginalVariableName }} != nil {
+							{{ if .Prepare -}}
+								{{ range .Prepare -}}
+									{{- . }}
+								{{- end }}
+							{{- end }}
 		{{ .VarName }} = &{{ if .TypePkg }}{{ .TypePkg }}.{{ end }}{{ .Type }}{
 			{{- range .Props }}
 		 	{{ .Name }}:{{ .Spacing }} {{ .Value }},

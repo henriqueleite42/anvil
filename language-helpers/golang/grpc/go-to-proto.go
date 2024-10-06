@@ -113,7 +113,7 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 		}
 		if propType.Type == schemas.TypeType_List {
 			if propType.Optional {
-				return nil, fmt.Errorf("unable to parse \"%s\": grpc-client-go currently doesn't support optional lists", *v.PropName)
+				return nil, fmt.Errorf("unable to parse \"%s\": language-helper golang grpc GoToProto currently doesn't support optional lists", *v.PropName)
 			}
 			if propType.ChildTypes == nil {
 				return nil, fmt.Errorf("ChildTypes for \"%s\" not found", t.Name)
@@ -156,7 +156,7 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 				}
 
 				if childTypeType == "" {
-					return nil, fmt.Errorf("unable to parse \"%s\": grpc-client-go currently doesn't support lists of lists and lists of maps", *v.PropName)
+					return nil, fmt.Errorf("unable to parse \"%s\": language-helper golang grpc GoToProto currently doesn't support lists of lists and lists of maps", *v.PropName)
 				}
 
 				varName := formatter.PascalToCamel(i.PrefixForVariableNaming + *v.PropName)
@@ -195,11 +195,15 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 				}
 			}
 
+			pkgPb := "pb"
+			varNamePascal := i.PrefixForVariableNaming + *v.PropName
+			varName := formatter.PascalToCamel(varNamePascal)
 			propsProps := []*templates.InputPropMapTemplProp{}
-			for _, v := range propType.ChildTypes {
-				childPropType, ok := self.schema.Types.Types[v.TypeHash]
+			childPropsPrepare := []string{}
+			for _, vv := range propType.ChildTypes {
+				childPropType, ok := self.schema.Types.Types[vv.TypeHash]
 				if !ok {
-					return nil, fmt.Errorf("type \"%s\" not found", v.TypeHash)
+					return nil, fmt.Errorf("type \"%s\" not found", vv.TypeHash)
 				}
 
 				var value string
@@ -207,19 +211,19 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 					childPropType.Type == schemas.TypeType_Int ||
 					childPropType.Type == schemas.TypeType_Float ||
 					childPropType.Type == schemas.TypeType_Bool {
-					value = fmt.Sprintf("%s.%s", propNameWithPrefix, *v.PropName)
+					value = fmt.Sprintf("%s.%s", propNameWithPrefix, *vv.PropName)
 				}
 				if childPropType.Type == schemas.TypeType_Timestamp {
 					if childPropType.Optional {
-						return nil, fmt.Errorf("grpc-client-go doesn't support optional map child timestamp properties")
+						return nil, fmt.Errorf("language-helper golang grpc GoToProto doesn't support optional map child timestamp properties")
 					}
 
 					self.goTypeParser.AddImport("google.golang.org/protobuf/types/known/timestamppb")
-					value = fmt.Sprintf("timestamppb.New(%s.%s)", propNameWithPrefix, *v.PropName)
+					value = fmt.Sprintf("timestamppb.New(%s.%s)", propNameWithPrefix, *vv.PropName)
 				}
 				if childPropType.Type == schemas.TypeType_Enum {
 					if childPropType.Optional {
-						return nil, fmt.Errorf("grpc-client-go doesn't support optional map child timestamp properties")
+						return nil, fmt.Errorf("language-helper golang grpc GoToProto doesn't support optional map child timestamp properties")
 					}
 
 					if childPropType.EnumHash == nil {
@@ -232,37 +236,81 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 						return nil, err
 					}
 
-					value = fmt.Sprintf("convert%sToPb(%s.%s)", enum.GolangName, propNameWithPrefix, *v.PropName)
+					value = fmt.Sprintf("convert%sToPb(%s.%s)", enum.GolangName, propNameWithPrefix, *vv.PropName)
+				}
+				if childPropType.Type == schemas.TypeType_Map {
+					childVarNamePascal := varNamePascal + *vv.PropName
+					childVarName := formatter.PascalToCamel(childVarNamePascal)
+					childPropWithPrefix := fmt.Sprintf("%s.%s", propNameWithPrefix, *vv.PropName)
+
+					r, err := self.GoToProto(&GoToProtoInput{
+						Type:                    childPropType,
+						MethodName:              i.MethodName,
+						VariableName:            childPropWithPrefix,
+						PrefixForVariableNaming: childVarNamePascal,
+						HasOutput:               i.HasOutput,
+						indentationLvl:          i.indentationLvl + 1,
+					})
+					if err != nil {
+						return nil, err
+					}
+
+					childProps := make([]*templates.InputPropMapTemplProp, len(r.Props), len(r.Props))
+					for k, v := range r.Props {
+						childProps[k] = &templates.InputPropMapTemplProp{
+							Name:    v.Name,
+							Spacing: v.Spacing,
+							Value:   v.Value,
+						}
+					}
+
+					prepareChildMap, err := self.templateManager.Parse("input-prop-map", &templates.InputPropMapTemplInput{
+						MethodName:           i.MethodName,
+						Optional:             childPropType.Optional,
+						HasOutput:            i.HasOutput,
+						OriginalVariableName: childPropWithPrefix,
+						TypePkg:              &pkgPb,
+						VarName:              childVarName,
+						Type:                 r.Name,
+						Props:                childProps,
+						Prepare:              r.PropsPrepare,
+						IndentationLvl:       i.indentationLvl,
+					})
+					if err != nil {
+						return nil, err
+					}
+
+					childPropsPrepare = append(childPropsPrepare, prepareChildMap)
+					value = childVarName
 				}
 
 				if value == "" {
-					return nil, fmt.Errorf("unable to parse \"%s\": language-helper golang grpc currently doesn't support maps of lists and maps of maps", *v.PropName)
+					return nil, fmt.Errorf("unable to parse \"%s\": language-helper golang grpc GoToProto currently doesn't support maps of lists and maps of maps", *vv.PropName)
 				}
 
 				propsProps = append(propsProps, &templates.InputPropMapTemplProp{
-					Name:    *v.PropName,
-					Spacing: strings.Repeat(" ", childBiggest-len(*v.PropName)),
+					Name:    *vv.PropName,
+					Spacing: strings.Repeat(" ", childBiggest-len(*vv.PropName)),
 					Value:   value,
 				})
 			}
-
-			varName := formatter.PascalToCamel(i.PrefixForVariableNaming + *v.PropName)
 
 			propTypeParsed, err := self.goTypeParser.ParseType(propType)
 			if err != nil {
 				return nil, err
 			}
 
-			pbTypePkg := "pb"
 			prepareMap, err := self.templateManager.Parse("input-prop-map", &templates.InputPropMapTemplInput{
 				MethodName:           i.MethodName,
 				Optional:             t.Optional,
 				HasOutput:            i.HasOutput,
 				OriginalVariableName: propNameWithPrefix,
-				TypePkg:              &pbTypePkg,
+				TypePkg:              &pkgPb,
 				VarName:              varName,
 				Props:                propsProps,
 				Type:                 propTypeParsed.GolangType,
+				Prepare:              childPropsPrepare,
+				IndentationLvl:       i.indentationLvl,
 			})
 			if err != nil {
 				return nil, err
