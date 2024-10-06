@@ -26,14 +26,14 @@ func (self *InputPropMapTemplInput) Idt() string {
 	return strings.Repeat("	", self.IndentationLvl)
 }
 
-const InputPropMapTempl = `	var {{ .VarName }} *{{ if ne .TypePkg "" }}{{ .TypePkg }}.{{ end }}{{ .Type }} = nil
+const InputPropMapTempl = `	var {{ .VarName }} *{{ if .TypePkg }}{{ .TypePkg }}.{{ end }}{{ .Type }} = nil
 	if {{ .OriginalVariableName }} != nil {
 							{{ if .Prepare -}}
 								{{ range .Prepare -}}
 									{{- . }}
 								{{- end }}
 							{{- end }}
-		{{ .VarName }} = &{{ if ne .TypePkg "" }}{{ .TypePkg }}.{{ end }}{{ .Type }}{
+		{{ .VarName }} = &{{ if .TypePkg }}{{ .TypePkg }}.{{ end }}{{ .Type }}{
 			{{- range .Props }}
 		 	{{ .Name }}:{{ .Spacing }} {{ .Value }},
 			{{- end }}

@@ -215,14 +215,14 @@ func (self *goGrpcParser) ProtoToGo(i *ProtoToGoInput) (*Type, error) {
 				}
 				if childPropType.Type == schemas.TypeType_Timestamp {
 					if childPropType.Optional {
-						return nil, fmt.Errorf("grpc-client-go doesn't support optional map child timestamp properties")
+						return nil, fmt.Errorf("language-helper golang grpc ProtoToGo doesn't support optional map child timestamp properties")
 					}
 
 					value = fmt.Sprintf("%s.%s.AsTime()", propNameWithPrefix, *vv.PropName)
 				}
 				if childPropType.Type == schemas.TypeType_Enum {
 					if childPropType.Optional {
-						return nil, fmt.Errorf("grpc-client-go doesn't support optional map child timestamp properties")
+						return nil, fmt.Errorf("language-helper golang grpc ProtoToGo doesn't support optional map child timestamp properties")
 					}
 
 					if childPropType.EnumHash == nil {
@@ -263,12 +263,13 @@ func (self *goGrpcParser) ProtoToGo(i *ProtoToGoInput) (*Type, error) {
 						}
 					}
 
+					pkgPb := "pb"
 					prepareChildMap, err := self.templateManager.Parse("input-prop-map", &templates.InputPropMapTemplInput{
 						MethodName:           i.MethodName,
 						Optional:             childPropType.Optional,
 						HasOutput:            i.HasOutput,
 						OriginalVariableName: childPropWithPrefix,
-						TypePkg:              "pb",
+						TypePkg:              &pkgPb,
 						VarName:              childVarName,
 						Type:                 r.Name,
 						Props:                childProps,

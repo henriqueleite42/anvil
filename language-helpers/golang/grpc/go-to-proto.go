@@ -195,6 +195,7 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 				}
 			}
 
+			pkgPb := "pb"
 			varNamePascal := i.PrefixForVariableNaming + *v.PropName
 			varName := formatter.PascalToCamel(varNamePascal)
 			propsProps := []*templates.InputPropMapTemplProp{}
@@ -214,7 +215,7 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 				}
 				if childPropType.Type == schemas.TypeType_Timestamp {
 					if childPropType.Optional {
-						return nil, fmt.Errorf("grpc-client-go doesn't support optional map child timestamp properties")
+						return nil, fmt.Errorf("language-helper golang grpc GoToProto doesn't support optional map child timestamp properties")
 					}
 
 					self.goTypeParser.AddImport("google.golang.org/protobuf/types/known/timestamppb")
@@ -222,7 +223,7 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 				}
 				if childPropType.Type == schemas.TypeType_Enum {
 					if childPropType.Optional {
-						return nil, fmt.Errorf("grpc-client-go doesn't support optional map child timestamp properties")
+						return nil, fmt.Errorf("language-helper golang grpc GoToProto doesn't support optional map child timestamp properties")
 					}
 
 					if childPropType.EnumHash == nil {
@@ -268,7 +269,7 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 						Optional:             childPropType.Optional,
 						HasOutput:            i.HasOutput,
 						OriginalVariableName: childPropWithPrefix,
-						TypePkg:              "pb",
+						TypePkg:              &pkgPb,
 						VarName:              childVarName,
 						Type:                 r.Name,
 						Props:                childProps,
@@ -299,13 +300,12 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 				return nil, err
 			}
 
-			pbTypePkg := "pb"
 			prepareMap, err := self.templateManager.Parse("input-prop-map", &templates.InputPropMapTemplInput{
 				MethodName:           i.MethodName,
 				Optional:             t.Optional,
 				HasOutput:            i.HasOutput,
 				OriginalVariableName: propNameWithPrefix,
-				TypePkg:              &pbTypePkg,
+				TypePkg:              &pkgPb,
 				VarName:              varName,
 				Props:                propsProps,
 				Type:                 propTypeParsed.GolangType,
