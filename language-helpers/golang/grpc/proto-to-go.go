@@ -263,13 +263,22 @@ func (self *goGrpcParser) ProtoToGo(i *ProtoToGoInput) (*Type, error) {
 						}
 					}
 
-					pkgPb := "pb"
+					childPropParsed, err := self.goTypeParser.ParseType(childPropType)
+					if err != nil {
+						return nil, err
+					}
+
+					var typePkg *string
+					if childPropParsed.GolangPkg != nil && *childPropParsed.GolangPkg != i.CurPkg {
+						typePkg = childPropParsed.GolangPkg
+					}
+
 					prepareChildMap, err := self.templateManager.Parse("input-prop-map", &templates.InputPropMapTemplInput{
 						MethodName:           i.MethodName,
 						Optional:             childPropType.Optional,
 						HasOutput:            i.HasOutput,
 						OriginalVariableName: childPropWithPrefix,
-						TypePkg:              &pkgPb,
+						TypePkg:              typePkg,
 						VarName:              childVarName,
 						Type:                 r.Name,
 						Props:                childProps,
