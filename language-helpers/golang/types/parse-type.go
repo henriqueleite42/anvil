@@ -84,9 +84,17 @@ func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
 			return nil, err
 		}
 
+		var golangType string
+		if resolvedChildType.AnvilType == schemas.TypeType_Map ||
+			resolvedChildType.Optional {
+			golangType = "[]*" + resolvedChildType.GolangType
+		} else {
+			golangType = "[]" + resolvedChildType.GolangType
+		}
+
 		result = &Type{
 			GolangPkg:  resolvedChildType.GolangPkg,
-			GolangType: "[]" + resolvedChildType.GolangType,
+			GolangType: golangType,
 		}
 	}
 
