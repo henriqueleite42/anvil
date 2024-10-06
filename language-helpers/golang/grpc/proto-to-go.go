@@ -248,7 +248,9 @@ func (self *goGrpcParser) ProtoToGo(i *ProtoToGoInput) (*Type, error) {
 						VariableName:            childPropWithPrefix,
 						PrefixForVariableNaming: childVarNamePascal,
 						HasOutput:               i.HasOutput,
-						indentationLvl:          i.indentationLvl + 1,
+						CurPkg:                  i.CurPkg,
+
+						indentationLvl: i.indentationLvl + 1,
 					})
 					if err != nil {
 						return nil, err
