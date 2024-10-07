@@ -567,13 +567,61 @@ Usecase:
           #     Type: List
           #     Items:
           #       Type: String
-          # ListOfMap:
-          #   Type: List
-          #   Items:
-          #     Type: Map
-          #     Properties:
-          #       Foo:
-          #         Type: String
+          ListOfMap:
+            Type: List
+            Items:
+              Type: Map
+              Properties:
+                Strings:
+                  Type: String
+                Int:
+                  Type: Int
+                Float:
+                  Type: Float
+                Bool:
+                  Type: Bool
+                Timestamp:
+                  Type: Timestamp
+                Enum:
+                  Type: Enum
+                  Values:
+                    $ref: Enums.FooBar
+          ListOfMapDeep2:
+            Type: List
+            Items:
+              Type: Map
+              Properties:
+                Strings:
+                  Type: String
+                Int:
+                  Type: Int
+                Float:
+                  Type: Float
+                Bool:
+                  Type: Bool
+                Timestamp:
+                  Type: Timestamp
+                Enum:
+                  Type: Enum
+                  Values:
+                    $ref: Enums.FooBar
+                Deep2:
+                  Type: Map
+                  Properties:
+                    Strings:
+                      Type: String
+                    Int:
+                      Type: Int
+                    Float:
+                      Type: Float
+                    Bool:
+                      Type: Bool
+                    Timestamp:
+                      Type: Timestamp
+                    Enum:
+                      Type: Enum
+                      Values:
+                        $ref: Enums.FooBar
           StringsOptional:
             Type: String
             Optional: true

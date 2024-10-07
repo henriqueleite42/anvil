@@ -207,7 +207,7 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 					}
 
 					prepare = []string{prepareMap}
-					childTypeType = fmt.Sprintf("*%s.%s", *&pkgPb, childTypeParsed.GolangType)
+					childTypeType = fmt.Sprintf("*%s.%s", pkgPb, childTypeParsed.GolangType)
 					childTypeToAppend = childVarName
 				}
 

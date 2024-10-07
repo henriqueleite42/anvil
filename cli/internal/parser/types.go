@@ -195,10 +195,11 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 
 		kk := i.k + "Item"
 		typeHash, err := self.resolveType(&resolveInput{
-			path: fmt.Sprintf("%s.%s.Items", i.path, i.k),
-			ref:  ref,
-			k:    kk,
-			v:    itemsMap,
+			namePrefix: i.namePrefix,
+			path:       fmt.Sprintf("%s.%s.Items", i.path, i.k),
+			ref:        ref,
+			k:          kk,
+			v:          itemsMap,
 		})
 		if err != nil {
 			return "", err
