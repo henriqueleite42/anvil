@@ -11,15 +11,15 @@ type InputPropMapTemplProp struct {
 type InputPropMapTemplInput struct {
 	IndentationLvl int // internal use, controls sub levels
 
+	HasOutput            bool
 	MethodName           string
-	TypePkg              *string
+	Optional             bool
 	OriginalVariableName string
 	Prepare              []string
-	VarName              string
-	Type                 string
 	Props                []*InputPropMapTemplProp
-	Optional             bool
-	HasOutput            bool
+	Type                 string
+	TypePkg              *string
+	VarName              string
 }
 
 func (self *InputPropMapTemplInput) Idt() string {
@@ -28,11 +28,11 @@ func (self *InputPropMapTemplInput) Idt() string {
 
 const InputPropMapTempl = `	var {{ .VarName }} *{{ if .TypePkg }}{{ .TypePkg }}.{{ end }}{{ .Type }} = nil
 	if {{ .OriginalVariableName }} != nil {
-							{{ if .Prepare -}}
-								{{ range .Prepare -}}
-									{{- . }}
-								{{- end }}
-							{{- end }}
+		{{- if .Prepare }}
+			{{- range .Prepare }}
+{{ . }}
+			{{- end }}
+		{{- end }}
 		{{ .VarName }} = &{{ if .TypePkg }}{{ .TypePkg }}.{{ end }}{{ .Type }}{
 			{{- range .Props }}
 		 	{{ .Name }}:{{ .Spacing }} {{ .Value }},

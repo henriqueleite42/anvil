@@ -43,8 +43,20 @@ Usecase:
           MapDeep1:
             Type: Map
             Properties:
-              Foo:
+              Strings:
                 Type: String
+              Int:
+                Type: Int
+              Float:
+                Type: Float
+              Bool:
+                Type: Bool
+              Timestamp:
+                Type: Timestamp
+              Enum:
+                Type: Enum
+                Values:
+                  $ref: Enums.FooBar
           MapDeep2:
             Type: Map
             Properties:
@@ -56,11 +68,29 @@ Usecase:
                 Type: Float
               Bool:
                 Type: Bool
+              Timestamp:
+                Type: Timestamp
+              Enum:
+                Type: Enum
+                Values:
+                  $ref: Enums.FooBar
               Deep2:
                 Type: Map
                 Properties:
-                  Foo:
+                  Strings:
                     Type: String
+                  Int:
+                    Type: Int
+                  Float:
+                    Type: Float
+                  Bool:
+                    Type: Bool
+                  Timestamp:
+                    Type: Timestamp
+                  Enum:
+                    Type: Enum
+                    Values:
+                      $ref: Enums.FooBar
           MapDeep3:
             Type: Map
             Properties:
@@ -72,6 +102,12 @@ Usecase:
                 Type: Float
               Bool:
                 Type: Bool
+              Timestamp:
+                Type: Timestamp
+              Enum:
+                Type: Enum
+                Values:
+                  $ref: Enums.FooBar
               Deep2:
                 Type: Map
                 Properties:
@@ -83,33 +119,12 @@ Usecase:
                     Type: Float
                   Bool:
                     Type: Bool
-                  Deep3:
-                    Type: Map
-                    Properties:
-                      Foo:
-                        Type: String
-          MapDeep4:
-            Type: Map
-            Properties:
-              Strings:
-                Type: String
-              Int:
-                Type: Int
-              Float:
-                Type: Float
-              Bool:
-                Type: Bool
-              Deep2:
-                Type: Map
-                Properties:
-                  Strings:
-                    Type: String
-                  Int:
-                    Type: Int
-                  Float:
-                    Type: Float
-                  Bool:
-                    Type: Bool
+                  Timestamp:
+                    Type: Timestamp
+                  Enum:
+                    Type: Enum
+                    Values:
+                      $ref: Enums.FooBar
                   Deep3:
                     Type: Map
                     Properties:
@@ -121,11 +136,80 @@ Usecase:
                         Type: Float
                       Bool:
                         Type: Bool
+                      Timestamp:
+                        Type: Timestamp
+                      Enum:
+                        Type: Enum
+                        Values:
+                          $ref: Enums.FooBar
+          MapDeep4:
+            Type: Map
+            Properties:
+              Strings:
+                Type: String
+              Int:
+                Type: Int
+              Float:
+                Type: Float
+              Bool:
+                Type: Bool
+              Timestamp:
+                Type: Timestamp
+              Enum:
+                Type: Enum
+                Values:
+                  $ref: Enums.FooBar
+              Deep2:
+                Type: Map
+                Properties:
+                  Strings:
+                    Type: String
+                  Int:
+                    Type: Int
+                  Float:
+                    Type: Float
+                  Bool:
+                    Type: Bool
+                  Timestamp:
+                    Type: Timestamp
+                  Enum:
+                    Type: Enum
+                    Values:
+                      $ref: Enums.FooBar
+                  Deep3:
+                    Type: Map
+                    Properties:
+                      Strings:
+                        Type: String
+                      Int:
+                        Type: Int
+                      Float:
+                        Type: Float
+                      Bool:
+                        Type: Bool
+                      Timestamp:
+                        Type: Timestamp
+                      Enum:
+                        Type: Enum
+                        Values:
+                          $ref: Enums.FooBar
                       Deep4:
                         Type: Map
                         Properties:
-                          Foo:
+                          Strings:
                             Type: String
+                          Int:
+                            Type: Int
+                          Float:
+                            Type: Float
+                          Bool:
+                            Type: Bool
+                          Timestamp:
+                            Type: Timestamp
+                          Enum:
+                            Type: Enum
+                            Values:
+                              $ref: Enums.FooBar
           # MapList:
           #   Type: Map
           #   Properties:
@@ -153,13 +237,61 @@ Usecase:
           #     Type: List
           #     Items:
           #       Type: String
-          # ListOfMap:
-          #   Type: List
-          #   Items:
-          #     Type: Map
-          #     Properties:
-          #       Foo:
-          #         Type: String
+          ListOfMap:
+            Type: List
+            Items:
+              Type: Map
+              Properties:
+                Strings:
+                  Type: String
+                Int:
+                  Type: Int
+                Float:
+                  Type: Float
+                Bool:
+                  Type: Bool
+                Timestamp:
+                  Type: Timestamp
+                Enum:
+                  Type: Enum
+                  Values:
+                    $ref: Enums.FooBar
+          ListOfMapDeep2:
+            Type: List
+            Items:
+              Type: Map
+              Properties:
+                Strings:
+                  Type: String
+                Int:
+                  Type: Int
+                Float:
+                  Type: Float
+                Bool:
+                  Type: Bool
+                Timestamp:
+                  Type: Timestamp
+                Enum:
+                  Type: Enum
+                  Values:
+                    $ref: Enums.FooBar
+                Deep2:
+                  Type: Map
+                  Properties:
+                    Strings:
+                      Type: String
+                    Int:
+                      Type: Int
+                    Float:
+                      Type: Float
+                    Bool:
+                      Type: Bool
+                    Timestamp:
+                      Type: Timestamp
+                    Enum:
+                      Type: Enum
+                      Values:
+                        $ref: Enums.FooBar
           StringsOptional:
             Type: String
             Optional: true
@@ -241,8 +373,20 @@ Usecase:
           MapDeep1:
             Type: Map
             Properties:
-              Foo:
+              Strings:
                 Type: String
+              Int:
+                Type: Int
+              Float:
+                Type: Float
+              Bool:
+                Type: Bool
+              Timestamp:
+                Type: Timestamp
+              Enum:
+                Type: Enum
+                Values:
+                  $ref: Enums.FooBar
           MapDeep2:
             Type: Map
             Properties:
@@ -254,11 +398,29 @@ Usecase:
                 Type: Float
               Bool:
                 Type: Bool
+              Timestamp:
+                Type: Timestamp
+              Enum:
+                Type: Enum
+                Values:
+                  $ref: Enums.FooBar
               Deep2:
                 Type: Map
                 Properties:
-                  Foo:
+                  Strings:
                     Type: String
+                  Int:
+                    Type: Int
+                  Float:
+                    Type: Float
+                  Bool:
+                    Type: Bool
+                  Timestamp:
+                    Type: Timestamp
+                  Enum:
+                    Type: Enum
+                    Values:
+                      $ref: Enums.FooBar
           MapDeep3:
             Type: Map
             Properties:
@@ -270,6 +432,12 @@ Usecase:
                 Type: Float
               Bool:
                 Type: Bool
+              Timestamp:
+                Type: Timestamp
+              Enum:
+                Type: Enum
+                Values:
+                  $ref: Enums.FooBar
               Deep2:
                 Type: Map
                 Properties:
@@ -281,33 +449,12 @@ Usecase:
                     Type: Float
                   Bool:
                     Type: Bool
-                  Deep3:
-                    Type: Map
-                    Properties:
-                      Foo:
-                        Type: String
-          MapDeep4:
-            Type: Map
-            Properties:
-              Strings:
-                Type: String
-              Int:
-                Type: Int
-              Float:
-                Type: Float
-              Bool:
-                Type: Bool
-              Deep2:
-                Type: Map
-                Properties:
-                  Strings:
-                    Type: String
-                  Int:
-                    Type: Int
-                  Float:
-                    Type: Float
-                  Bool:
-                    Type: Bool
+                  Timestamp:
+                    Type: Timestamp
+                  Enum:
+                    Type: Enum
+                    Values:
+                      $ref: Enums.FooBar
                   Deep3:
                     Type: Map
                     Properties:
@@ -319,11 +466,80 @@ Usecase:
                         Type: Float
                       Bool:
                         Type: Bool
+                      Timestamp:
+                        Type: Timestamp
+                      Enum:
+                        Type: Enum
+                        Values:
+                          $ref: Enums.FooBar
+          MapDeep4:
+            Type: Map
+            Properties:
+              Strings:
+                Type: String
+              Int:
+                Type: Int
+              Float:
+                Type: Float
+              Bool:
+                Type: Bool
+              Timestamp:
+                Type: Timestamp
+              Enum:
+                Type: Enum
+                Values:
+                  $ref: Enums.FooBar
+              Deep2:
+                Type: Map
+                Properties:
+                  Strings:
+                    Type: String
+                  Int:
+                    Type: Int
+                  Float:
+                    Type: Float
+                  Bool:
+                    Type: Bool
+                  Timestamp:
+                    Type: Timestamp
+                  Enum:
+                    Type: Enum
+                    Values:
+                      $ref: Enums.FooBar
+                  Deep3:
+                    Type: Map
+                    Properties:
+                      Strings:
+                        Type: String
+                      Int:
+                        Type: Int
+                      Float:
+                        Type: Float
+                      Bool:
+                        Type: Bool
+                      Timestamp:
+                        Type: Timestamp
+                      Enum:
+                        Type: Enum
+                        Values:
+                          $ref: Enums.FooBar
                       Deep4:
                         Type: Map
                         Properties:
-                          Foo:
+                          Strings:
                             Type: String
+                          Int:
+                            Type: Int
+                          Float:
+                            Type: Float
+                          Bool:
+                            Type: Bool
+                          Timestamp:
+                            Type: Timestamp
+                          Enum:
+                            Type: Enum
+                            Values:
+                              $ref: Enums.FooBar
           # MapList:
           #   Type: Map
           #   Properties:
@@ -351,13 +567,61 @@ Usecase:
           #     Type: List
           #     Items:
           #       Type: String
-          # ListOfMap:
-          #   Type: List
-          #   Items:
-          #     Type: Map
-          #     Properties:
-          #       Foo:
-          #         Type: String
+          ListOfMap:
+            Type: List
+            Items:
+              Type: Map
+              Properties:
+                Strings:
+                  Type: String
+                Int:
+                  Type: Int
+                Float:
+                  Type: Float
+                Bool:
+                  Type: Bool
+                Timestamp:
+                  Type: Timestamp
+                Enum:
+                  Type: Enum
+                  Values:
+                    $ref: Enums.FooBar
+          ListOfMapDeep2:
+            Type: List
+            Items:
+              Type: Map
+              Properties:
+                Strings:
+                  Type: String
+                Int:
+                  Type: Int
+                Float:
+                  Type: Float
+                Bool:
+                  Type: Bool
+                Timestamp:
+                  Type: Timestamp
+                Enum:
+                  Type: Enum
+                  Values:
+                    $ref: Enums.FooBar
+                Deep2:
+                  Type: Map
+                  Properties:
+                    Strings:
+                      Type: String
+                    Int:
+                      Type: Int
+                    Float:
+                      Type: Float
+                    Bool:
+                      Type: Bool
+                    Timestamp:
+                      Type: Timestamp
+                    Enum:
+                      Type: Enum
+                      Values:
+                        $ref: Enums.FooBar
           StringsOptional:
             Type: String
             Optional: true
