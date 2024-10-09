@@ -4,36 +4,35 @@ import (
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
-type Prop struct {
-	Name    string
-	Spacing string
-	Value   string
-}
-
 type Type struct {
-	Name         string
-	Props        []*Prop
-	PropsPrepare []string
+	GolangType     string   // Already includes package, and * if necessary. Ex: *foo.Bar, *string, int32
+	GolangTypeName string   // Only includes the type name and package. Ex: foo.Bar, string, int32
+	ProtoType      string   // Already includes package, and * if necessary. Ex: *foo.Bar, *string, int32
+	ProtoTypeName  string   // Only includes the type name and package. Ex: foo.Bar, string, int32
+	Value          string   // The value to bbe used
+	Prepare        []string // Things necessary to prepare the values
 }
 
 type GoToProtoInput struct {
-	Type                    *schemas.Type
-	MethodName              string
-	VariableName            string
-	PrefixForVariableNaming string
-	HasOutput               bool
-	CurPkg                  string
+	Type                     *schemas.Type
+	TypeName                 string
+	MethodName               string
+	VariableToAccessTheValue string
+	PrefixForVariableNaming  string
+	HasOutput                bool
+	CurPkg                   string
 
 	indentationLvl int // Internal use, used for child types
 }
 
 type ProtoToGoInput struct {
-	Type                    *schemas.Type
-	MethodName              string
-	VariableName            string
-	PrefixForVariableNaming string
-	HasOutput               bool
-	CurPkg                  string
+	Type                     *schemas.Type
+	TypeName                 string
+	MethodName               string
+	VariableToAccessTheValue string
+	PrefixForVariableNaming  string
+	HasOutput                bool
+	CurPkg                   string
 
 	indentationLvl int // Internal use, used for child types
 }

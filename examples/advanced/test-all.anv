@@ -210,13 +210,13 @@ Usecase:
                             Type: Enum
                             Values:
                               $ref: Enums.FooBar
-          # MapList:
-          #   Type: Map
-          #   Properties:
-          #     Foo:
-          #       Type: List
-          #       Items:
-          #         Type: String
+          MapList:
+            Type: Map
+            Properties:
+              Foo:
+                Type: List
+                Items:
+                  Type: String
           List:
             Type: List
             Items:
@@ -540,13 +540,13 @@ Usecase:
                             Type: Enum
                             Values:
                               $ref: Enums.FooBar
-          # MapList:
-          #   Type: Map
-          #   Properties:
-          #     Foo:
-          #       Type: List
-          #       Items:
-          #         Type: String
+          MapList:
+            Type: Map
+            Properties:
+              Foo:
+                Type: List
+                Items:
+                  Type: String
           List:
             Type: List
             Items:

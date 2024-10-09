@@ -55,13 +55,13 @@ type {{ .Domain }}Api interface {
 	{{- if not $method.Input }}
 	{{ $method.MethodName }}() error
 	{{- else }}
-	{{ $method.MethodName }}(i *{{ $method.Input.Name }}) error
+	{{ $method.MethodName }}(i {{ $method.Input.GolangType }}) error
 	{{- end }}
 {{- else }}
 	{{- if not $method.Input }}
-	{{ $method.MethodName }}() (*{{ $method.Output.Name }}, error)
+	{{ $method.MethodName }}() ({{ $method.Output.GolangType }}, error)
 	{{- else }}
-	{{ $method.MethodName }}(i *{{ $method.Input.Name }}) (*{{ $method.Output.Name }}, error)
+	{{ $method.MethodName }}(i {{ $method.Input.GolangType }}) ({{ $method.Output.GolangType }}, error)
 	{{- end }}
 {{- end }}
 {{- end }}

@@ -124,12 +124,11 @@ func Parse(schema *schemas.Schema, silent bool, outputFolderPath string) error {
 			}
 
 			t, err := grpcParser.GoToProto(&grpc.GoToProtoInput{
-				Type:                    inputType,
-				MethodName:              methodName,
-				VariableName:            "i",
-				PrefixForVariableNaming: "Input",
-				HasOutput:               method.Output != nil,
-				CurPkg:                  domainSnake,
+				Type:                     inputType,
+				MethodName:               methodName,
+				VariableToAccessTheValue: "i",
+				HasOutput:                method.Output != nil,
+				CurPkg:                   domainSnake,
 			})
 			if err != nil {
 				return err
@@ -157,12 +156,11 @@ func Parse(schema *schemas.Schema, silent bool, outputFolderPath string) error {
 			}
 
 			t, err := grpcParser.ProtoToGo(&grpc.ProtoToGoInput{
-				Type:                    outputType,
-				MethodName:              methodName,
-				VariableName:            "result",
-				PrefixForVariableNaming: "Output",
-				HasOutput:               true,
-				CurPkg:                  domainSnake,
+				Type:                     outputType,
+				MethodName:               methodName,
+				VariableToAccessTheValue: "result",
+				HasOutput:                true,
+				CurPkg:                   domainSnake,
 			})
 			if err != nil {
 				return err

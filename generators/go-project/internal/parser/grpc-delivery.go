@@ -39,11 +39,10 @@ func (self *Parser) ResolveGrpcDelivery(dlv *schemas.DeliveryGrpcRpc) error {
 		}
 
 		templT, err := grpcParser.ProtoToGo(&grpc.ProtoToGoInput{
-			Type:                    t,
-			MethodName:              methodName,
-			VariableName:            "i",
-			PrefixForVariableNaming: "Input",
-			HasOutput:               outputTypeHash != "",
+			Type:                     t,
+			MethodName:               methodName,
+			VariableToAccessTheValue: "i",
+			HasOutput:                outputTypeHash != "",
 		})
 		if err != nil {
 			return err
@@ -63,11 +62,10 @@ func (self *Parser) ResolveGrpcDelivery(dlv *schemas.DeliveryGrpcRpc) error {
 		}
 
 		templT, err := grpcParser.GoToProto(&grpc.GoToProtoInput{
-			Type:                    t,
-			MethodName:              methodName,
-			VariableName:            "result",
-			PrefixForVariableNaming: "Output",
-			HasOutput:               true,
+			Type:                     t,
+			MethodName:               methodName,
+			VariableToAccessTheValue: "result",
+			HasOutput:                true,
 		})
 		if err != nil {
 			return err

@@ -1,12 +1,6 @@
-github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241001145943-a075b11482f5 h1:cnPlgNTfySRxaFXKvfVlhYm54QD9LW35ErECtxupp1c=
-github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241001145943-a075b11482f5/go.mod h1:1aCAFI8VjcMPFPPx55qS1gV768EL24uu7veUx1SsPpE=
-github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241003180329-af0dc5ae1c84 h1:HguhIYDmexAWkPqIkMnGxq8JAQKfY99zqDqObrPHr2M=
-github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241003180329-af0dc5ae1c84/go.mod h1:1aCAFI8VjcMPFPPx55qS1gV768EL24uu7veUx1SsPpE=
-github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241004173159-a52f7b7c419a h1:huFSXryvqn3y/v7VSUY3plrr4RB+cH5Xcr9ofoABqk8=
-github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241004173159-a52f7b7c419a/go.mod h1:1aCAFI8VjcMPFPPx55qS1gV768EL24uu7veUx1SsPpE=
-github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241004174236-d2111c4a068a h1:C+hYU2nkHMza2kRBXM9GdqJKIP7FON6p1GO+K8JZZ/A=
-github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241004174236-d2111c4a068a/go.mod h1:1aCAFI8VjcMPFPPx55qS1gV768EL24uu7veUx1SsPpE=
-github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241004182941-fc7def03f80d h1:DaCDHBiCopr4MN0dH8kdHHDwWsfiCSCIv8xmT7+vJ6I=
-github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241004182941-fc7def03f80d/go.mod h1:1aCAFI8VjcMPFPPx55qS1gV768EL24uu7veUx1SsPpE=
 github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241004183850-c743b161ddcb h1:1tf1YuVKhAHXOsV3blig7c5QNS6sniH9vJorpZGJkLM=
 github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241004183850-c743b161ddcb/go.mod h1:1aCAFI8VjcMPFPPx55qS1gV768EL24uu7veUx1SsPpE=
+gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
+gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
+gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
+gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=

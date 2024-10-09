@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"errors"
 	"log"
 	"os"
@@ -24,21 +23,15 @@ func addBuildCommand(rootCmd *cobra.Command) {
 				log.Fatal(err)
 			}
 
-			err = files.WriteAnvpFile(schema, schemaFile)
+			anvpPath, err := files.WriteAnvpFile(schema, schemaFile)
 			if err != nil {
 				log.Fatal(err)
 			}
-
-			json, err := json.Marshal(schema)
-			if err != nil {
-				log.Fatal(err)
-			}
-			jsonString := string(json)
 
 			argsToGenerator := []string{
 				"gen",
 				"--schema",
-				jsonString,
+				anvpPath,
 			}
 
 			if silent {
