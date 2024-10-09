@@ -30,23 +30,23 @@ func GetAnvpFilePath(anvFilePath string, createFolders bool) (string, error) {
 	return fmt.Sprintf("%s/%s", path, fileName), nil
 }
 
-func WriteAnvpFile(schema *schemas.Schema, anvFilePath string) error {
+func WriteAnvpFile(schema *schemas.Schema, anvFilePath string) (string, error) {
 	yamlData, err := yaml.Marshal(schema)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	filePath, err := GetAnvpFilePath(anvFilePath, true)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	err = os.WriteFile(filePath, yamlData, 0644)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return filePath, nil
 }
 
 func ReadAnvpFile(anvFilePath string) (*schemas.Schema, error) {

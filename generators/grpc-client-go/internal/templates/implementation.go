@@ -1,6 +1,8 @@
 package templates
 
-const ImplementationTempl = `package {{ .DomainSnake }}
+const ImplementationTempl = `
+{{- $dot := . -}}
+package {{ .DomainSnake }}
 
 import (
 {{- range .ImportsImplementation }}
@@ -42,30 +44,22 @@ func (self *{{ .Domain }}ApiImplementation) Close() error {
 	return self.conn.Close()
 }
 
-{{- with $originalInput := . }}
-{{- range $method := $originalInput.Methods }}
+{{- range $method := $dot.Methods }}
 	{{-  if not $method.Output }}
 		{{- if not $method.Input }}
-func (self *{{ $originalInput.Domain }}ApiImplementation) {{ $method.MethodName }}() error {
+func (self *{{ $dot.Domain }}ApiImplementation) {{ $method.MethodName }}() error {
 		{{- else }}
-func (self *{{ $originalInput.Domain }}ApiImplementation) {{ $method.MethodName }}(i *{{ $method.Input.Name }}) error {
-	if i == nil {
-		return errors.New("input must not be nil")
-	}
+func (self *{{ $dot.Domain }}ApiImplementation) {{ $method.MethodName }}(i {{ $method.Input.GolangType }}) error {
 		{{- end }}
 	{{- else }}
 		{{- if not $method.Input }}
-func (self *{{ $originalInput.Domain }}ApiImplementation) {{ $method.MethodName }}() (*{{ $method.Output.Name }}, error) {
+func (self *{{ $dot.Domain }}ApiImplementation) {{ $method.MethodName }}() ({{ $method.Output.GolangType }}, error) {
 		{{- else }}
-func (self *{{ $originalInput.Domain }}ApiImplementation) {{ $method.MethodName }}(i *{{ $method.Input.Name }}) (*{{ $method.Output.Name }}, error) {
-	if i == nil {
-		return nil, errors.New("input must not be nil")
-	}
+func (self *{{ $dot.Domain }}ApiImplementation) {{ $method.MethodName }}(i {{ $method.Input.GolangType }}) ({{ $method.Output.GolangType }}, error) {
 		{{- end }}
 	{{- end }}
-
 {{ if $method.Input -}}
-{{ range $method.Input.PropsPrepare -}}
+{{ range $method.Input.Prepare -}}
 {{ . }}
 {{ end -}}
 {{- end }}
@@ -73,40 +67,27 @@ func (self *{{ $originalInput.Domain }}ApiImplementation) {{ $method.MethodName 
 	defer cancel()
 	{{- if not $method.Output }}
 		{{- if not $method.Input }}
-	_, err := self.{{ $originalInput.DomainCamel }}Client.{{ $method.MethodName }}(ctx, &emptypb.Empty{})
+	_, err := self.{{ $dot.DomainCamel }}Client.{{ $method.MethodName }}(ctx, &emptypb.Empty{})
 		{{- else }}
-	_, err := self.{{ $originalInput.DomainCamel }}Client.{{ $method.MethodName }}(ctx, &pb.{{ $method.Input.Name }}{
-		{{- range $input := $method.Input.Props }}
-		{{ $input.Name }}:{{ $input.Spacing }} {{ $input.Value }},
-		{{- end }}
-	})
+	_, err := self.{{ $dot.DomainCamel }}Client.{{ $method.MethodName }}(ctx, {{ $method.Input.Value }})
 		{{- end }}
 	{{- else }}
 		{{- if not $method.Input }}
-	result, err := self.{{ $originalInput.DomainCamel }}Client.{{ $method.MethodName }}(ctx, &emptypb.Empty{})
+	result, err := self.{{ $dot.DomainCamel }}Client.{{ $method.MethodName }}(ctx, &emptypb.Empty{})
 		{{- else }}
-	result, err := self.{{ $originalInput.DomainCamel }}Client.{{ $method.MethodName }}(ctx, &pb.{{ $method.Input.Name }}{
-		{{- range $input := $method.Input.Props }}
-		{{ $input.Name }}:{{ $input.Spacing }} {{ $input.Value }},
-		{{- end }}
-	})
+	result, err := self.{{ $dot.DomainCamel }}Client.{{ $method.MethodName }}(ctx, {{ $method.Input.Value }})
 		{{- end }}
 	{{- end }}
 	{{- if $method.Output }}
 
-{{ range $method.Output.PropsPrepare -}}
+{{ range $method.Output.Prepare -}}
 {{ . }}
 {{ end }}
-	return &{{ $method.Output.Name }}{
-		{{- range $output := $method.Output.Props }}
-		{{ $output.Name }}:{{ $output.Spacing }} {{ $output.Value }},
-		{{- end }}
-	},err
+	return {{ $method.Output.Value }}, err
 	{{- else }}
 	return err
 	{{- end }}
 }
-{{- end }}
 {{- end }}
 
 func New{{ .Domain }}Api(i *{{ .Domain }}ApiInput) ({{ .Domain }}Api, error) {

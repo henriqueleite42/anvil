@@ -22,38 +22,28 @@ const GrpcDeliveryModuleTempl = `
 		return nil, err
 	}
 
-{{ if .Input.PropsPrepare -}}
+{{ if .Input.Prepare -}}
 	logger.Trace().Msg("start input props prepare")
-	{{- range .Input.PropsPrepare }}
+	{{- range .Input.Prepare }}
 {{ . }}
 	{{- end }}
 	logger.Trace().Msg("end input props prepare")
 {{- end }}
 
-	logger.Trace().Msg("build uscI")
-	uscI := &{{ .DomainSnake }}_usecase.{{ .Input.Name }}{
-		{{- range $input := .Input.Props }}
-		{{ $input.Name }}:{{ $input.Spacing }} {{ $input.Value }},
-		{{- end }}
-	}
-	logger.Debug().Interface("uscI", uscI).Msg("usecase input")
+	logger.Debug().Interface("uscI", {{ .Input.Value }}).Msg("usecase input")
 {{- end -}}
 
 {{- define "output" }}	logger.Debug().Interface("result", result).Msg("usecase output")
-{{ if .Output.PropsPrepare }}
+{{ if .Output.Prepare }}
 	logger.Trace().Msg("start output props prepare")
-	{{- range .Output.PropsPrepare }}
+	{{- range .Output.Prepare }}
 {{ . }}
 	{{- end }}
 	logger.Trace().Msg("end output props prepare")
 {{- end }}
 
 	logger.Trace().Msg("end")
-	return &pb.{{ .Output.Name }}{
-		{{- range $output := .Output.Props }}
-		{{ $output.Name }}:{{ $output.Spacing }} {{ $output.Value }},
-		{{- end }}
-	}, nil
+	return {{ .Output.Value }}, nil
 {{- end -}}
 
 {{- define "method" }}
@@ -76,7 +66,7 @@ func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context,
 {{- end -}}
 
 {{- define "method-with-input" }}
-func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context, i *pb.{{ .Input.Name }}) (*emptypb.Empty, error) {
+func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context, i {{ .Input.ProtoType }}) (*emptypb.Empty, error) {
 {{ template "logger" . }}
 
 {{ template "input" . }}
@@ -85,7 +75,7 @@ func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context,
 	reqCtx := context.WithValue(ctx, "logger", logger)
 
 	logger.Trace().Msg("call usecase")
-	err = self.{{ .DomainCamel }}Usecase.{{ .MethodName }}(reqCtx, uscI)
+	err = self.{{ .DomainCamel }}Usecase.{{ .MethodName }}(reqCtx, {{ .Input.Value }})
 	if err != nil {
 		logger.Warn().Err(err).Msg("usecase err")
 		return nil, err
@@ -97,7 +87,7 @@ func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context,
 {{ end -}}
 
 {{- define "method-with-output" }}
-func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context, _ *emptypb.Empty) (*pb.{{ .Output.Name }}, error) {
+func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context, _ *emptypb.Empty) ({{ .Output.ProtoType }}, error) {
 {{ template "logger" . }}
 
 	logger.Trace().Msg("create reqCtx")
@@ -115,7 +105,7 @@ func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context,
 {{ end -}}
 
 {{- define "method-with-input-and-output" }}
-func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context, i *pb.{{ .Input.Name }}) (*pb.{{ .Output.Name }}, error) {
+func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context, i {{ .Input.ProtoType }}) ({{ .Output.ProtoType }}, error) {
 {{ template "logger" . }}
 
 {{ template "input" . }}
@@ -124,7 +114,7 @@ func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context,
 	reqCtx := context.WithValue(ctx, "logger", logger)
 
 	logger.Trace().Msg("call usecase")
-	result, err := self.{{ .DomainCamel }}Usecase.{{ .MethodName }}(reqCtx, uscI)
+	result, err := self.{{ .DomainCamel }}Usecase.{{ .MethodName }}(reqCtx, {{ .Input.Value }})
 	if err != nil {
 		logger.Warn().Err(err).Msg("usecase err")
 		return nil, err
@@ -145,7 +135,7 @@ import (
 )
 
 type {{ .DomainCamel }}Controller struct {
-	pb.Unimplemented{{ .Domain }}Server
+	pb.Unimplemented{{ .Domain }}ApiServer
 
 	logger   {{ .SpacingRelativeToDomainName }}zerolog.Logger
 	validator{{ .SpacingRelativeToDomainName }}adapters.Validator
@@ -197,7 +187,7 @@ type Add{{ .Domain }}ControllerInput struct {
 }
 
 func Add{{ .Domain }}Controller(i *Add{{ .Domain }}ControllerInput) {
-	pb.Register{{ .Domain }}Server(i.Server, &{{ .DomainCamel }}Controller{
+	pb.Register{{ .Domain }}ApiServer(i.Server, &{{ .DomainCamel }}Controller{
 		logger:   {{ .SpacingRelativeToDomainName }}i.Logger,
 		validator:{{ .SpacingRelativeToDomainName }}i.Validator,
 		{{ .DomainCamel }}Usecase: i.{{ .Domain }}Usecase,

@@ -23,7 +23,7 @@ func addParseCommand(rootCmd *cobra.Command) {
 				return
 			}
 
-			err = files.WriteAnvpFile(schema, schemaFile)
+			_, err = files.WriteAnvpFile(schema, schemaFile)
 			if err != nil {
 				log.Fatal(err)
 			}

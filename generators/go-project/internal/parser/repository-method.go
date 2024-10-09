@@ -15,7 +15,7 @@ func (self *Parser) ResolveRepositoryMethod(usc *schemas.RepositoryMethod, pkgNa
 			return fmt.Errorf("fail to find type for \"%s.Input\"", usc.Name)
 		}
 
-		tParsed, err := self.GoTypesParserUsecase.ParseType(t)
+		tParsed, err := self.GoTypesParserRepository.ParseType(t)
 		if err != nil {
 			return err
 		}
@@ -30,7 +30,7 @@ func (self *Parser) ResolveRepositoryMethod(usc *schemas.RepositoryMethod, pkgNa
 			return fmt.Errorf("fail to find type for \"%s.Output\"", usc.Name)
 		}
 
-		tParsed, err := self.GoTypesParserUsecase.ParseType(t)
+		tParsed, err := self.GoTypesParserRepository.ParseType(t)
 		if err != nil {
 			return err
 		}

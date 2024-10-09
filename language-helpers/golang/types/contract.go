@@ -26,21 +26,28 @@ type Type struct {
 	MapProps   []*MapProp
 }
 
-func (self *Type) GetFullTypeName(curPkg string) string {
+func (self *Type) GetTypeName(curPkg string) string {
 	typeName := self.GolangType
 
 	if self.GolangPkg != nil && *self.GolangPkg != curPkg {
 		if self.AnvilType == schemas.TypeType_List {
-
 			trueType := strings.TrimPrefix(self.GolangType, "[]")
-			typeName = "[]" + *self.GolangPkg + "." + trueType
-
+			if strings.HasPrefix(trueType, "*") {
+				trueType = strings.TrimPrefix(trueType, "*")
+				typeName = "[]*" + *self.GolangPkg + "." + trueType
+			} else {
+				typeName = "[]" + *self.GolangPkg + "." + trueType
+			}
 		} else {
-
 			typeName = *self.GolangPkg + "." + typeName
-
 		}
 	}
+
+	return typeName
+}
+
+func (self *Type) GetFullTypeName(curPkg string) string {
+	typeName := self.GetTypeName(curPkg)
 
 	if self.AnvilType == schemas.TypeType_Map {
 		typeName = "*" + typeName

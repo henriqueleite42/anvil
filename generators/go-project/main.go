@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"log/slog"
@@ -10,6 +9,7 @@ import (
 
 	"github.com/henriqueleite42/anvil/generators/go-project/internal"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
+	"gopkg.in/yaml.v3"
 )
 
 func main() {
@@ -22,7 +22,7 @@ func main() {
 		log.Fatal(fmt.Sprintf("invalid command \"%s\"", command))
 	}
 
-	var schemaString string
+	var schemaPath string
 	var outputFolderPath string
 	var silent bool
 	for idx, arg := range os.Args {
@@ -31,7 +31,7 @@ func main() {
 		}
 
 		if arg == "--schema" {
-			schemaString = os.Args[idx+1]
+			schemaPath = os.Args[idx+1]
 			continue
 		}
 
@@ -46,12 +46,17 @@ func main() {
 		}
 	}
 
-	if schemaString == "" {
+	if schemaPath == "" {
 		log.Fatal("schema is required")
 	}
 
+	fileData, err := os.ReadFile(schemaPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	schema := &schemas.Schema{}
-	err := json.Unmarshal([]byte(schemaString), schema)
+	err = yaml.Unmarshal(fileData, &schema)
 	if err != nil {
 		log.Fatal(err)
 	}
