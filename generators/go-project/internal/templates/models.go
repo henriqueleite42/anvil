@@ -36,7 +36,7 @@ const (
 {{- range $entity := .Entities }}
 type {{ $entity.GolangType }} struct {
 {{- range $prop := $entity.MapProps }}
-	{{ $prop.Name }}{{ $prop.Spacing1 }} {{ $prop.GetFullTypeName $pkg }}{{ if $prop.Tags }}{{ $prop.Spacing2 }} ` + "`{{ $prop.GetTagsString }}`" + `{{ end }}
+	{{ $prop.Name }}{{ $prop.Spacing1 }} {{ $prop.Type.GetFullTypeName $pkg }}{{ if $prop.Tags }}{{ $prop.Spacing2 }} ` + "`{{ $prop.GetTagsString }}`" + `{{ end }}
 {{- end }}
 }
 {{ end -}}

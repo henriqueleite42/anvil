@@ -43,7 +43,7 @@ const ProtofileTempl = `syntax = "proto3";
 {{ range .Imports -}}
 import "{{ . }}";
 {{ end }}
-service {{ .Domain }} {
+service {{ .Domain }}Api {
 	{{- range .Methods -}}
 		{{- if .Input }}
 			{{- if .Output }}

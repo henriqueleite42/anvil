@@ -31,14 +31,15 @@ func (self *Type) GetTypeName(curPkg string) string {
 
 	if self.GolangPkg != nil && *self.GolangPkg != curPkg {
 		if self.AnvilType == schemas.TypeType_List {
-
 			trueType := strings.TrimPrefix(self.GolangType, "[]")
-			typeName = "[]" + *self.GolangPkg + "." + trueType
-
+			if strings.HasPrefix(trueType, "*") {
+				trueType = strings.TrimPrefix(trueType, "*")
+				typeName = "[]*" + *self.GolangPkg + "." + trueType
+			} else {
+				typeName = "[]" + *self.GolangPkg + "." + trueType
+			}
 		} else {
-
 			typeName = *self.GolangPkg + "." + typeName
-
 		}
 	}
 

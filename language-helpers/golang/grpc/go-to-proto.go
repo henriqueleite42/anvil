@@ -161,7 +161,7 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 			CurPkg:         i.CurPkg,
 
 			Type:                     childType,
-			TypeName:                 name + "Item",
+			TypeName:                 childType.Name,
 			VariableToAccessTheValue: "v",
 			PrefixForVariableNaming:  varNamePascal,
 		})

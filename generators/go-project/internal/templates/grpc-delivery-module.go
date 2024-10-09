@@ -66,7 +66,7 @@ func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context,
 {{- end -}}
 
 {{- define "method-with-input" }}
-func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context, i *pb.{{ .Input.Name }}) (*emptypb.Empty, error) {
+func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context, i {{ .Input.ProtoType }}) (*emptypb.Empty, error) {
 {{ template "logger" . }}
 
 {{ template "input" . }}
@@ -87,7 +87,7 @@ func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context,
 {{ end -}}
 
 {{- define "method-with-output" }}
-func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context, _ *emptypb.Empty) (*pb.{{ .Output.Name }}, error) {
+func (self *{{ .DomainCamel }}Controller) {{ .MethodName }}(ctx context.Context, _ *emptypb.Empty) ({{ .Output.ProtoType }}, error) {
 {{ template "logger" . }}
 
 	logger.Trace().Msg("create reqCtx")
@@ -135,7 +135,7 @@ import (
 )
 
 type {{ .DomainCamel }}Controller struct {
-	pb.Unimplemented{{ .Domain }}Server
+	pb.Unimplemented{{ .Domain }}ApiServer
 
 	logger   {{ .SpacingRelativeToDomainName }}zerolog.Logger
 	validator{{ .SpacingRelativeToDomainName }}adapters.Validator
@@ -187,7 +187,7 @@ type Add{{ .Domain }}ControllerInput struct {
 }
 
 func Add{{ .Domain }}Controller(i *Add{{ .Domain }}ControllerInput) {
-	pb.Register{{ .Domain }}Server(i.Server, &{{ .DomainCamel }}Controller{
+	pb.Register{{ .Domain }}ApiServer(i.Server, &{{ .DomainCamel }}Controller{
 		logger:   {{ .SpacingRelativeToDomainName }}i.Logger,
 		validator:{{ .SpacingRelativeToDomainName }}i.Validator,
 		{{ .DomainCamel }}Usecase: i.{{ .Domain }}Usecase,

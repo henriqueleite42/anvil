@@ -3,6 +3,6 @@ module github.com/henriqueleite42/anvil/generators/grpc
 go 1.22.4
 
 require (
-	github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241004183850-c743b161ddcb
+	github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241009133627-559ceea26a60
 	gopkg.in/yaml.v3 v3.0.1
 )

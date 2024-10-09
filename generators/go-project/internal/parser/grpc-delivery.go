@@ -42,7 +42,7 @@ func (self *Parser) ResolveGrpcDelivery(dlv *schemas.DeliveryGrpcRpc) error {
 			Type:                     t,
 			MethodName:               methodName,
 			VariableToAccessTheValue: "i",
-			HasOutput:                outputTypeHash != "",
+			HasOutput:                true,
 		})
 		if err != nil {
 			return err

@@ -50,21 +50,14 @@ func (self *{{ .Domain }}ApiImplementation) Close() error {
 func (self *{{ $dot.Domain }}ApiImplementation) {{ $method.MethodName }}() error {
 		{{- else }}
 func (self *{{ $dot.Domain }}ApiImplementation) {{ $method.MethodName }}(i {{ $method.Input.GolangType }}) error {
-	if i == nil {
-		return errors.New("input must not be nil")
-	}
 		{{- end }}
 	{{- else }}
 		{{- if not $method.Input }}
 func (self *{{ $dot.Domain }}ApiImplementation) {{ $method.MethodName }}() ({{ $method.Output.GolangType }}, error) {
 		{{- else }}
 func (self *{{ $dot.Domain }}ApiImplementation) {{ $method.MethodName }}(i {{ $method.Input.GolangType }}) ({{ $method.Output.GolangType }}, error) {
-	if i == nil {
-		return nil, errors.New("input must not be nil")
-	}
 		{{- end }}
 	{{- end }}
-
 {{ if $method.Input -}}
 {{ range $method.Input.Prepare -}}
 {{ . }}
