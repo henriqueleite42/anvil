@@ -290,13 +290,17 @@ func (self *goGrpcParser) ProtoToGo(i *ProtoToGoInput) (*Type, error) {
 			return nil, err
 		}
 
-		pbType := "pb." + t.Name
+		pbType, err := self.GetProtoTypeName(t)
+		if err != nil {
+			return nil, err
+		}
+		pbTypeWithPkg := "pb." + pbType
 
 		return &Type{
 			GolangType:     golangType,
 			GolangTypeName: golangTypeName,
-			ProtoType:      "*" + pbType,
-			ProtoTypeName:  pbType,
+			ProtoType:      "*" + pbTypeWithPkg,
+			ProtoTypeName:  pbTypeWithPkg,
 			Value:          varName,
 			Prepare:        []string{prepareMap},
 		}, nil
