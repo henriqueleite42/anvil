@@ -9,20 +9,8 @@ const GrpcDeliveryModuleTempl = `
 	logger.Trace().Msg("start")
 {{- end -}}
 
-{{- define "input" }}	logger.Trace().Msg("check i == nil")
-	if i == nil {
-		logger.Error().Msg("input is nil")
-		return nil, errors.New("input must not be nil")
-	}
-
-	logger.Trace().Msg("validate i")
-	err := self.validator.Validate(i)
-	if err != nil {
-		logger.Info().Err(err).Msg("invalid i")
-		return nil, err
-	}
-
-{{ if .Input.Prepare -}}
+{{- define "input" }}
+{{- if .Input.Prepare -}}
 	logger.Trace().Msg("start input props prepare")
 	{{- range .Input.Prepare }}
 {{ . }}
@@ -30,7 +18,14 @@ const GrpcDeliveryModuleTempl = `
 	logger.Trace().Msg("end input props prepare")
 {{- end }}
 
-	logger.Debug().Interface("uscI", {{ .Input.Value }}).Msg("usecase input")
+	logger.Trace().Msg("validate {{ .Input.Value }}")
+	err := self.validator.Validate({{ .Input.Value }})
+	if err != nil {
+		logger.Info().Err(err).Msg("invalid {{ .Input.Value }}")
+		return nil, err
+	}
+
+	logger.Debug().Interface("{{ .Input.Value }}", {{ .Input.Value }}).Msg("usecase input")
 {{- end -}}
 
 {{- define "output" }}	logger.Debug().Interface("result", result).Msg("usecase output")
@@ -137,7 +132,7 @@ import (
 type {{ .DomainCamel }}Controller struct {
 	pb.Unimplemented{{ .Domain }}ApiServer
 
-	logger   {{ .SpacingRelativeToDomainName }}zerolog.Logger
+	logger   {{ .SpacingRelativeToDomainName }}*zerolog.Logger
 	validator{{ .SpacingRelativeToDomainName }}adapters.Validator
 	{{ .DomainCamel }}Usecase  {{ .DomainSnake }}_usecase.{{ .Domain }}Usecase
 }
@@ -181,7 +176,7 @@ func convertPbTo{{ $enum.GolangName }}(val pb.{{ $enum.GolangName }}) models.{{ 
 
 type Add{{ .Domain }}ControllerInput struct {
 	Server   {{ .SpacingRelativeToDomainName }}*grpc.Server
-	Logger   {{ .SpacingRelativeToDomainName }}zerolog.Logger
+	Logger   {{ .SpacingRelativeToDomainName }}*zerolog.Logger
 	Validator{{ .SpacingRelativeToDomainName }}adapters.Validator
 	{{ .Domain }}Usecase  {{ .DomainSnake }}_usecase.{{ .Domain }}Usecase
 }

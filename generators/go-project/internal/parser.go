@@ -300,11 +300,58 @@ func Parse(schema *schemas.Schema) ([]*File, error) {
 		if err != nil {
 			return nil, err
 		}
-		files = append(files, &File{
-			Name:    fmt.Sprintf("delivery/grpc/%s/%s.go", templInput.DomainSnake, domainKebab),
-			Content: grpcModule,
-		})
+		files = append(
+			files,
+			&File{
+				Name:    fmt.Sprintf("delivery/grpc/%s/%s.go", templInput.DomainSnake, domainKebab),
+				Content: grpcModule,
+			},
+			&File{
+				Name:    "delivery/grpc/grpc.go",
+				Content: templates.GrpcDelivery,
+			},
+		)
 	}
+
+	files = append(
+		files,
+		&File{
+			Name:    "adapters/validator.go",
+			Content: templates.ValidatorTempl,
+		},
+		&File{
+			Name:    "adapters/go-validator/go-validator.go",
+			Content: templates.ValidatorImplementationTempl,
+		},
+	)
+
+	files = append(
+		files,
+		&File{
+			Name:    "delivery/delivery.go",
+			Content: templates.DeliveryTempl,
+		},
+		&File{
+			Name:    "delivery/gratefully-shutdown.go",
+			Content: templates.GratefullyShutdownTempl,
+		},
+	)
+
+	files = append(
+		files,
+		&File{
+			Name:    "utils/sync.go",
+			Content: templates.UtilsSyncTempl,
+		},
+	)
+
+	files = append(
+		files,
+		&File{
+			Name:    "cmd/main.go",
+			Content: templates.MainTempl,
+		},
+	)
 
 	return files, nil
 }

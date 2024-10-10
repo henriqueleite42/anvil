@@ -1,0 +1,80 @@
+package templates
+
+const GrpcDelivery = `package grpc
+
+import (
+	"fmt"
+	"log"
+	"net"
+	"os"
+	"sync"
+	"time"
+
+	"github.com/rs/zerolog"
+	"google.golang.org/grpc"
+)
+
+type grpcDelivery struct {
+	server    *grpc.Server
+	logger		*zerolog.Logger
+	validator adapters.Validator
+}
+
+type NewGrpcDeliveryInput struct {
+	Logger		*zerolog.Logger
+	Validator adapters.Validator
+}
+
+func (self *grpcDelivery) Name() string {
+	return "GrpcDelivery"
+}
+
+func (self *grpcDelivery) Listen() {
+	go func() {
+		// Add routers here
+
+		port := fmt.Sprintf(":%v", os.Getenv("GRPC_PORT"))
+		listener, err := net.Listen("tcp", port)
+		if err != nil {
+			self.logger.Error().
+				Err(err).
+				Msgf("failed to listen grpc delivery on port: %s", port)
+			return
+		}
+
+		self.logger.Info().
+			Msgf("gRPC server initialized at: %v", listener.Addr())
+
+		if err := self.server.Serve(listener); err != nil {
+			self.logger.Error().
+				Err(err).
+				Msg("failed to serve grpc delivery")
+			return
+		}
+	}()
+}
+
+func (self *grpcDelivery) Cancel(timeout time.Duration) {
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		self.server.GracefulStop()
+	}()
+
+	if err := utils.WaitWithTimeout(&wg, timeout); err != nil {
+		self.logger.Error().Err(err).Msg("grpc delivery timeout")
+	}
+}
+
+func NewGrpcDelivery(i *NewGrpcDeliveryInput) delivery.Delivery {
+	server := grpc.NewServer()
+
+	return &grpcDelivery{
+		server:    server,
+		logger: 	 i.Logger,
+		validator: i.Validator,
+	}
+}
+`
