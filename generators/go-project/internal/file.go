@@ -14,7 +14,7 @@ func fileExists(path string) bool {
 	return true
 }
 
-func WriteFile(path string, fileNameWithPath string, content string) error {
+func WriteFile(path string, fileNameWithPath string, content string, overwrite bool) error {
 	myDir, err := os.Getwd()
 	if err != nil {
 		return err
@@ -38,7 +38,7 @@ func WriteFile(path string, fileNameWithPath string, content string) error {
 
 	finalPath := path + "/" + fileName
 
-	if fileExists(finalPath) {
+	if !overwrite && fileExists(finalPath) {
 		return fmt.Errorf("file \"%s\" already exists, generator \"go-project\" is unable to overwrite files without losing data", finalPath)
 	}
 

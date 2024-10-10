@@ -5,12 +5,15 @@ import (
 	"sort"
 
 	"github.com/henriqueleite42/anvil/generators/grpc/internal/templates"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/grpc"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/template"
+	types_parser "github.com/henriqueleite42/anvil/language-helpers/golang/types"
 )
 
 type parser struct {
 	schema                  *schemas.Schema
+	grpcParser              grpc.GrpcParser
 	imports                 map[string]bool
 	methods                 []*templates.ProtofileTemplInputMethod
 	enums                   map[string]*templates.ProtofileTemplInputEnum
@@ -64,8 +67,27 @@ func Parse(schema *schemas.Schema, silent bool, outputFolderPath string) error {
 	//
 	// -----------------------------
 
+	goTypeParser, err := types_parser.NewTypeParser(&types_parser.NewTypeParserInput{
+		Schema:        schema,
+		EnumsPkg:      "pb",
+		TypesPkg:      "pb",
+		EventsPkg:     "pb",
+		EntitiesPkg:   "pb",
+		RepositoryPkg: "pb",
+		UsecasePkg:    "pb",
+	})
+	if err != nil {
+		return err
+	}
+
+	grpcParser := grpc.NewGrpcParser(&grpc.NewGrpcParserInput{
+		Schema:       schema,
+		GoTypeParser: goTypeParser,
+	})
+
 	parserInstance := &parser{
 		schema:                  schema,
+		grpcParser:              grpcParser,
 		imports:                 map[string]bool{},
 		methods:                 make([]*templates.ProtofileTemplInputMethod, 0, len(rpcs)),
 		enums:                   map[string]*templates.ProtofileTemplInputEnum{},
@@ -98,7 +120,7 @@ func Parse(schema *schemas.Schema, silent bool, outputFolderPath string) error {
 				return fmt.Errorf("type \"%s\" not found for usecase method \"%s\"", method.Input.TypeHash, method.Name)
 			}
 
-			inputTypeResolved, err := parserInstance.resolveType(inputType)
+			inputTypeResolved, err := parserInstance.resolveType(inputType, v.Name)
 			if err != nil {
 				return err
 			}
@@ -120,7 +142,7 @@ func Parse(schema *schemas.Schema, silent bool, outputFolderPath string) error {
 				return fmt.Errorf("type \"%s\" not found for usecase method \"%s\"", method.Output.TypeHash, method.Name)
 			}
 
-			outputTypeResolved, err := parserInstance.resolveType(outputType)
+			outputTypeResolved, err := parserInstance.resolveType(outputType, v.Name)
 			if err != nil {
 				return err
 			}

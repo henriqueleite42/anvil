@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/henriqueleite42/anvil/generators/grpc/internal/templates"
@@ -19,16 +20,18 @@ func (self *parser) resolveEnum(e *schemas.Enum) *templates.ProtofileTemplInputE
 
 	biggest := 0
 	for _, v := range e.Values {
-		newLen := len(v.Name)
+		name := fmt.Sprintf("%s_%s", e.Name, v.Name)
+		newLen := len(name)
 		if newLen > biggest {
 			biggest = newLen
 		}
 	}
 
 	for k, v := range e.Values {
+		name := fmt.Sprintf("%s_%s", e.Name, v.Name)
 		result.Values = append(result.Values, &templates.ProtofileTemplInputEnumValue{
-			Name:    v.Name,
-			Spacing: strings.Repeat(" ", biggest-len(v.Name)),
+			Name:    name,
+			Spacing: strings.Repeat(" ", biggest-len(name)),
 			Idx:     k,
 		})
 	}

@@ -8,7 +8,7 @@ import (
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
-func (self *parser) resolveTypeProp(t *schemas.Type) (string, error) {
+func (self *parser) resolveTypeProp(t *schemas.Type, methodName string) (string, error) {
 	var typeString string
 	if t.Type == schemas.TypeType_String {
 		typeString = "string"
@@ -48,7 +48,7 @@ func (self *parser) resolveTypeProp(t *schemas.Type) (string, error) {
 			return "", fmt.Errorf("type \"%s\" is missing prop \"ChildTypes\"", t.Ref)
 		}
 
-		resolvedType, err := self.resolveType(t)
+		resolvedType, err := self.resolveType(t, methodName)
 		if err != nil {
 			return "", err
 		}
@@ -73,7 +73,7 @@ func (self *parser) resolveTypeProp(t *schemas.Type) (string, error) {
 			return "", fmt.Errorf("fail to resolve child type \"%s\" for type \"%s\".", childTypeRef, t.Name)
 		}
 
-		typeName, err := self.resolveTypeProp(childType)
+		typeName, err := self.resolveTypeProp(childType, methodName)
 		if err != nil {
 			return "", err
 		}
@@ -91,7 +91,7 @@ func (self *parser) resolveTypeProp(t *schemas.Type) (string, error) {
 	return typeString, nil
 }
 
-func (self *parser) resolveType(t *schemas.Type) (*templates.ProtofileTemplInputType, error) {
+func (self *parser) resolveType(t *schemas.Type, methodName string) (*templates.ProtofileTemplInputType, error) {
 	if existentType, ok := self.typesToAvoidDuplication[t.Ref]; ok {
 		return existentType, nil
 	}
@@ -100,8 +100,13 @@ func (self *parser) resolveType(t *schemas.Type) (*templates.ProtofileTemplInput
 		return nil, fmt.Errorf("\"%s\" type must be a Map", t.Name)
 	}
 
+	protoTypeName, err := self.grpcParser.GetProtoTypeName(t)
+	if err != nil {
+		return nil, err
+	}
+
 	result := &templates.ProtofileTemplInputType{
-		Name:  t.Name,
+		Name:  protoTypeName,
 		Props: make([]*templates.ProtofileTemplInputTypeProp, 0, len(t.ChildTypes)),
 	}
 
@@ -111,7 +116,7 @@ func (self *parser) resolveType(t *schemas.Type) (*templates.ProtofileTemplInput
 			return nil, fmt.Errorf("child type \"%s\" not found for type \"%s\"", v.TypeHash, t.Name)
 		}
 
-		propType, err := self.resolveTypeProp(childType)
+		propType, err := self.resolveTypeProp(childType, methodName)
 		if err != nil {
 			return nil, err
 		}

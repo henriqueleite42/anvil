@@ -24,8 +24,9 @@ var templatesNamesValues = map[string]string{
 }
 
 type File struct {
-	Name    string
-	Content string
+	Name      string
+	Content   string
+	Overwrite bool
 }
 
 func Parse(schema *schemas.Schema) ([]*File, error) {
@@ -217,8 +218,9 @@ func Parse(schema *schemas.Schema) ([]*File, error) {
 			return nil, err
 		}
 		files = append(files, &File{
-			Name:    "models/" + domainKebab + ".go",
-			Content: models,
+			Name:      "models/" + domainKebab + ".go",
+			Content:   models,
+			Overwrite: true,
 		})
 	}
 	if len(templInput.MethodsRepository) > 0 {
@@ -227,8 +229,9 @@ func Parse(schema *schemas.Schema) ([]*File, error) {
 			return nil, err
 		}
 		files = append(files, &File{
-			Name:    fmt.Sprintf("repository/%s/%s.go", domainKebab, domainKebab),
-			Content: repository,
+			Name:      fmt.Sprintf("repository/%s/%s.go", domainKebab, domainKebab),
+			Content:   repository,
+			Overwrite: true,
 		})
 
 		repositoryStruct, err := templateManager.Parse("repository-struct", templInput)
@@ -264,8 +267,9 @@ func Parse(schema *schemas.Schema) ([]*File, error) {
 			return nil, err
 		}
 		files = append(files, &File{
-			Name:    fmt.Sprintf("usecase/%s/%s.go", domainKebab, domainKebab),
-			Content: usecase,
+			Name:      fmt.Sprintf("usecase/%s/%s.go", domainKebab, domainKebab),
+			Content:   usecase,
+			Overwrite: true,
 		})
 
 		usecaseStruct, err := templateManager.Parse("usecase-struct", templInput)
@@ -303,8 +307,9 @@ func Parse(schema *schemas.Schema) ([]*File, error) {
 		files = append(
 			files,
 			&File{
-				Name:    fmt.Sprintf("delivery/grpc/%s/%s.go", templInput.DomainSnake, domainKebab),
-				Content: grpcModule,
+				Name:      fmt.Sprintf("delivery/grpc/%s/%s.go", templInput.DomainSnake, domainKebab),
+				Content:   grpcModule,
+				Overwrite: true,
 			},
 			&File{
 				Name:    "delivery/grpc/grpc.go",
@@ -316,8 +321,9 @@ func Parse(schema *schemas.Schema) ([]*File, error) {
 	files = append(
 		files,
 		&File{
-			Name:    "adapters/validator.go",
-			Content: templates.ValidatorTempl,
+			Name:      "adapters/validator.go",
+			Content:   templates.ValidatorTempl,
+			Overwrite: true,
 		},
 		&File{
 			Name:    "adapters/go-validator/go-validator.go",
@@ -328,20 +334,23 @@ func Parse(schema *schemas.Schema) ([]*File, error) {
 	files = append(
 		files,
 		&File{
-			Name:    "delivery/delivery.go",
-			Content: templates.DeliveryTempl,
+			Name:      "delivery/delivery.go",
+			Content:   templates.DeliveryTempl,
+			Overwrite: true,
 		},
 		&File{
-			Name:    "delivery/gratefully-shutdown.go",
-			Content: templates.GratefullyShutdownTempl,
+			Name:      "delivery/gratefully-shutdown.go",
+			Content:   templates.GratefullyShutdownTempl,
+			Overwrite: true,
 		},
 	)
 
 	files = append(
 		files,
 		&File{
-			Name:    "utils/sync.go",
-			Content: templates.UtilsSyncTempl,
+			Name:      "utils/sync.go",
+			Content:   templates.UtilsSyncTempl,
+			Overwrite: true,
 		},
 	)
 
