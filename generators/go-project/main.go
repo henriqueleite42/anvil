@@ -71,7 +71,7 @@ func main() {
 	}
 
 	for _, v := range files {
-		err = internal.WriteFile(outputFolderPath, v.Name, v.Content)
+		err = internal.WriteFile(outputFolderPath, v.Name, v.Content, v.Overwrite)
 		if err != nil {
 			if strings.Contains(err.Error(), "already exists") {
 				slog.Warn(err.Error())

@@ -263,12 +263,17 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 			prepare = append(prepare, r.Prepare...)
 		}
 
+		pbType, err := self.GetProtoTypeName(t)
+		if err != nil {
+			return nil, err
+		}
+
 		pkgPb := "pb"
 		prepareMap, err := self.templateManager.Parse("input-prop-map", &templates.InputPropMapTemplInput{
 			MethodName:           i.MethodName,
 			VarName:              varName,
 			OriginalVariableName: i.VariableToAccessTheValue,
-			Type:                 parsedType.GolangType,
+			Type:                 pbType,
 			Optional:             t.Optional,
 			HasOutput:            i.HasOutput,
 			Prepare:              prepare,
@@ -280,13 +285,13 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 			return nil, err
 		}
 
-		pbType := "pb." + name
+		pbTypeWithPkg := pkgPb + "." + pbType
 
 		return &Type{
 			GolangType:     golangType,
 			GolangTypeName: golangTypeName,
-			ProtoType:      "*" + pbType,
-			ProtoTypeName:  pbType,
+			ProtoType:      "*" + pbTypeWithPkg,
+			ProtoTypeName:  pbTypeWithPkg,
 			Value:          varName,
 			Prepare:        []string{prepareMap},
 		}, nil

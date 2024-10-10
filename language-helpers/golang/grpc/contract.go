@@ -38,6 +38,7 @@ type ProtoToGoInput struct {
 }
 
 type GrpcParser interface {
-	GoToProto(t *GoToProtoInput) (*Type, error)
-	ProtoToGo(t *ProtoToGoInput) (*Type, error)
+	GetProtoTypeName(t *schemas.Type) (string, error)
+	GoToProto(i *GoToProtoInput) (*Type, error)
+	ProtoToGo(i *ProtoToGoInput) (*Type, error)
 }
