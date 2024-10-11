@@ -63,17 +63,18 @@ func (self *Type) GetFullTypeName(curPkg string) string {
 }
 
 type EnumValue struct {
-	Idx     int
+	Idx     int32
 	Name    string
 	Spacing string
 	Value   string
 }
 
 type Enum struct {
-	GolangPkg  string
-	GolangName string
-	GolangType string
-	Values     []*EnumValue
+	GolangPkg        string
+	GolangName       string
+	GolangType       string
+	Values           []*EnumValue
+	DeprecatedValues []*EnumValue
 }
 
 func (self *Enum) GetFullEnumName(curPkg string) string {

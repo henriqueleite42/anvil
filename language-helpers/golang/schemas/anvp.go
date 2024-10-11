@@ -99,8 +99,10 @@ var (
 )
 
 type EnumValue struct {
-	Name  string `yaml:"Name"`
-	Value string `yaml:"Value"`
+	Name       string `yaml:"Name"`
+	Value      string `yaml:"Value"`
+	Index      int32  `yaml:"Index"`
+	Deprecated bool   `yaml:"Deprecated"`
 }
 
 type Enum struct {

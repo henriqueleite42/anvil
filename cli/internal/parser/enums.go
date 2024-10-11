@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/henriqueleite42/anvil/language-helpers/golang/hashing"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
@@ -82,16 +83,44 @@ func (self *anvToAnvpParser) resolveEnum(i *resolveInput) (string, error) {
 			nameString = valuesK
 		}
 
-		valueString, ok := valuesVMap["Value"].(string)
+		valueAny, ok := valuesVMap["Value"]
+		if !ok {
+			return "", fmt.Errorf("\"%s.%s.Values.%s.Value\" is required", i.path, i.k, valuesK)
+		}
+		valueString, ok := valueAny.(string)
 		if !ok {
 			return "", fmt.Errorf("fail to parse \"%s.%s.Values.%s.Value\" to `string`", i.path, i.k, valuesK)
 		}
 
+		indexAny, ok := valuesVMap["Index"]
+		if !ok {
+			return "", fmt.Errorf("\"%s.%s.Values.%s.Index\" is required", i.path, i.k, valuesK)
+		}
+		indexInt, ok := indexAny.(int32)
+		if !ok {
+			return "", fmt.Errorf("fail to parse \"%s.%s.Values.%s.Index\" to `int32`", i.path, i.k, valuesK)
+		}
+
+		var deprecated bool
+		deprecatedAny, ok := valuesVMap["Deprecated"]
+		if ok {
+			deprecatedBool, ok := deprecatedAny.(bool)
+			if !ok {
+				return "", fmt.Errorf("fail to parse \"%s.%s.Values.%s.Deprecated\" to `int32`", i.path, i.k, valuesK)
+			}
+			deprecated = deprecatedBool
+		}
+
 		values = append(values, &schemas.EnumValue{
-			Name:  nameString,
-			Value: valueString,
+			Name:       nameString,
+			Value:      valueString,
+			Index:      indexInt,
+			Deprecated: deprecated,
 		})
 	}
+	sort.Slice(values, func(i, j int) bool {
+		return values[i].Index < values[j].Index
+	})
 
 	dbType := self.formatToEntitiesNamingCase(i.k + "Enum")
 

@@ -19,10 +19,11 @@ func (self *typeParser) ParseEnum(e *schemas.Enum) (*Enum, error) {
 	}
 
 	enum := &Enum{
-		GolangPkg:  self.enumsPkg,
-		GolangName: e.Name,
-		GolangType: eType,
-		Values:     []*EnumValue{},
+		GolangPkg:        self.enumsPkg,
+		GolangName:       e.Name,
+		GolangType:       eType,
+		Values:           make([]*EnumValue, 0, len(e.Values)),
+		DeprecatedValues: []*EnumValue{},
 	}
 
 	biggest := len(e.Values[0].Name)
@@ -33,15 +34,21 @@ func (self *typeParser) ParseEnum(e *schemas.Enum) (*Enum, error) {
 		}
 	}
 
-	for k, v := range e.Values {
+	for _, v := range e.Values {
 		targetLen := biggest - len(v.Name)
 
-		enum.Values = append(enum.Values, &EnumValue{
-			Idx:     k,
+		value := &EnumValue{
+			Idx:     v.Index,
 			Name:    v.Name,
 			Spacing: strings.Repeat(" ", targetLen),
 			Value:   v.Value,
-		})
+		}
+
+		if v.Deprecated {
+			enum.DeprecatedValues = append(enum.DeprecatedValues, value)
+		} else {
+			enum.Values = append(enum.Values, value)
+		}
 	}
 
 	self.enumsToAvoidDuplication[e.Name] = enum
