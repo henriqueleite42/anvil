@@ -1,14 +1,30 @@
 package templates
 
+import "fmt"
+
 type ProtofileTemplInputEnumValue struct {
 	Name    string
 	Spacing string
-	Idx     int
+	Idx     int32
 }
 
 type ProtofileTemplInputEnum struct {
-	Name   string
-	Values []*ProtofileTemplInputEnumValue
+	Name             string
+	Values           []*ProtofileTemplInputEnumValue
+	DeprecatedValues []int32
+}
+
+func (self *ProtofileTemplInputEnum) GetDeprecatedValues() string {
+	var result string
+	for _, v := range self.DeprecatedValues {
+		if len(result) > 0 {
+			result += fmt.Sprintf(", %v", v)
+		} else {
+			result += fmt.Sprintf("%v", v)
+		}
+	}
+
+	return result
 }
 
 type ProtofileTemplInputMethod struct {
@@ -65,6 +81,10 @@ service {{ .Domain }}Api {
 enum {{ .Name }} {
 	{{- range .Values }}
 	{{ .Name }}{{ .Spacing }} = {{ .Idx }};
+	{{- end }}
+	{{- if .DeprecatedValues }}
+
+	reserved {{ .GetDeprecatedValues }};
 	{{- end }}
 }
 {{ end }}

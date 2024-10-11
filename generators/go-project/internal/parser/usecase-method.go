@@ -47,6 +47,7 @@ func (self *Parser) ResolveUsecaseMethod(usc *schemas.UsecaseMethod, pkgName str
 		MethodName:     usc.Name,
 		InputTypeName:  inputTypeName,
 		OutputTypeName: outputTypeName,
+		Order:          usc.Order,
 	})
 
 	self.MethodsUsecaseToAvoidDuplication[usc.Ref] = true

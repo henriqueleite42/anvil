@@ -10,6 +10,7 @@ type TemplMethodDelivery struct {
 	DomainCamel string
 	DomainSnake string
 	MethodName  string
+	Order       int
 	Input       *grpc.Type
 	Output      *grpc.Type
 }
@@ -18,6 +19,7 @@ type TemplMethod struct {
 	MethodName     string
 	InputTypeName  string
 	OutputTypeName string
+	Order          int
 }
 
 type TemplInput struct {

@@ -96,10 +96,11 @@ func (self *anvToAnvpParser) resolveEnum(i *resolveInput) (string, error) {
 		if !ok {
 			return "", fmt.Errorf("\"%s.%s.Values.%s.Index\" is required", i.path, i.k, valuesK)
 		}
-		indexInt, ok := indexAny.(int32)
+		indexInt, ok := indexAny.(int)
 		if !ok {
-			return "", fmt.Errorf("fail to parse \"%s.%s.Values.%s.Index\" to `int32`", i.path, i.k, valuesK)
+			return "", fmt.Errorf("fail to parse \"%s.%s.Values.%s.Index\" to `int`", i.path, i.k, valuesK)
 		}
+		indexInt32 := int32(indexInt)
 
 		var deprecated bool
 		deprecatedAny, ok := valuesVMap["Deprecated"]
@@ -114,7 +115,7 @@ func (self *anvToAnvpParser) resolveEnum(i *resolveInput) (string, error) {
 		values = append(values, &schemas.EnumValue{
 			Name:       nameString,
 			Value:      valueString,
-			Index:      indexInt,
+			Index:      indexInt32,
 			Deprecated: deprecated,
 		})
 	}

@@ -83,6 +83,7 @@ func (self *Parser) ResolveGrpcDelivery(dlv *schemas.DeliveryGrpcRpc) error {
 		MethodName:  methodName,
 		Input:       input,
 		Output:      output,
+		Order:       dlv.Order,
 	})
 
 	return nil
