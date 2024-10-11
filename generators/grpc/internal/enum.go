@@ -14,8 +14,9 @@ func (self *parser) resolveEnum(e *schemas.Enum) *templates.ProtofileTemplInputE
 	}
 
 	result := &templates.ProtofileTemplInputEnum{
-		Name:   e.Name,
-		Values: make([]*templates.ProtofileTemplInputEnumValue, 0, len(e.Values)),
+		Name:             e.Name,
+		Values:           make([]*templates.ProtofileTemplInputEnumValue, 0, len(e.Values)),
+		DeprecatedValues: []int32{},
 	}
 
 	biggest := 0
@@ -27,12 +28,17 @@ func (self *parser) resolveEnum(e *schemas.Enum) *templates.ProtofileTemplInputE
 		}
 	}
 
-	for k, v := range e.Values {
+	for _, v := range e.Values {
+		if v.Deprecated {
+			result.DeprecatedValues = append(result.DeprecatedValues, v.Index)
+			continue
+		}
+
 		name := fmt.Sprintf("%s_%s", e.Name, v.Name)
 		result.Values = append(result.Values, &templates.ProtofileTemplInputEnumValue{
 			Name:    name,
 			Spacing: strings.Repeat(" ", biggest-len(name)),
-			Idx:     k,
+			Idx:     v.Index,
 		})
 	}
 

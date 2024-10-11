@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/henriqueleite42/anvil/generators/go-project/internal/parser"
@@ -180,8 +181,24 @@ func Parse(schema *schemas.Schema) ([]*File, error) {
 	entities := goTypesParserModels.GetEntities()
 	typesRepository := goTypesParserRepository.GetRepository()
 	typesRepository = append(typesRepository, goTypesParserRepository.GetTypes()...)
+	sort.Slice(typesRepository, func(i, j int) bool {
+		return typesRepository[i].GolangType < typesRepository[j].GolangType
+	})
 	typesUsecase := goTypesParserUsecase.GetUsecase()
 	typesUsecase = append(typesUsecase, goTypesParserUsecase.GetTypes()...)
+	sort.Slice(typesUsecase, func(i, j int) bool {
+		return typesUsecase[i].GolangType < typesUsecase[j].GolangType
+	})
+
+	sort.Slice(typeParser.MethodsRepository, func(i, j int) bool {
+		return typeParser.MethodsRepository[i].Order < typeParser.MethodsRepository[j].Order
+	})
+	sort.Slice(typeParser.MethodsUsecase, func(i, j int) bool {
+		return typeParser.MethodsUsecase[i].Order < typeParser.MethodsUsecase[j].Order
+	})
+	sort.Slice(typeParser.MethodsGrpcDelivery, func(i, j int) bool {
+		return typeParser.MethodsGrpcDelivery[i].Order < typeParser.MethodsGrpcDelivery[j].Order
+	})
 
 	templInput := &templates.TemplInput{
 		Domain:                      schema.Domain,

@@ -29,10 +29,19 @@
 							"Value": {
 								"type": "string",
 								"description": "The value of the enum. Usually used by the generators to create values in the database and code."
+							},
+							"Index": {
+								"type": "number",
+								"description": "The index of the enum value. Must be a positive integer. Required because many places need the enum values to keep some kind of order."
+							},
+							"Deprecated": {
+								"type": "bool",
+								"description": "If the property is deprecated or not."
 							}
 						},
 						"required": [
-							"Values"
+							"Value",
+							"Index"
 						],
 						"additionalProperties": false
 					}

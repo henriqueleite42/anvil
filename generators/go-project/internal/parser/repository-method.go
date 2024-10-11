@@ -42,6 +42,7 @@ func (self *Parser) ResolveRepositoryMethod(usc *schemas.RepositoryMethod, pkgNa
 		MethodName:     usc.Name,
 		InputTypeName:  inputTypeName,
 		OutputTypeName: outputTypeName,
+		Order:          usc.Order,
 	})
 
 	return nil

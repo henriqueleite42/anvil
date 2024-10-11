@@ -17,6 +17,8 @@ github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241003140919-f
 github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241003140919-f7b7c7dc538a/go.mod h1:1aCAFI8VjcMPFPPx55qS1gV768EL24uu7veUx1SsPpE=
 github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241004170513-6ab88534c715 h1:wItkdFRJ/TvCKBTSZMshzBjoqZfMYqi8SkH0WNvIV+s=
 github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241004170513-6ab88534c715/go.mod h1:1aCAFI8VjcMPFPPx55qS1gV768EL24uu7veUx1SsPpE=
+github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241011192146-55ea92115a64 h1:o5elKBFr8JVWWwAmyr67bXKLFDPQj4eaMBUUn33iHXo=
+github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241011192146-55ea92115a64/go.mod h1:1aCAFI8VjcMPFPPx55qS1gV768EL24uu7veUx1SsPpE=
 github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2s0bqwp9tc8=
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=

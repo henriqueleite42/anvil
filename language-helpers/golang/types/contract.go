@@ -63,17 +63,18 @@ func (self *Type) GetFullTypeName(curPkg string) string {
 }
 
 type EnumValue struct {
-	Idx     int
+	Idx     int32
 	Name    string
 	Spacing string
 	Value   string
 }
 
 type Enum struct {
-	GolangPkg  string
-	GolangName string
-	GolangType string
-	Values     []*EnumValue
+	GolangPkg        string
+	GolangName       string
+	GolangType       string
+	Values           []*EnumValue
+	DeprecatedValues []*EnumValue
 }
 
 func (self *Enum) GetFullEnumName(curPkg string) string {
@@ -101,14 +102,14 @@ type TypeParser interface {
 
 	// Returns all parsed enums, sorted alphabetically
 	GetEnums() []*Enum
-	// Returns all parsed types, sorted by parse order
+	// Returns all parsed types, sorted alphabetically
 	GetTypes() []*Type
-	// Returns all parsed events, sorted by parse order
+	// Returns all parsed events, sorted alphabetically
 	GetEvents() []*Type
-	// Returns all parsed entities, sorted by parse order
+	// Returns all parsed entities, sorted alphabetically
 	GetEntities() []*Type
-	// Returns all parsed repository types, sorted by parse order
+	// Returns all parsed repository types, sorted alphabetically
 	GetRepository() []*Type
-	// Returns all parsed usecase types, sorted by parse order
+	// Returns all parsed usecase types, sorted alphabetically
 	GetUsecase() []*Type
 }
