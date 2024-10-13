@@ -6,7 +6,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/henriqueleite42/anvil/generators/atlas/internal"
 	"github.com/henriqueleite42/anvil/generators/atlas/internal/postgres"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 	"gopkg.in/yaml.v3"
@@ -61,15 +60,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	result, err := postgres.Parse(schema)
+	err = postgres.Parse(schema, silent, outputFolderPath)
 	if err != nil {
 		log.Fatal(err)
-	}
-
-	if !silent {
-		err := internal.WriteHclFile(outputFolderPath, schema, result)
-		if err != nil {
-			log.Fatal(err)
-		}
 	}
 }

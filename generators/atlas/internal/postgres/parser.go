@@ -2,54 +2,50 @@ package postgres
 
 import (
 	"fmt"
-	"strings"
 
+	"github.com/henriqueleite42/anvil/generators/atlas/internal/templates"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/template"
 )
 
-type hclFile struct {
-	schema    *schemas.Schema
-	dbSchemas map[string]string
-	enums     map[string]string
-	tables    string
-}
-
-type SortedByOrder struct {
-	Order int
-	Key   string
-}
-
-func (self *hclFile) toString() string {
-	schemasArr := []string{}
-	for _, v := range self.dbSchemas {
-		schemasArr = append(schemasArr, v)
+func Parse(schema *schemas.Schema, silent bool, outputFolderPath string) error {
+	if schema.Domain == "" {
+		return fmt.Errorf("no domain specified")
 	}
-	schemas := strings.Join(schemasArr, "\n")
-
-	enumsArr := []string{}
-	for _, v := range self.enums {
-		enumsArr = append(enumsArr, v)
-	}
-	enums := strings.Join(enumsArr, "\n")
-
-	return fmt.Sprintf(`%s
-
-%s
-
-%s`, schemas, enums, self.tables)
-}
-
-func Parse(schema *schemas.Schema) (string, error) {
-	proto := &hclFile{
-		schema:    schema,
-		dbSchemas: map[string]string{},
-		enums:     map[string]string{},
+	if schema.Entities == nil || schema.Entities.Entities == nil {
+		return fmt.Errorf("no entities to create tables")
 	}
 
-	err := proto.resolveTables(schema)
+	templateManager := template.NewTemplateManager()
+	err := templateManager.AddTemplate("hcl", templates.HclTempl)
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	return proto.toString(), nil
+	enums, err := resolveEnums(schema)
+	if err != nil {
+		return err
+	}
+
+	entities, err := resolveEntities(schema)
+	if err != nil {
+		return err
+	}
+
+	templInput := &templates.HclTemplInput{
+		Enums:    enums,
+		Entities: entities,
+	}
+
+	hclFile, err := templateManager.Parse("hcl", templInput)
+	if err != nil {
+		return err
+	}
+
+	err = WriteFile(schema, outputFolderPath, hclFile)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

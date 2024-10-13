@@ -1,41 +1,24 @@
 package postgres
 
 import (
-	"fmt"
-	"strings"
+	"sort"
 
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
-func (self *hclFile) resolveEnum(
-	schema *schemas.Schema,
-	dbSchema string,
-	enumHash *string,
-) (string, error) {
-	if enumHash == nil {
-		return "", fmt.Errorf("missing EnumHash")
-	}
+func resolveEnums(schema *schemas.Schema) ([]*schemas.Enum, error) {
 	if schema.Enums == nil || schema.Enums.Enums == nil {
-		return "", fmt.Errorf("no enums found in schema, but required for \"%s\"", *enumHash)
+		return []*schemas.Enum{}, nil
 	}
 
-	enum, ok := schema.Enums.Enums[*enumHash]
-	if !ok {
-		return "", fmt.Errorf("enums \"%s\" not found in schema", *enumHash)
+	enums := make([]*schemas.Enum, 0, len(schema.Enums.Enums))
+
+	for _, v := range schema.Enums.Enums {
+		enums = append(enums, v)
 	}
+	sort.Slice(enums, func(i, j int) bool {
+		return enums[i].Name < enums[j].Name
+	})
 
-	enumValuesArr := []string{}
-	for _, v := range enum.Values {
-		enumValuesArr = append(enumValuesArr, fmt.Sprintf("		\"%s\"", v.Value))
-	}
-	enumValues := strings.Join(enumValuesArr, ",\n")
-
-	self.enums[enum.DbName] = fmt.Sprintf(`enum "%s" {
-	schema = %s
-	values = [
-%s
-	]
-}`, enum.DbName, dbSchema, enumValues)
-
-	return enum.DbName, nil
+	return enums, nil
 }
