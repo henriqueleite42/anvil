@@ -247,8 +247,7 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 					}
 					columnsToCreateName = append(columnsToCreateName, *cType.DbName)
 				}
-				// TODO make it dynamic to match pattern specified in Entities.NamingCase (maybe create a Entities.ConstraintCase?)
-				name = strings.Join(columnsToCreateName, "_") + "_idx"
+				name = fmt.Sprintf("%s_%s_idx", tableName, strings.Join(columnsToCreateName, "_"))
 			}
 
 			var unique bool

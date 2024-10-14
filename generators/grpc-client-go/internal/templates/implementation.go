@@ -2,7 +2,7 @@ package templates
 
 const ImplementationTempl = `
 {{- $dot := . -}}
-package {{ .DomainSnake }}
+package {{ .DomainSnake }}_grpc_client
 
 import (
 {{- range .ImportsImplementation }}
@@ -15,7 +15,7 @@ import (
 type {{ .Domain }}ApiImplementation struct {
 	timeout time.Duration
 
-	{{ .DomainCamel }}Client pb.{{ .Domain }}Client
+	{{ .DomainCamel }}ApiClient pb.{{ .Domain }}ApiClient
 
 	conn *grpc.ClientConn
 }
@@ -67,15 +67,15 @@ func (self *{{ $dot.Domain }}ApiImplementation) {{ $method.MethodName }}(i {{ $m
 	defer cancel()
 	{{- if not $method.Output }}
 		{{- if not $method.Input }}
-	_, err := self.{{ $dot.DomainCamel }}Client.{{ $method.MethodName }}(ctx, &emptypb.Empty{})
+	_, err := self.{{ $dot.DomainCamel }}ApiClient.{{ $method.MethodName }}(ctx, &emptypb.Empty{})
 		{{- else }}
-	_, err := self.{{ $dot.DomainCamel }}Client.{{ $method.MethodName }}(ctx, {{ $method.Input.Value }})
+	_, err := self.{{ $dot.DomainCamel }}ApiClient.{{ $method.MethodName }}(ctx, {{ $method.Input.Value }})
 		{{- end }}
 	{{- else }}
 		{{- if not $method.Input }}
-	result, err := self.{{ $dot.DomainCamel }}Client.{{ $method.MethodName }}(ctx, &emptypb.Empty{})
+	result, err := self.{{ $dot.DomainCamel }}ApiClient.{{ $method.MethodName }}(ctx, &emptypb.Empty{})
 		{{- else }}
-	result, err := self.{{ $dot.DomainCamel }}Client.{{ $method.MethodName }}(ctx, {{ $method.Input.Value }})
+	result, err := self.{{ $dot.DomainCamel }}ApiClient.{{ $method.MethodName }}(ctx, {{ $method.Input.Value }})
 		{{- end }}
 	{{- end }}
 	{{- if $method.Output }}
@@ -112,7 +112,7 @@ func New{{ .Domain }}Api(i *{{ .Domain }}ApiInput) ({{ .Domain }}Api, error) {
 	}
 
 	return &{{ .Domain }}ApiImplementation{
-		{{ .DomainCamel }}Client: pb.New{{ .Domain }}Client(conn),
+		{{ .DomainCamel }}ApiClient: pb.New{{ .Domain }}ApiClient(conn),
 		timeout:{{ .SpacingRelativeToDomainName }}timeout,
 		conn:   {{ .SpacingRelativeToDomainName }}conn,
 	}, nil

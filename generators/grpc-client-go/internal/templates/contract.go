@@ -2,7 +2,7 @@ package templates
 
 const ContractTempl = `
 {{- $dot := . -}}
-package {{ .DomainSnake }}
+package {{ .DomainSnake }}_grpc_client
 
 import (
 {{- range .ImportsContract }}

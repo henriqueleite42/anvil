@@ -56,26 +56,28 @@ func Parse(schema *schemas.Schema, silent bool, outputFolderPath string) error {
 		}
 	}
 
+	pkg := domainSnake + "_grpc_client"
+
 	contractGoTypesParser, err := types_parser.NewTypeParser(&types_parser.NewTypeParserInput{
 		Schema:        schema,
-		EnumsPkg:      domainSnake,
-		TypesPkg:      domainSnake,
-		EventsPkg:     domainSnake,
-		EntitiesPkg:   domainSnake,
-		RepositoryPkg: domainSnake,
-		UsecasePkg:    domainSnake,
+		EnumsPkg:      pkg,
+		TypesPkg:      pkg,
+		EventsPkg:     pkg,
+		EntitiesPkg:   pkg,
+		RepositoryPkg: pkg,
+		UsecasePkg:    pkg,
 	})
 	if err != nil {
 		return err
 	}
 	implementationGoTypesParser, err := types_parser.NewTypeParser(&types_parser.NewTypeParserInput{
 		Schema:        schema,
-		EnumsPkg:      domainSnake,
-		TypesPkg:      domainSnake,
-		EventsPkg:     domainSnake,
-		EntitiesPkg:   domainSnake,
-		RepositoryPkg: domainSnake,
-		UsecasePkg:    domainSnake,
+		EnumsPkg:      pkg,
+		TypesPkg:      pkg,
+		EventsPkg:     pkg,
+		EntitiesPkg:   pkg,
+		RepositoryPkg: pkg,
+		UsecasePkg:    pkg,
 	})
 	if err != nil {
 		return err
@@ -128,7 +130,7 @@ func Parse(schema *schemas.Schema, silent bool, outputFolderPath string) error {
 				MethodName:               methodName,
 				VariableToAccessTheValue: "i",
 				HasOutput:                method.Output != nil,
-				CurPkg:                   domainSnake,
+				CurPkg:                   pkg,
 			})
 			if err != nil {
 				return err
@@ -160,15 +162,13 @@ func Parse(schema *schemas.Schema, silent bool, outputFolderPath string) error {
 				MethodName:               methodName,
 				VariableToAccessTheValue: "result",
 				HasOutput:                true,
-				CurPkg:                   domainSnake,
+				CurPkg:                   pkg,
 			})
 			if err != nil {
 				return err
 			}
 
 			output = t
-		} else {
-			implementationGoTypesParser.AddImport("google.golang.org/protobuf/types/known/emptypb")
 		}
 
 		methods = append(methods, &templates.TemplMethod{
