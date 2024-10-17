@@ -60,17 +60,17 @@ func (self *parser) resolveTypeProp(t *schemas.Type, methodName string) (string,
 			return "", fmt.Errorf("type \"%s\" is missing prop \"ChildTypes\"", t.Name)
 		}
 		if len(t.ChildTypes) != 1 {
-			return "", fmt.Errorf("type \"%s.ChildTypes\" has more than 1 item in the list. It must have exactly one item.", t.Name)
+			return "", fmt.Errorf("type \"%s.ChildTypes\" has more than 1 item in the list. It must have exactly one item", t.Name)
 		}
 
 		childTypeRef := t.ChildTypes[0].TypeHash
 		if childTypeRef == "" {
-			return "", fmt.Errorf("type \"%s.ChildTypes\" must have exactly one item.", t.Name)
+			return "", fmt.Errorf("type \"%s.ChildTypes\" must have exactly one item", t.Name)
 		}
 
 		childType, ok := self.schema.Types.Types[childTypeRef]
 		if !ok {
-			return "", fmt.Errorf("fail to resolve child type \"%s\" for type \"%s\".", childTypeRef, t.Name)
+			return "", fmt.Errorf("fail to resolve child type \"%s\" for type \"%s\"", childTypeRef, t.Name)
 		}
 
 		typeName, err := self.resolveTypeProp(childType, methodName)

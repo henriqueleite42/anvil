@@ -12,12 +12,12 @@ import (
 {{ end -}}
 )
 
-type {{ .Domain }}ApiImplementation struct {
+type {{ .DomainCamel }}ApiImplementation struct {
 	timeout time.Duration
+	conn 		*grpc.ClientConn
 
 	{{ .DomainCamel }}ApiClient pb.{{ .Domain }}ApiClient
 
-	conn *grpc.ClientConn
 }
 {{ range $enum := .Enums }}
 func convert{{ $enum.GolangName }}ToPb(val {{ $enum.GolangName }}) pb.{{ $enum.GolangName }} {
@@ -40,22 +40,22 @@ func convertPbTo{{ $enum.GolangName }}(val pb.{{ $enum.GolangName }}) {{ $enum.G
 }
 {{- end }}
 
-func (self *{{ .Domain }}ApiImplementation) Close() error {
+func (self *{{ .DomainCamel }}ApiImplementation) Close() error {
 	return self.conn.Close()
 }
 
 {{- range $method := $dot.Methods }}
 	{{-  if not $method.Output }}
 		{{- if not $method.Input }}
-func (self *{{ $dot.Domain }}ApiImplementation) {{ $method.MethodName }}() error {
+func (self *{{ $dot.DomainCamel }}ApiImplementation) {{ $method.MethodName }}() error {
 		{{- else }}
-func (self *{{ $dot.Domain }}ApiImplementation) {{ $method.MethodName }}(i {{ $method.Input.GolangType }}) error {
+func (self *{{ $dot.DomainCamel }}ApiImplementation) {{ $method.MethodName }}(i {{ $method.Input.GolangType }}) error {
 		{{- end }}
 	{{- else }}
 		{{- if not $method.Input }}
-func (self *{{ $dot.Domain }}ApiImplementation) {{ $method.MethodName }}() ({{ $method.Output.GolangType }}, error) {
+func (self *{{ $dot.DomainCamel }}ApiImplementation) {{ $method.MethodName }}() ({{ $method.Output.GolangType }}, error) {
 		{{- else }}
-func (self *{{ $dot.Domain }}ApiImplementation) {{ $method.MethodName }}(i {{ $method.Input.GolangType }}) ({{ $method.Output.GolangType }}, error) {
+func (self *{{ $dot.DomainCamel }}ApiImplementation) {{ $method.MethodName }}(i {{ $method.Input.GolangType }}) ({{ $method.Output.GolangType }}, error) {
 		{{- end }}
 	{{- end }}
 {{ if $method.Input -}}
@@ -68,14 +68,26 @@ func (self *{{ $dot.Domain }}ApiImplementation) {{ $method.MethodName }}(i {{ $m
 	{{- if not $method.Output }}
 		{{- if not $method.Input }}
 	_, err := self.{{ $dot.DomainCamel }}ApiClient.{{ $method.MethodName }}(ctx, &emptypb.Empty{})
+	if err != nil {
+		return err
+	}
 		{{- else }}
 	_, err := self.{{ $dot.DomainCamel }}ApiClient.{{ $method.MethodName }}(ctx, {{ $method.Input.Value }})
+	if err != nil {
+		return err
+	}
 		{{- end }}
 	{{- else }}
 		{{- if not $method.Input }}
 	result, err := self.{{ $dot.DomainCamel }}ApiClient.{{ $method.MethodName }}(ctx, &emptypb.Empty{})
+	if err != nil {
+		return nil, err
+	}
 		{{- else }}
 	result, err := self.{{ $dot.DomainCamel }}ApiClient.{{ $method.MethodName }}(ctx, {{ $method.Input.Value }})
+	if err != nil {
+		return nil, err
+	}
 		{{- end }}
 	{{- end }}
 	{{- if $method.Output }}
@@ -83,7 +95,7 @@ func (self *{{ $dot.Domain }}ApiImplementation) {{ $method.MethodName }}(i {{ $m
 {{ range $method.Output.Prepare -}}
 {{ . }}
 {{ end }}
-	return {{ $method.Output.Value }}, err
+	return {{ $method.Output.Value }}, nil
 	{{- else }}
 	return err
 	{{- end }}
@@ -111,7 +123,7 @@ func New{{ .Domain }}Api(i *{{ .Domain }}ApiInput) ({{ .Domain }}Api, error) {
 		timeout = i.Timeout
 	}
 
-	return &{{ .Domain }}ApiImplementation{
+	return &{{ .DomainCamel }}ApiImplementation{
 		{{ .DomainCamel }}ApiClient: pb.New{{ .Domain }}ApiClient(conn),
 		timeout:{{ .SpacingRelativeToDomainName }}timeout,
 		conn:   {{ .SpacingRelativeToDomainName }}conn,
