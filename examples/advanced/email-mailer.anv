@@ -2,16 +2,8 @@
 
 Domain: EmailMailer
 
-Metadata:
-  Description: |
-    Sends emails based on templates
-  Servers:
-    Prod:
-      Url: https://example-email-mailer.com
-
-Relationships:
-  Authentication: # It's a good practice to use the same name for the relationship as the Domain in the referenced file, but it's not mandatory
-    Uri: ./authentication.anv
+Description: |
+  Sends emails based on templates
 
 Entities:
   NamingCase: snake
@@ -52,6 +44,10 @@ Usecase:
               $ref: Authentication.Events.UserCreated # References the event `UserCreated` of the relationship `Authentication`
 
 Delivery:
+  Servers:
+    Prod:
+      Url: https://example-email-mailer.com
+
   Queue:
     Queues:
       - UsecaseMethod: SendWelcomeEmail

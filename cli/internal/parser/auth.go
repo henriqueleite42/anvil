@@ -7,13 +7,13 @@ import (
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
-func (self *anvToAnvpParser) auth(file map[string]any) error {
+func (self *anvToAnvpParser) auth(curDomain string, file map[string]any) error {
 	authSchema, ok := file["Auth"]
 	if !ok {
 		return nil
 	}
 
-	path := "Auth"
+	path := curDomain + ".Auth"
 
 	authMap, ok := authSchema.(map[string]any)
 	if !ok {
@@ -73,7 +73,7 @@ func (self *anvToAnvpParser) auth(file map[string]any) error {
 			applyToAllRoutes = applyToAllRoutesString
 		}
 
-		ref := self.getRef("", "Auth."+k)
+		ref := self.getRef(curDomain, "Auth."+k)
 		refHash := hashing.String(ref)
 
 		rootNode, err := getRootNode(path)

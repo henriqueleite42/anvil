@@ -3,13 +3,15 @@ package files
 import (
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 
+	"github.com/henriqueleite42/anvil/language-helpers/golang/hashing"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 	"gopkg.in/yaml.v3"
 )
 
-func GetAnvpFilePath(anvFilePath string, createFolders bool) (string, error) {
+func GetAnvpFilePath(anvpFileName string, createFolders bool) (string, error) {
 	myDir, err := os.Getwd()
 	if err != nil {
 		return "", err
@@ -24,19 +26,24 @@ func GetAnvpFilePath(anvFilePath string, createFolders bool) (string, error) {
 		}
 	}
 
-	parts := strings.Split(anvFilePath, "/")
-	fileName := parts[len(parts)-1] + "p"
-
-	return fmt.Sprintf("%s/%s", path, fileName), nil
+	return fmt.Sprintf("%s/%s.anvp", path, anvpFileName), nil
 }
 
-func WriteAnvpFile(schema *schemas.Schema, anvFilePath string) (string, error) {
+func WriteAnvpFile(schema *schemas.AnvpSchema, schemaFiles []string) (string, error) {
 	yamlData, err := yaml.Marshal(schema)
 	if err != nil {
 		return "", err
 	}
 
-	filePath, err := GetAnvpFilePath(anvFilePath, true)
+	sort.Slice(schemaFiles, func(i, j int) bool {
+		return schemaFiles[i] < schemaFiles[j]
+	})
+
+	anvpFileName := hashing.String(
+		strings.Join(schemaFiles, ""),
+	)
+
+	filePath, err := GetAnvpFilePath(anvpFileName, true)
 	if err != nil {
 		return "", err
 	}

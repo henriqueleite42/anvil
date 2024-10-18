@@ -5,54 +5,6 @@
 	"description": "API Maker",
 	"type": "object",
 	"$defs": {
-		"Enum": {
-			"type": "object",
-			"properties": {
-				"Type": {
-					"type": "string",
-					"description": "The type of the enum values",
-					"enum": [
-						"String",
-						"Int"
-					]
-				},
-				"Values": {
-					"type": "object",
-					"description": "The key value pair of the enum, with additional config if necessary",
-					"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-						"type": "object",
-						"properties": {
-							"Name": {
-								"type": "string",
-								"description": "The name of the enum value. Usually used by the generators to create values in the database and code."
-							},
-							"Value": {
-								"type": "string",
-								"description": "The value of the enum. Usually used by the generators to create values in the database and code."
-							},
-							"Index": {
-								"type": "number",
-								"description": "The index of the enum value. Must be a positive integer. Required because many places need the enum values to keep some kind of order."
-							},
-							"Deprecated": {
-								"type": "bool",
-								"description": "If the property is deprecated or not."
-							}
-						},
-						"required": [
-							"Value",
-							"Index"
-						],
-						"additionalProperties": false
-					}
-				}
-			},
-			"required": [
-				"Type",
-				"Values"
-			],
-			"additionalProperties": false
-		},
 		"Field": {
 			"type": "object",
 			"properties": {
@@ -110,6 +62,10 @@
 					"type": "string",
 					"description": "For now, only supported for String, Int, Float and Bool types. Raw default value that it should have."
 				},
+				"EnumRef": {
+					"type": "string",
+					"description": "Enum ref for enum types"
+				},
 				"Items": {
 					"type": "object",
 					"description": "Reference of a Type or Entity",
@@ -124,28 +80,6 @@
 								}
 							},
 							"additionalProperties": false
-						}
-					]
-				},
-				"Values": {
-					"oneOf": [
-						{
-							"type": "object",
-							"description": "Used for Enum and List[Enum]. The values of the enum.",
-							"patternProperties": {
-								"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-									"type": "string"
-								}
-							}
-						},
-						{
-							"type": "object",
-							"description": "Reference of an Enum",
-							"properties": {
-								"$ref": {
-									"$ref": "#/$defs/Enum"
-								}
-							}
 						}
 					]
 				},
@@ -188,7 +122,7 @@
 					"Items"
 				],
 				"properties": {
-					"Values": {
+					"EnumRef": {
 						"not": {}
 					},
 					"Properties": {
@@ -206,7 +140,7 @@
 				},
 				"then": {
 					"required": [
-						"Values"
+						"EnumRef"
 					],
 					"properties": {
 						"Items": {
@@ -233,7 +167,7 @@
 							"Items": {
 								"not": {}
 							},
-							"Values": {
+							"EnumRef": {
 								"not": {}
 							}
 						}
@@ -243,7 +177,7 @@
 							"Items": {
 								"not": {}
 							},
-							"Values": {
+							"EnumRef": {
 								"not": {}
 							},
 							"Properties": {
@@ -321,56 +255,9 @@
 			"description": "The name of the domain being defined. A single project can have multiple domains. Example: You have the \"Post\" project, it can have the \"Post\" and \"PostComment\" domains, because both are related to Posts.",
 			"pattern": "^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$"
 		},
-		"Metadata": {
-			"type": "object",
-			"description": "The name of the domain being defined. A single project can have multiple domains. Example: You have the \"Post\" project, it can have the \"Post\" and \"PostComment\" domains, because both are related to Posts.",
-			"properties": {
-				"Description": {
-					"type": "string"
-				},
-				"Servers": {
-					"type": "object",
-					"description": "The url to each of your servers, like Production and Staging",
-					"patternProperties": {
-						"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-							"type": "object",
-							"properties": {
-								"Url": {
-									"type": "string"
-								}
-							},
-							"required": [
-								"Url"
-							]
-						}
-					}
-				}
-			}
-		},
-		"Relationships": {
-			"type": "object",
-			"description": "The relationships that the project has with other projects. Useful to know which version of another project it uses and track updates.",
-			"patternProperties": {
-				"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-					"type": "object",
-					"description": "Usually the `Domain` in the related schema",
-					"properties": {
-						"Uri": {
-							"type": "string",
-							"description": "Uri to relationship. If it's a local file, must start with `file://` (you can use relative paths, like `./example.yaml`, but we recommend to use it only for testing purposes), if it's a url can start with `http://` or `https://`.",
-							"format": "uri-reference"
-						}
-					},
-					"required": [
-						"Uri"
-					],
-					"additionalProperties": false
-				}
-			}
-		},
-		"Imports": {
-			"$ref": "#/$defs/Import",
-			"description": "Reusable imports to be used as Dependency or Input."
+		"Description": {
+			"type": "string",
+			"description": "Domain description"
 		},
 		"Auth": {
 			"type": "object",
@@ -411,7 +298,54 @@
 			"description": "Description of string or integer types with fixed values.",
 			"patternProperties": {
 				"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
-					"$ref": "#/$defs/Enum"
+					"type": "object",
+					"properties": {
+						"Type": {
+							"type": "string",
+							"description": "The type of the enum values",
+							"enum": [
+								"String",
+								"Int"
+							]
+						},
+						"Values": {
+							"type": "object",
+							"description": "The key value pair of the enum, with additional config if necessary",
+							"patternProperties": {
+								"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+									"type": "object",
+									"properties": {
+										"Name": {
+											"type": "string",
+											"description": "The name of the enum value. Usually used by the generators to create values in the database and code."
+										},
+										"Value": {
+											"type": "string",
+											"description": "The value of the enum. Usually used by the generators to create values in the database and code."
+										},
+										"Index": {
+											"type": "number",
+											"description": "The index of the enum value. Must be a positive integer. Required because many places need the enum values to keep some kind of order."
+										},
+										"Deprecated": {
+											"type": "boolean",
+											"description": "If the property is deprecated or not."
+										}
+									},
+									"required": [
+										"Value",
+										"Index"
+									],
+									"additionalProperties": false
+								}
+							}
+						}
+					},
+					"required": [
+						"Type",
+						"Values"
+					],
+					"additionalProperties": false
 				}
 			}
 		},
@@ -785,6 +719,23 @@
 						"type": "object",
 						"properties": {
 							"$ref": "#/$defs/Import"
+						}
+					}
+				},
+				"Servers": {
+					"type": "object",
+					"description": "The url to each of your servers, like Production and Staging",
+					"patternProperties": {
+						"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
+							"type": "object",
+							"properties": {
+								"Url": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"Url"
+							]
 						}
 					}
 				},

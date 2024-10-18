@@ -18,15 +18,7 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 		self.schema.Types.Types = map[string]*schemas.Type{}
 	}
 
-	// Types ref works a little different,
-	// because they also can be created Entities, Usecase, Repository, etc
-	// so we use their reference instead of the Type
-	var ref string
-	if i.ref != "" {
-		ref = i.ref + "." + i.k
-	} else {
-		ref = "Types." + i.k
-	}
+	ref := self.getDeepRef(i.curDomain, i.ref, i.k)
 	refHash := hashing.String(ref)
 
 	_, ok := self.schema.Types.Types[refHash]
@@ -50,6 +42,11 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 		if !ok {
 			return "", fmt.Errorf("fail to parse \"%s.%s.$ref\" to `string`", i.path, i.k)
 		}
+		refString = self.anvRefToAnvpRef(
+			i.curDomain,
+			refString,
+		)
+
 		return hashing.String(refString), nil
 	}
 
@@ -142,7 +139,7 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 	propertiesAny, ok := vMap["Properties"]
 	if ok {
 		if typeType != schemas.TypeType_Map {
-			return "", fmt.Errorf("Type \"%s.%s\" cannot have property \"Properties\". Only types with map \"Type\" can.", i.path, i.k)
+			return "", fmt.Errorf("type \"%s.%s\" cannot have property \"Properties\". Only types with map \"Type\" can", i.path, i.k)
 		}
 
 		propertiesMap, ok := propertiesAny.(map[string]any)
@@ -154,6 +151,7 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 
 		for kk, vv := range propertiesMap {
 			typeHash, err := self.resolveType(&resolveInput{
+				curDomain:  i.curDomain,
 				namePrefix: i.namePrefix + i.k,
 				path:       fmt.Sprintf("%s.%s.Properties", i.path, i.k),
 				ref:        ref,
@@ -179,13 +177,13 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 			return typeRefI.Name < typeRefJ.Name
 		})
 	} else if typeType == schemas.TypeType_Map {
-		return "", fmt.Errorf("Type \"%s.%s\" must have property \"Properties\". All types with map \"Type\" must.", i.path, i.k)
+		return "", fmt.Errorf("type \"%s.%s\" must have property \"Properties\". All types with map \"Type\" must", i.path, i.k)
 	}
 
 	itemsAny, ok := vMap["Items"]
 	if ok {
 		if typeType != schemas.TypeType_List {
-			return "", fmt.Errorf("Type \"%s.%s\" cannot have property \"Items\". Only types with list \"Type\" can.", i.path, i.k)
+			return "", fmt.Errorf("type \"%s.%s\" cannot have property \"Items\". Only types with list \"Type\" can", i.path, i.k)
 		}
 
 		itemsMap, ok := itemsAny.(map[string]any)
@@ -195,6 +193,7 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 
 		kk := i.k + "Item"
 		typeHash, err := self.resolveType(&resolveInput{
+			curDomain:  i.curDomain,
 			namePrefix: i.namePrefix,
 			path:       fmt.Sprintf("%s.%s.Items", i.path, i.k),
 			ref:        ref,
@@ -217,30 +216,29 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 			TypeHash: typeHash,
 		})
 	} else if typeType == schemas.TypeType_List {
-		return "", fmt.Errorf("Type \"%s.%s\" must have property \"Items\". All types with list \"Type\" must.", i.path, i.k)
+		return "", fmt.Errorf("type \"%s.%s\" must have property \"Items\". All types with list \"Type\" must", i.path, i.k)
 	}
 
 	var enumHash *string = nil
-	valuesAny, ok := vMap["Values"]
+	enumRefAny, ok := vMap["EnumRef"]
 	if ok {
 		if typeType != schemas.TypeType_Enum {
-			return "", fmt.Errorf("Type \"%s.%s\" cannot have property \"Values\". Only types with enum \"Type\" can.", i.path, i.k)
+			return "", fmt.Errorf("type \"%s.%s\" cannot have property \"EnumRef\". Only types with enum \"Type\" can", i.path, i.k)
 		}
-
-		valuesHash, err := self.resolveEnum(&resolveInput{
-			path: i.path + ".Values",
-			ref:  ref,
-			k:    i.k,
-			v:    valuesAny,
-		})
-		if err != nil {
-			return "", err
+		enumRefString, ok := enumRefAny.(string)
+		if !ok {
+			return "", fmt.Errorf("fail to parse \"%s.%s.EnumRef\" to `string`", i.path, i.k)
 		}
+		enumRefString = self.anvRefToAnvpRef(
+			i.curDomain,
+			enumRefString,
+		)
 
-		enumHash = &valuesHash
+		enumHashVar := hashing.String(enumRefString)
+		enumHash = &enumHashVar
 	}
 	if typeType == schemas.TypeType_Enum && enumHash == nil {
-		return "", fmt.Errorf("Type \"%s.%s\" must have property \"Values\". All types with enum \"Type\" must.", i.path, i.k)
+		return "", fmt.Errorf("type \"%s.%s\" must have property \"EnumRef\". All types with enum \"Type\" must", i.path, i.k)
 	}
 
 	var dbName *string = nil
@@ -265,9 +263,8 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 		}
 		dbType = &dbTypeString
 	} else if typeType == schemas.TypeType_Enum {
-		// TODO make it dynamic to match pattern specified in Entities.NamingCase (maybe create a Entities.ConstraintCase?)
 		if self.schema.Enums == nil || self.schema.Enums.Enums == nil {
-			return "", fmt.Errorf("something went wrong when parsing the enum of \"%s.%s\": no enums parsed.", i.path, i.k)
+			return "", fmt.Errorf("something went wrong when parsing the enum of \"%s.%s\": no enums parsed", i.path, i.k)
 		}
 		enum := self.schema.Enums.Enums[*enumHash]
 
@@ -312,13 +309,13 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 	return refHash, nil
 }
 
-func (self *anvToAnvpParser) types(file map[string]any) error {
+func (self *anvToAnvpParser) types(curDomain string, file map[string]any) error {
 	typesSchema, ok := file["Types"]
 	if !ok {
 		return nil
 	}
 
-	path := "Types"
+	path := curDomain + ".Types"
 
 	typesMap, ok := typesSchema.(map[string]any)
 	if !ok {
@@ -326,14 +323,21 @@ func (self *anvToAnvpParser) types(file map[string]any) error {
 	}
 
 	for k, v := range typesMap {
-		_, err := self.resolveType(&resolveInput{
-			path: "Types.Types",
-			ref:  "Types",
-			k:    k,
-			v:    v,
+		typeHash, err := self.resolveType(&resolveInput{
+			curDomain: curDomain,
+			path:      path + ".Types",
+			ref:       "Types",
+			k:         k,
+			v:         v,
 		})
 		if err != nil {
 			return err
+		}
+
+		t := self.schema.Types.Types[typeHash]
+
+		if t.Type != schemas.TypeType_Map {
+			return fmt.Errorf("fail to parse \"%s.Types.%s\": root types must be Maps", path, k)
 		}
 	}
 

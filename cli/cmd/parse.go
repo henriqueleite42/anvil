@@ -14,7 +14,7 @@ func addParseCommand(rootCmd *cobra.Command) {
 		Use:   "parse",
 		Short: "Parse the file to create the formatted version",
 		Run: func(cmd *cobra.Command, args []string) {
-			schema, err := parser.ParseAnvToAnvp(schemaFile)
+			schema, err := parser.ParseAnvToAnvp(schemaFiles)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -23,14 +23,14 @@ func addParseCommand(rootCmd *cobra.Command) {
 				return
 			}
 
-			_, err = files.WriteAnvpFile(schema, schemaFile)
+			_, err = files.WriteAnvpFile(schema, schemaFiles)
 			if err != nil {
 				log.Fatal(err)
 			}
 		},
 	}
 
-	parseCmd.PersistentFlags().StringVar(&schemaFile, "schema", "", "config file")
+	parseCmd.PersistentFlags().StringSliceVar(&schemaFiles, "schema", []string{}, "config files")
 	parseCmd.MarkPersistentFlagRequired("schema")
 	viper.BindPFlag("schema", parseCmd.PersistentFlags().Lookup("schema"))
 

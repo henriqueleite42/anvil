@@ -8,13 +8,21 @@ import (
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
-func (self *anvToAnvpParser) repository(file map[string]any) error {
-	path := "Repository"
-
+func (self *anvToAnvpParser) repository(curDomain string, file map[string]any) error {
 	repositoryAny, ok := file["Repository"]
 	if !ok {
 		return nil
 	}
+
+	if self.schema.Repositories == nil {
+		self.schema.Repositories = &schemas.Repositories{}
+	}
+	if self.schema.Repositories.Repositories == nil {
+		self.schema.Repositories.Repositories = map[string]*schemas.Repository{}
+	}
+
+	path := curDomain + ".Repository"
+
 	repositoryMap, ok := repositoryAny.(map[string]any)
 	if !ok {
 		return fmt.Errorf("fail to parse \"%s\" to `map[string]any`", path)
@@ -72,10 +80,11 @@ func (self *anvToAnvpParser) repository(file map[string]any) error {
 
 			var typeHash string
 			typeHash, err := self.resolveType(&resolveInput{
-				path: fmt.Sprintf("%s.Methods.%s", path, k),
-				ref:  self.getRef("", fmt.Sprintf("%s.%s", path, k)),
-				k:    k + "Input",
-				v:    inputMap,
+				curDomain: curDomain,
+				path:      fmt.Sprintf("%s.Methods.%s", path, k),
+				ref:       self.getRef(curDomain, "Repository."+k),
+				k:         k + "Input",
+				v:         inputMap,
 			})
 			if err != nil {
 				return err
@@ -96,10 +105,11 @@ func (self *anvToAnvpParser) repository(file map[string]any) error {
 
 			var typeHash string
 			typeHash, err := self.resolveType(&resolveInput{
-				path: fmt.Sprintf("%s.Methods.%s", path, k),
-				ref:  self.getRef("", fmt.Sprintf("%s.Methods.%s.%s", path, k, "Output")),
-				k:    k + "Output",
-				v:    outputMap,
+				curDomain: curDomain,
+				path:      fmt.Sprintf("%s.Methods.%s", path, k),
+				ref:       self.getRef(curDomain, fmt.Sprintf("Repository.Methods.%s.Output", k)),
+				k:         k + "Output",
+				v:         outputMap,
 			})
 			if err != nil {
 				return err
@@ -116,7 +126,7 @@ func (self *anvToAnvpParser) repository(file map[string]any) error {
 		method := &schemas.RepositoryMethod{
 			Ref:          self.getRef("", fmt.Sprintf("%s.%s", path, k)),
 			OriginalPath: fullPath,
-			Order:        order,
+			Order:        uint(order),
 			Name:         k,
 			Description:  description,
 			Input:        input,
@@ -149,7 +159,7 @@ func (self *anvToAnvpParser) repository(file map[string]any) error {
 	}
 	repository.StateHash = repositoryStateHash
 
-	self.schema.Repository = repository
+	self.schema.Repositories.Repositories[curDomain] = repository
 
 	return nil
 }

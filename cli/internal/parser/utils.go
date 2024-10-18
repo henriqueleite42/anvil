@@ -23,22 +23,6 @@ type SortedByOrder struct {
 //
 // Doing it at the end ensures that we do it only once
 func (self *anvToAnvpParser) stateHashes() error {
-	if self.schema.Relationships != nil {
-		stateHash, err := hashing.Struct(self.schema.Relationships)
-		if err != nil {
-			return errors.New("fail to get \"Relationships\" state hash")
-		}
-		self.schema.Relationships.StateHash = stateHash
-	}
-
-	if self.schema.Imports != nil {
-		stateHash, err := hashing.Struct(self.schema.Imports)
-		if err != nil {
-			return errors.New("fail to get \"Imports\" state hash")
-		}
-		self.schema.Imports.StateHash = stateHash
-	}
-
 	if self.schema.Auths != nil {
 		stateHash, err := hashing.Struct(self.schema.Auths)
 		if err != nil {
@@ -79,28 +63,28 @@ func (self *anvToAnvpParser) stateHashes() error {
 		self.schema.Entities.StateHash = stateHash
 	}
 
-	if self.schema.Repository != nil {
-		stateHash, err := hashing.Struct(self.schema.Repository)
+	if self.schema.Repositories != nil {
+		stateHash, err := hashing.Struct(self.schema.Repositories)
 		if err != nil {
-			return errors.New("fail to get \"Repository\" state hash")
+			return errors.New("fail to get \"Repositories\" state hash")
 		}
-		self.schema.Repository.StateHash = stateHash
+		self.schema.Repositories.StateHash = stateHash
 	}
 
-	if self.schema.Usecase != nil {
-		stateHash, err := hashing.Struct(self.schema.Usecase)
+	if self.schema.Usecases != nil {
+		stateHash, err := hashing.Struct(self.schema.Repositories)
 		if err != nil {
-			return errors.New("fail to get \"Usecase\" state hash")
+			return errors.New("fail to get \"Repositories\" state hash")
 		}
-		self.schema.Usecase.StateHash = stateHash
+		self.schema.Repositories.StateHash = stateHash
 	}
 
-	if self.schema.Delivery != nil {
-		stateHash, err := hashing.Struct(self.schema.Delivery)
+	if self.schema.Deliveries != nil {
+		stateHash, err := hashing.Struct(self.schema.Deliveries)
 		if err != nil {
-			return errors.New("fail to get \"Delivery\" state hash")
+			return errors.New("fail to get \"Deliveries\" state hash")
 		}
-		self.schema.Delivery.StateHash = stateHash
+		self.schema.Deliveries.StateHash = stateHash
 	}
 
 	return nil
@@ -113,20 +97,45 @@ type GetRefInput struct {
 	NestedRef      string // Optional, not using pointer to facilitate use
 }
 
-func (self *anvToAnvpParser) getRef(parentRef string, ref string) string {
+func (self *anvToAnvpParser) getRef(curDomain string, ref string) string {
+	return self.getDeepRef(curDomain, "", ref)
+}
+
+func (self *anvToAnvpParser) getDeepRef(curDomain string, parentRef string, ref string) string {
+	domainPref := curDomain + "."
+
+	refWithoutDomain := strings.TrimPrefix(ref, domainPref)
+
 	if parentRef == "" {
-		return ref
+		return domainPref + refWithoutDomain
 	}
 
-	return parentRef + "." + ref
+	parentRefWithoutDomain := strings.TrimPrefix(parentRef, domainPref)
+
+	return domainPref + parentRefWithoutDomain + "." + ref
+}
+
+func (self *anvToAnvpParser) anvRefToAnvpRef(
+	curDomain string,
+	ref string,
+) string {
+	if strings.HasPrefix(ref, "Entities") ||
+		strings.HasPrefix(ref, "Types") ||
+		strings.HasPrefix(ref, "Enums") ||
+		strings.HasPrefix(ref, "Auths") ||
+		strings.HasPrefix(ref, "Events") {
+		return curDomain + "." + ref
+	}
+
+	return ref
 }
 
 func getRootNode(path string) (string, error) {
 	nodes := strings.Split(path, ".")
-	if len(nodes) == 0 {
+	if len(nodes) < 2 {
 		return "", fmt.Errorf("fail to get root node from \"%s\"", path)
 	}
-	return nodes[0], nil
+	return nodes[1], nil
 }
 
 func (self *anvToAnvpParser) formatToEntitiesNamingCase(str string) string {

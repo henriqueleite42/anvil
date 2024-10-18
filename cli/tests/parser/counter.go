@@ -9,7 +9,11 @@ import (
 )
 
 func Counter(logJson bool) {
-	schema, err := parser.ParseAnvToAnvp("../examples/beginner/counter.anv")
+	schema, err := parser.ParseAnvToAnvp(
+		[]string{
+			"../examples/beginner/counter.anv",
+		},
+	)
 	if err != nil {
 		log.Fatal(err)
 	}

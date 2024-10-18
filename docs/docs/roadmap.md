@@ -108,12 +108,6 @@ Allow the schema to get properties from the authentication, like the UserId.
 - You can see which project depends on each other
 - If we already have CHANGELOGs implemented, see which version of the project it's using
 
-### Three Shaking
-
-Remove unused things from relationships.
-
-Currently, If something has a relationship, we import THE WHOLE FILE and not only the used things. We must find a way to three shake it and generate a smaller file.
-
 ### CLI Warnings
 
 - Add warning like "Type Foo is unused, maybe you should remove it."

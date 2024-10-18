@@ -2,16 +2,12 @@ package parser
 
 import (
 	"fmt"
-	"regexp"
 	"sort"
 	"strings"
 
 	"github.com/henriqueleite42/anvil/language-helpers/golang/hashing"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
-
-var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
-var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
 
 func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 	if self.schema.Entities == nil {
@@ -21,10 +17,7 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 		self.schema.Entities.Entities = map[string]*schemas.Entity{}
 	}
 
-	ref := "Entities." + i.k
-	if i.ref != "" {
-		ref = i.ref + "." + ref
-	}
+	ref := self.getDeepRef(i.curDomain, i.ref, "Entities."+i.k)
 	refHash := hashing.String(ref)
 
 	path := fmt.Sprintf("%s.%s", i.path, i.k)
@@ -45,17 +38,22 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 		if !ok {
 			return "", fmt.Errorf("fail to parse \"%s.%s.$ref\" to `string`", i.path, i.k)
 		}
+		refString = self.anvRefToAnvpRef(
+			i.curDomain,
+			refString,
+		)
+
 		return hashing.String(refString), nil
 	}
 
-	var tableSchema *string = nil
-	tableSchemaAny, ok := vMap["Schema"]
+	var dbSchema *string = nil
+	dbSchemaAny, ok := vMap["Schema"]
 	if ok {
-		tableSchemaString, ok := tableSchemaAny.(string)
+		dbSchemaString, ok := dbSchemaAny.(string)
 		if !ok {
 			return "", fmt.Errorf("fail to parse \"%s.%s.Schema\" to `string`", i.path, i.k)
 		}
-		tableSchema = &tableSchemaString
+		dbSchema = &dbSchemaString
 	}
 
 	var tableName string
@@ -112,14 +110,14 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 		vv := columnsMap[kk]
 
 		columnPath := fmt.Sprintf("%s.%s.Columns.%s", i.path, i.k, kk)
-		columnRef := ref + "." + kk
+		columnRef := fmt.Sprintf("%s.%s", ref, kk)
 
-		var typeHash string
 		typeHash, err := self.resolveType(&resolveInput{
-			path: fmt.Sprintf("%s.%s.Columns", i.path, i.k),
-			ref:  ref,
-			k:    kk,
-			v:    vv,
+			curDomain: i.curDomain,
+			path:      fmt.Sprintf("%s.%s.Columns", i.path, i.k),
+			ref:       ref,
+			k:         kk,
+			v:         vv,
 		})
 		if err != nil {
 			return "", err
@@ -129,7 +127,7 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 		column := &schemas.EntityColumn{
 			Ref:          columnRef,
 			OriginalPath: columnPath,
-			Order:        columnOrder,
+			Order:        uint(columnOrder),
 			Name:         kk,
 			TypeHash:     typeHash,
 		}
@@ -215,10 +213,7 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 				if !ok {
 					return "", fmt.Errorf("fail to parse \"%s.%s.Indexes.%d.Columns.%d\" to `string`", i.path, i.k, kk, kkk)
 				}
-				columnRef := fmt.Sprintf("Entities.%s.%s", i.k, vvvString)
-				if i.ref != "" {
-					columnRef = i.ref + "." + columnRef
-				}
+				columnRef := fmt.Sprintf("%s.%s", ref, vvvString)
 				hash := hashing.String(columnRef)
 				columnsHashes = append(columnsHashes, hash)
 			}
@@ -236,14 +231,14 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 				for _, vvv := range columnsHashes {
 					column, ok := columns[vvv]
 					if !ok {
-						return "", fmt.Errorf("fail to find one of the columns to created database name for \"%s.%s.Indexes.%d\"", i.path, i.k, kk)
+						return "", fmt.Errorf("fail to find one of the columns to create database name for \"%s.%s.Indexes.%d\"", i.path, i.k, kk)
 					}
 					cType, ok := self.schema.Types.Types[column.TypeHash]
 					if !ok {
-						return "", fmt.Errorf("fail to find one of the columns types to created database name for \"%s.%s.Indexes.%d\"", i.path, i.k, kk)
+						return "", fmt.Errorf("fail to find columns type to create database name for \"%s.%s.Indexes.%d.%s\"", i.path, i.k, kk, column.Name)
 					}
 					if cType.DbName == nil {
-						return "", fmt.Errorf("fail to find get DbName to created database name for \"%s.%s.Indexes.%d\"", i.path, i.k, kk)
+						return "", fmt.Errorf("fail to find get DbName to create database name for \"%s.%s.Indexes.%d\"", i.path, i.k, kk)
 					}
 					columnsToCreateName = append(columnsToCreateName, *cType.DbName)
 				}
@@ -311,7 +306,7 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 				if !ok {
 					return "", fmt.Errorf("fail to parse \"%s.%s.ForeignKeys.%d.Columns.%d\" to `string`", i.path, i.k, kk, kkk)
 				}
-				columnRef := fmt.Sprintf("Entities.%s.%s", i.k, vvvString)
+				columnRef := fmt.Sprintf("%s.%s", ref, vvvString)
 				hash := hashing.String(columnRef)
 
 				column, ok := columns[hash]
@@ -354,7 +349,7 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 
 				parts := strings.Split(vvvString, ".")
 				if len(parts) != 2 {
-					return "", fmt.Errorf("You can only reference columns using the pattern \"TableName.ColumnName\" on \"%s.%s.ForeignKeys.%d.RefColumns.%d\" to `string`", i.path, i.k, kk, kkk)
+					return "", fmt.Errorf("you can only reference columns using the pattern \"TableName.ColumnName\" on \"%s.%s.ForeignKeys.%d.RefColumns.%d\" to `string`", i.path, i.k, kk, kkk)
 				}
 
 				refTableName := parts[0]
@@ -365,7 +360,7 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 				}
 
 				if firstTableRefName != refTableName {
-					return "", fmt.Errorf("You can only reference one ref table per foreign key. Error found on \"%s.%s.ForeignKeys.%d.RefColumns.%d\" to `string`", i.path, i.k, kk, kkk)
+					return "", fmt.Errorf("you can only reference one ref table per foreign key. Error found on \"%s.%s.ForeignKeys.%d.RefColumns.%d\" to `string`", i.path, i.k, kk, kkk)
 				}
 
 				if refTableHash == "" {
@@ -441,8 +436,8 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 		Name:         i.k,
 		RootNode:     rootNode,
 		TypeHash:     refHash,
-		Order:        order,
-		Schema:       tableSchema,
+		Order:        uint(order),
+		DbSchema:     dbSchema,
 		DbName:       tableName,
 		Columns:      columns,
 		PrimaryKey:   primaryKey,
@@ -461,13 +456,13 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 	return refHash, nil
 }
 
-func (self *anvToAnvpParser) resolveEntitiesMetadata(file map[string]any) error {
+func (self *anvToAnvpParser) resolveEntitiesMetadata(curDomain string, file map[string]any) error {
 	entitiesSchema, ok := file["Entities"]
 	if !ok {
 		return nil
 	}
 
-	path := "Entities"
+	path := curDomain + ".Entities"
 
 	entitiesMap, ok := entitiesSchema.(map[string]any)
 	if !ok {
@@ -502,13 +497,13 @@ func (self *anvToAnvpParser) resolveEntitiesMetadata(file map[string]any) error 
 	return nil
 }
 
-func (self *anvToAnvpParser) entities(file map[string]any) error {
+func (self *anvToAnvpParser) entities(curDomain string, file map[string]any) error {
 	entitiesSchema, ok := file["Entities"]
 	if !ok {
 		return nil
 	}
 
-	path := "Entities"
+	path := curDomain + ".Entities"
 
 	entitiesMap, ok := entitiesSchema.(map[string]any)
 	if !ok {
@@ -543,10 +538,11 @@ func (self *anvToAnvpParser) entities(file map[string]any) error {
 	for _, k := range keys {
 		v := entitiesMap[k]
 		_, err := self.resolveEntity(&resolveInput{
-			path: path + ".Entities",
-			ref:  "",
-			k:    k,
-			v:    v,
+			curDomain: curDomain,
+			path:      path + ".Entities",
+			ref:       "",
+			k:         k,
+			v:         v,
 		})
 		if err != nil {
 			return err
