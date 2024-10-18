@@ -21,6 +21,7 @@ type GoToProtoInput struct {
 	PrefixForVariableNaming  string
 	HasOutput                bool
 	CurPkg                   string
+	CurDomain                string
 
 	indentationLvl int // Internal use, used for child types
 }
@@ -33,12 +34,13 @@ type ProtoToGoInput struct {
 	PrefixForVariableNaming  string
 	HasOutput                bool
 	CurPkg                   string
+	CurDomain                string
 
 	indentationLvl int // Internal use, used for child types
 }
 
 type GrpcParser interface {
-	GetProtoTypeName(t *schemas.Type) (string, error)
+	GetProtoTypeName(curDomain string, t *schemas.Type) (string, error)
 	GoToProto(i *GoToProtoInput) (*Type, error)
 	ProtoToGo(i *ProtoToGoInput) (*Type, error)
 }

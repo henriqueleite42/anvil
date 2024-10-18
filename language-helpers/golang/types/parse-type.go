@@ -109,7 +109,7 @@ func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
 			return existentType, nil
 		}
 
-		props := make([]*MapProp, len(t.ChildTypes), len(t.ChildTypes))
+		props := make([]*MapProp, len(t.ChildTypes))
 
 		for k, v := range t.ChildTypes {
 			if v.PropName == nil {
