@@ -8,12 +8,12 @@ type HclTemplInputEntityColumn struct {
 	Default       *string
 	Optional      bool
 	AutoIncrement bool
-	Order         int
+	Order         uint
 }
 
 type HclTemplInputEntityPrimaryColumn struct {
 	DbName string
-	Order  int
+	Order  uint
 }
 
 type HclTemplInputEntityForeignKey struct {

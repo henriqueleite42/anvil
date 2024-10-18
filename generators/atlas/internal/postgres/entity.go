@@ -8,7 +8,7 @@ import (
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
-func resolveEntities(schema *schemas.Schema) ([]*templates.HclTemplInputEntity, error) {
+func resolveEntities(schema *schemas.AnvpSchema) ([]*templates.HclTemplInputEntity, error) {
 	result := make([]*templates.HclTemplInputEntity, 0, len(schema.Entities.Entities))
 
 	for _, v := range schema.Entities.Entities {

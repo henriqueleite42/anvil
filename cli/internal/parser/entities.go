@@ -165,11 +165,11 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 	}
 	pkColumnsHashes := []string{}
 	for cni, columnNameAny := range primaryKeyArr {
-		columnNameString, ok := columnNameAny.(string)
+		columnName, ok := columnNameAny.(string)
 		if !ok {
 			return "", fmt.Errorf("fail to parse \"%s.%s.PrimaryKey.%d\" to `[]any`", i.path, i.k, cni)
 		}
-		columnRef := fmt.Sprintf("Entities.%s.%s", i.k, columnNameString)
+		columnRef := fmt.Sprintf("%s.Entities.%s.%s", i.curDomain, i.k, columnName)
 		hash := hashing.String(columnRef)
 		pkColumnsHashes = append(pkColumnsHashes, hash)
 	}
@@ -209,11 +209,11 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 				return "", fmt.Errorf("fail to parse \"%s.%s.Indexes.%d.Columns\" to `[]any`", i.path, i.k, kk)
 			}
 			for kkk, vvv := range columnsArr {
-				vvvString, ok := vvv.(string)
+				columnName, ok := vvv.(string)
 				if !ok {
 					return "", fmt.Errorf("fail to parse \"%s.%s.Indexes.%d.Columns.%d\" to `string`", i.path, i.k, kk, kkk)
 				}
-				columnRef := fmt.Sprintf("%s.%s", ref, vvvString)
+				columnRef := fmt.Sprintf("%s.%s", ref, columnName)
 				hash := hashing.String(columnRef)
 				columnsHashes = append(columnsHashes, hash)
 			}
