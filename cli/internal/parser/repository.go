@@ -80,11 +80,12 @@ func (self *anvToAnvpParser) repository(curDomain string, file map[string]any) e
 
 			var typeHash string
 			typeHash, err := self.resolveType(&resolveInput{
-				curDomain: curDomain,
-				path:      fmt.Sprintf("%s.Methods.%s", path, k),
-				ref:       self.getRef(curDomain, "Repository."+k),
-				k:         k + "Input",
-				v:         inputMap,
+				namePrefix: k,
+				curDomain:  curDomain,
+				path:       fmt.Sprintf("%s.Methods.%s", path, k),
+				ref:        self.getRef(curDomain, "Repository."+k),
+				k:          "Input",
+				v:          inputMap,
 			})
 			if err != nil {
 				return err
@@ -105,11 +106,12 @@ func (self *anvToAnvpParser) repository(curDomain string, file map[string]any) e
 
 			var typeHash string
 			typeHash, err := self.resolveType(&resolveInput{
-				curDomain: curDomain,
-				path:      fmt.Sprintf("%s.Methods.%s", path, k),
-				ref:       self.getRef(curDomain, fmt.Sprintf("Repository.Methods.%s.Output", k)),
-				k:         k + "Output",
-				v:         outputMap,
+				namePrefix: k,
+				curDomain:  curDomain,
+				path:       fmt.Sprintf("%s.Methods.%s", path, k),
+				ref:        self.getRef(curDomain, "Repository."+k),
+				k:          "Output",
+				v:          outputMap,
 			})
 			if err != nil {
 				return err
@@ -120,11 +122,11 @@ func (self *anvToAnvpParser) repository(curDomain string, file map[string]any) e
 			}
 		}
 
-		fullPath := fmt.Sprintf("%s.Methods.Methods.%s", path, k)
+		fullPath := fmt.Sprintf("%s.Methods.%s", path, k)
 
 		order := len(methods.Methods)
 		method := &schemas.RepositoryMethod{
-			Ref:          self.getRef("", fmt.Sprintf("%s.%s", path, k)),
+			Ref:          self.getRef(curDomain, "Repository."+k),
 			OriginalPath: fullPath,
 			Order:        uint(order),
 			Name:         k,

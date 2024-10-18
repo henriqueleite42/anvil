@@ -128,7 +128,7 @@ func (self *anvToAnvpParser) delivery(curDomain string, file map[string]any) err
 			}
 
 			originalPath := fmt.Sprintf("%s.Grpc.Rpcs.%d", path, k)
-			ref := self.getRef(curDomain, "Delivery.Grpc.%s"+name)
+			ref := self.getRef(curDomain, "Delivery.Grpc."+name)
 
 			rpc := &schemas.DeliveryGrpcRpc{
 				Ref:               ref,

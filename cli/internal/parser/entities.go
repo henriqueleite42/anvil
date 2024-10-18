@@ -260,6 +260,7 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 
 			index := &schemas.EntityIndex{
 				OriginalPath:   indexPath,
+				Order:          uint(kk),
 				ConstraintName: name,
 				ColumnsHashes:  columnsHashes,
 				Unique:         unique,
@@ -412,6 +413,7 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 			fk := &schemas.EntityForeignKey{
 				OriginalPath:     fkPath,
 				ConstraintName:   name,
+				Order:            uint(kk),
 				ColumnsHashes:    columnsHashes,
 				RefTableHash:     refTableHash,
 				RefColumnsHashes: refColumnsHashes,

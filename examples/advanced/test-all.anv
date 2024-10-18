@@ -1,15 +1,8 @@
 # yaml-language-server: $schema=../../schemas/v1.0.0.json
 
 Domain: TestAll
-
-Metadata:
-  Description: |
-    Tests the most amount of features as possible
-  Servers:
-    Prod:
-      Url: https://example.com
-    Stg:
-      Url: https://staging.example.com
+Description: |
+  Tests the most amount of features as possible
 
 Enums:
   FooBar:
@@ -40,7 +33,7 @@ Usecase:
             Type: Timestamp
           Enum:
             Type: Enum
-            EnumHash: Enums.FooBar
+            EnumRef: Enums.FooBar
           MapDeep1:
             Type: Map
             Properties:
@@ -56,7 +49,7 @@ Usecase:
                 Type: Timestamp
               Enum:
                 Type: Enum
-                EnumHash: Enums.FooBar
+                EnumRef: Enums.FooBar
           MapDeep2:
             Type: Map
             Properties:
@@ -72,7 +65,7 @@ Usecase:
                 Type: Timestamp
               Enum:
                 Type: Enum
-                EnumHash: Enums.FooBar
+                EnumRef: Enums.FooBar
               Deep2:
                 Type: Map
                 Properties:
@@ -88,7 +81,7 @@ Usecase:
                     Type: Timestamp
                   Enum:
                     Type: Enum
-                    EnumHash: Enums.FooBar
+                    EnumRef: Enums.FooBar
           MapDeep3:
             Type: Map
             Properties:
@@ -104,7 +97,7 @@ Usecase:
                 Type: Timestamp
               Enum:
                 Type: Enum
-                EnumHash: Enums.FooBar
+                EnumRef: Enums.FooBar
               Deep2:
                 Type: Map
                 Properties:
@@ -120,7 +113,7 @@ Usecase:
                     Type: Timestamp
                   Enum:
                     Type: Enum
-                    EnumHash: Enums.FooBar
+                    EnumRef: Enums.FooBar
                   Deep3:
                     Type: Map
                     Properties:
@@ -136,7 +129,7 @@ Usecase:
                         Type: Timestamp
                       Enum:
                         Type: Enum
-                        EnumHash: Enums.FooBar
+                        EnumRef: Enums.FooBar
           MapDeep4:
             Type: Map
             Properties:
@@ -152,7 +145,7 @@ Usecase:
                 Type: Timestamp
               Enum:
                 Type: Enum
-                EnumHash: Enums.FooBar
+                EnumRef: Enums.FooBar
               Deep2:
                 Type: Map
                 Properties:
@@ -168,7 +161,7 @@ Usecase:
                     Type: Timestamp
                   Enum:
                     Type: Enum
-                    EnumHash: Enums.FooBar
+                    EnumRef: Enums.FooBar
                   Deep3:
                     Type: Map
                     Properties:
@@ -184,7 +177,7 @@ Usecase:
                         Type: Timestamp
                       Enum:
                         Type: Enum
-                        EnumHash: Enums.FooBar
+                        EnumRef: Enums.FooBar
                       Deep4:
                         Type: Map
                         Properties:
@@ -200,7 +193,7 @@ Usecase:
                             Type: Timestamp
                           Enum:
                             Type: Enum
-                            EnumHash: Enums.FooBar
+                            EnumRef: Enums.FooBar
           MapList:
             Type: Map
             Properties:
@@ -220,7 +213,7 @@ Usecase:
             Type: List
             Items:
               Type: Enum
-              EnumHash: Enums.FooBar
+              EnumRef: Enums.FooBar
           # ListOfList:
           #   Type: List
           #   Items:
@@ -244,7 +237,7 @@ Usecase:
                   Type: Timestamp
                 Enum:
                   Type: Enum
-                  EnumHash: Enums.FooBar
+                  EnumRef: Enums.FooBar
           ListOfMapDeep2:
             Type: List
             Items:
@@ -262,7 +255,7 @@ Usecase:
                   Type: Timestamp
                 Enum:
                   Type: Enum
-                  EnumHash: Enums.FooBar
+                  EnumRef: Enums.FooBar
                 Deep2:
                   Type: Map
                   Properties:
@@ -278,7 +271,7 @@ Usecase:
                       Type: Timestamp
                     Enum:
                       Type: Enum
-                      EnumHash: Enums.FooBar
+                      EnumRef: Enums.FooBar
           StringsOptional:
             Type: String
             Optional: true
@@ -296,7 +289,7 @@ Usecase:
             Optional: true
           EnumOptional:
             Type: Enum
-            EnumHash: Enums.FooBar
+            EnumRef: Enums.FooBar
             Optional: true
           MapOptional:
             Type: Map
@@ -354,7 +347,7 @@ Usecase:
             Type: Timestamp
           Enum:
             Type: Enum
-            EnumHash: Enums.FooBar
+            EnumRef: Enums.FooBar
           MapDeep1:
             Type: Map
             Properties:
@@ -370,7 +363,7 @@ Usecase:
                 Type: Timestamp
               Enum:
                 Type: Enum
-                EnumHash: Enums.FooBar
+                EnumRef: Enums.FooBar
           MapDeep2:
             Type: Map
             Properties:
@@ -386,7 +379,7 @@ Usecase:
                 Type: Timestamp
               Enum:
                 Type: Enum
-                EnumHash: Enums.FooBar
+                EnumRef: Enums.FooBar
               Deep2:
                 Type: Map
                 Properties:
@@ -402,7 +395,7 @@ Usecase:
                     Type: Timestamp
                   Enum:
                     Type: Enum
-                    EnumHash: Enums.FooBar
+                    EnumRef: Enums.FooBar
           MapDeep3:
             Type: Map
             Properties:
@@ -418,7 +411,7 @@ Usecase:
                 Type: Timestamp
               Enum:
                 Type: Enum
-                EnumHash: Enums.FooBar
+                EnumRef: Enums.FooBar
               Deep2:
                 Type: Map
                 Properties:
@@ -434,7 +427,7 @@ Usecase:
                     Type: Timestamp
                   Enum:
                     Type: Enum
-                    EnumHash: Enums.FooBar
+                    EnumRef: Enums.FooBar
                   Deep3:
                     Type: Map
                     Properties:
@@ -450,7 +443,7 @@ Usecase:
                         Type: Timestamp
                       Enum:
                         Type: Enum
-                        EnumHash: Enums.FooBar
+                        EnumRef: Enums.FooBar
           MapDeep4:
             Type: Map
             Properties:
@@ -466,7 +459,7 @@ Usecase:
                 Type: Timestamp
               Enum:
                 Type: Enum
-                EnumHash: Enums.FooBar
+                EnumRef: Enums.FooBar
               Deep2:
                 Type: Map
                 Properties:
@@ -482,7 +475,7 @@ Usecase:
                     Type: Timestamp
                   Enum:
                     Type: Enum
-                    EnumHash: Enums.FooBar
+                    EnumRef: Enums.FooBar
                   Deep3:
                     Type: Map
                     Properties:
@@ -498,7 +491,7 @@ Usecase:
                         Type: Timestamp
                       Enum:
                         Type: Enum
-                        EnumHash: Enums.FooBar
+                        EnumRef: Enums.FooBar
                       Deep4:
                         Type: Map
                         Properties:
@@ -514,7 +507,7 @@ Usecase:
                             Type: Timestamp
                           Enum:
                             Type: Enum
-                            EnumHash: Enums.FooBar
+                            EnumRef: Enums.FooBar
           MapList:
             Type: Map
             Properties:
@@ -534,7 +527,7 @@ Usecase:
             Type: List
             Items:
               Type: Enum
-              EnumHash: Enums.FooBar
+              EnumRef: Enums.FooBar
           # ListOfList:
           #   Type: List
           #   Items:
@@ -558,7 +551,7 @@ Usecase:
                   Type: Timestamp
                 Enum:
                   Type: Enum
-                  EnumHash: Enums.FooBar
+                  EnumRef: Enums.FooBar
           ListOfMapDeep2:
             Type: List
             Items:
@@ -576,7 +569,7 @@ Usecase:
                   Type: Timestamp
                 Enum:
                   Type: Enum
-                  EnumHash: Enums.FooBar
+                  EnumRef: Enums.FooBar
                 Deep2:
                   Type: Map
                   Properties:
@@ -592,7 +585,7 @@ Usecase:
                       Type: Timestamp
                     Enum:
                       Type: Enum
-                      EnumHash: Enums.FooBar
+                      EnumRef: Enums.FooBar
           StringsOptional:
             Type: String
             Optional: true
@@ -610,7 +603,7 @@ Usecase:
             Optional: true
           EnumOptional:
             Type: Enum
-            EnumHash: Enums.FooBar
+            EnumRef: Enums.FooBar
             Optional: true
           # MapOptional:
           #   Type: Map
@@ -656,6 +649,11 @@ Usecase:
     FooBar: {}
 
 Delivery:
+  Servers:
+    Prod:
+      Url: https://example.com
+    Stg:
+      Url: https://staging.example.com
   Grpc:
     Rpcs:
       - UsecaseMethod: TestAllTypes

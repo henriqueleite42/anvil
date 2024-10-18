@@ -20,6 +20,10 @@ func (self *anvToAnvpParser) domain(fileUri string, file map[string]any) (string
 		return "", fmt.Errorf("%s: fail to parse \"Domain\" to `string`", fileUri)
 	}
 
+	if _, ok := self.schema.Schemas[domainString]; ok {
+		return "", fmt.Errorf("duplicated domain \"%s\"", domainString)
+	}
+
 	var description *string = nil
 	descriptionAny, ok := file["Description"]
 	if ok {

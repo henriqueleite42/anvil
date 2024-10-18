@@ -35,7 +35,6 @@ func addBuildCommand(rootCmd *cobra.Command) {
 			if err != nil {
 				log.Fatal(err)
 			}
-			return
 
 			argsToGenerator = append(argsToGenerator,
 				"--schema",

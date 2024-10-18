@@ -80,11 +80,12 @@ func (self *anvToAnvpParser) usecase(curDomain string, file map[string]any) erro
 
 			var typeHash string
 			typeHash, err := self.resolveType(&resolveInput{
-				curDomain: curDomain,
-				path:      fmt.Sprintf("%s.Methods.%s", path, k),
-				ref:       self.getRef(curDomain, "Usecase."+k),
-				k:         k + "Input",
-				v:         inputMap,
+				namePrefix: k,
+				curDomain:  curDomain,
+				path:       fmt.Sprintf("%s.Methods.%s", path, k),
+				ref:        self.getRef(curDomain, "Usecase."+k),
+				k:          "Input",
+				v:          inputMap,
 			})
 			if err != nil {
 				return err
@@ -105,11 +106,12 @@ func (self *anvToAnvpParser) usecase(curDomain string, file map[string]any) erro
 
 			var typeHash string
 			typeHash, err := self.resolveType(&resolveInput{
-				curDomain: curDomain,
-				path:      fmt.Sprintf("%s.Methods.%s", path, k),
-				ref:       self.getRef(curDomain, "Usecase."+k),
-				k:         k + "Output",
-				v:         outputMap,
+				namePrefix: k,
+				curDomain:  curDomain,
+				path:       fmt.Sprintf("%s.Methods.%s", path, k),
+				ref:        self.getRef(curDomain, "Usecase."+k),
+				k:          "Output",
+				v:          outputMap,
 			})
 			if err != nil {
 				return err
@@ -123,7 +125,7 @@ func (self *anvToAnvpParser) usecase(curDomain string, file map[string]any) erro
 		// TODO implement EventHashes
 
 		ref := self.getRef(curDomain, "Usecase."+k)
-		fullPath := fmt.Sprintf("%s.Methods.Methods.%s", path, k)
+		fullPath := fmt.Sprintf("%s.Methods.%s", path, k)
 
 		order := len(methods.Methods)
 		method := &schemas.UsecaseMethod{

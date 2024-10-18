@@ -3,7 +3,7 @@
 Domain: Authentication
 
 Description: |
-  Handles with user creation and authentication
+  Handles user creation and authentication
 
 Auth: # Authentication & Authorization
   Jwt:
@@ -24,6 +24,10 @@ Enums:
         Index: 1
 
 Types:
+  Password:
+    # The original password, without encryption
+    Type: String
+    Confidentiality: HIGH
   AuthOutput:
     Type: Map
     Properties:
@@ -107,9 +111,7 @@ Repository:
         Email:
           $ref: Entities.User.Email
         Password:
-          # Here we receive the original password, because it's responsibility of the repository to encrypt it.
-          Type: String
-          Confidentiality: HIGH
+          $ref: Types.Password
       Output:
         $ref: Entities.User
     GetByEmail:
@@ -141,8 +143,7 @@ Usecase:
             $ref: Entities.User.Email
           Password:
             # Here we receive the original password, because it's responsibility of the repository to encrypt it.
-            Type: String
-            Confidentiality: HIGH
+            $ref: Types.Password
       Output:
         $ref: Types.AuthOutput # You can reference Types here, but not Enums. The same applies for the Input.
       Events:
@@ -159,8 +160,7 @@ Usecase:
             $ref: Entities.User.Email
           Password:
             # Here we receive the original password, because it's responsibility of the repository to encrypt it.
-            Type: String
-            Confidentiality: HIGH
+            $ref: Types.Password
       Output:
         $ref: Types.AuthOutput # You can reference Types here, but not Enums. The same applies for the Input.
     GetMyData:

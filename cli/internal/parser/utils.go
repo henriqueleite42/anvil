@@ -72,11 +72,11 @@ func (self *anvToAnvpParser) stateHashes() error {
 	}
 
 	if self.schema.Usecases != nil {
-		stateHash, err := hashing.Struct(self.schema.Repositories)
+		stateHash, err := hashing.Struct(self.schema.Usecases)
 		if err != nil {
-			return errors.New("fail to get \"Repositories\" state hash")
+			return errors.New("fail to get \"Usecases\" state hash")
 		}
-		self.schema.Repositories.StateHash = stateHash
+		self.schema.Usecases.StateHash = stateHash
 	}
 
 	if self.schema.Deliveries != nil {
