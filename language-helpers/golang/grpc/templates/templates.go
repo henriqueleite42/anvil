@@ -13,7 +13,7 @@ type InputPropOptionalTemplInput struct {
 	NeedsPointer         bool
 }
 
-// go:embed input-prop-optional.txt
+//go:embed input-prop-optional.txt
 var InputPropOptionalTempl string
 
 type InputPropMapTemplProp struct {
@@ -40,7 +40,7 @@ func (self *InputPropMapTemplInput) Idt() string {
 	return strings.Repeat("	", self.IndentationLvl)
 }
 
-// go:embed input-prop-map.txt
+//go:embed input-prop-map.txt
 var InputPropMapTempl string
 
 type InputPropListTemplInput struct {
@@ -61,5 +61,5 @@ func (self *InputPropListTemplInput) Idt() string {
 	return strings.Repeat("	", self.IndentationLvl)
 }
 
-// go:embed input-prop-list.txt
+//go:embed input-prop-list.txt
 var InputPropListTempl string
