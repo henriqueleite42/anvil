@@ -8,7 +8,7 @@ package hashing
 import (
 	"bytes"
 	"crypto/sha1"
-	"fmt"
+	"encoding/hex"
 	"reflect"
 	"sort"
 	"strconv"
@@ -17,7 +17,7 @@ import (
 func Struct(c interface{}) (string, error) {
 	sum := sha1.Sum(serialize(c))
 
-	return fmt.Sprintf("%x", sum[:]), nil
+	return hex.EncodeToString(sum[:]), nil
 }
 
 type item struct {
