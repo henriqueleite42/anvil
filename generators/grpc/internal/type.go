@@ -8,7 +8,7 @@ import (
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
-func (self *parser) resolveTypeProp(t *schemas.Type, methodName string) (string, error) {
+func (self *parser) resolveTypeProp(curDomain string, t *schemas.Type) (string, error) {
 	var typeString string
 	if t.Type == schemas.TypeType_String {
 		typeString = "string"
@@ -48,7 +48,7 @@ func (self *parser) resolveTypeProp(t *schemas.Type, methodName string) (string,
 			return "", fmt.Errorf("type \"%s\" is missing prop \"ChildTypes\"", t.Ref)
 		}
 
-		resolvedType, err := self.resolveType(t, methodName)
+		resolvedType, err := self.resolveType(curDomain, t)
 		if err != nil {
 			return "", err
 		}
@@ -73,7 +73,7 @@ func (self *parser) resolveTypeProp(t *schemas.Type, methodName string) (string,
 			return "", fmt.Errorf("fail to resolve child type \"%s\" for type \"%s\"", childTypeRef, t.Name)
 		}
 
-		typeName, err := self.resolveTypeProp(childType, methodName)
+		typeName, err := self.resolveTypeProp(curDomain, childType)
 		if err != nil {
 			return "", err
 		}
@@ -91,7 +91,7 @@ func (self *parser) resolveTypeProp(t *schemas.Type, methodName string) (string,
 	return typeString, nil
 }
 
-func (self *parser) resolveType(t *schemas.Type, methodName string) (*templates.ProtofileTemplInputType, error) {
+func (self *parser) resolveType(curDomain string, t *schemas.Type) (*templates.ProtofileTemplInputType, error) {
 	if existentType, ok := self.typesToAvoidDuplication[t.Ref]; ok {
 		return existentType, nil
 	}
@@ -100,7 +100,7 @@ func (self *parser) resolveType(t *schemas.Type, methodName string) (*templates.
 		return nil, fmt.Errorf("\"%s\" type must be a Map", t.Name)
 	}
 
-	protoTypeName, err := self.grpcParser.GetProtoTypeName(t)
+	protoTypeName, err := self.grpcParser.GetProtoTypeName(curDomain, t)
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +116,7 @@ func (self *parser) resolveType(t *schemas.Type, methodName string) (*templates.
 			return nil, fmt.Errorf("child type \"%s\" not found for type \"%s\"", v.TypeHash, t.Name)
 		}
 
-		propType, err := self.resolveTypeProp(childType, methodName)
+		propType, err := self.resolveTypeProp(curDomain, childType)
 		if err != nil {
 			return nil, err
 		}
