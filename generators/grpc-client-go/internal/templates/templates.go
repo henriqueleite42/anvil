@@ -1,6 +1,8 @@
 package templates
 
 import (
+	_ "embed"
+
 	"github.com/henriqueleite42/anvil/language-helpers/golang/grpc"
 	types_parser "github.com/henriqueleite42/anvil/language-helpers/golang/types"
 )
@@ -23,3 +25,9 @@ type TemplInput struct {
 	Types                       []*types_parser.Type
 	Methods                     []*TemplMethod
 }
+
+//go:embed contract.txt
+var ContractTempl string
+
+//go:embed implementation.txt
+var ImplementationTempl string

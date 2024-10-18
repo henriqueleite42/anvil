@@ -1,8 +1,6 @@
-package templates
-
-const ContractTempl = `
 {{- $dot := . -}}
-package {{ .DomainSnake }}_grpc_client
+{{- $pkg := print .DomainSnake "_grpc_client" -}}
+package {{ $pkg }}
 
 import (
 {{- range .ImportsContract }}
@@ -43,7 +41,7 @@ const (
 {{ range $type := .Types }}
 type {{ $type.GolangType }} struct {
 {{- range $prop := $type.MapProps }}
-	{{ $prop.Name }}{{ $prop.Spacing1 }} {{ $prop.Type.GetFullTypeName $dot.DomainSnake }}
+	{{ $prop.Name }}{{ $prop.Spacing1 }} {{ $prop.Type.GetFullTypeName $pkg }}
 {{- end }}
 }
 {{- end }}
@@ -66,4 +64,4 @@ type {{ .Domain }}Api interface {
 {{- end }}
 {{- end }}
 }
-`
+
