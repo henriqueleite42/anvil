@@ -341,34 +341,34 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 			if len(refColumnsArr) == 0 {
 				return "", fmt.Errorf("at least 1 column is required for \"%s.%s.ForeignKeys.%d.RefColumns\"", i.path, i.k, kk)
 			}
-			var firstTableRefName string
+			var firstRefTable string
 			for kkk, vvv := range refColumnsArr {
-				vvvString, ok := vvv.(string)
+				refColumn, ok := vvv.(string)
 				if !ok {
 					return "", fmt.Errorf("fail to parse \"%s.%s.ForeignKeys.%d.RefColumns.%d\" to `string`", i.path, i.k, kk, kkk)
 				}
 
-				parts := strings.Split(vvvString, ".")
-				if len(parts) != 2 {
-					return "", fmt.Errorf("you can only reference columns using the pattern \"TableName.ColumnName\" on \"%s.%s.ForeignKeys.%d.RefColumns.%d\" to `string`", i.path, i.k, kk, kkk)
+				amountOfDots := strings.Count(refColumn, ".")
+				if amountOfDots != 1 && amountOfDots != 3 {
+					return "", fmt.Errorf("you can only reference columns using the patterns \"{TableName}.{ColumnName}\" and \"{Domain}.Entities.{TableName}.{ColumnName}\" on \"%s.%s.ForeignKeys.%d.RefColumns.%d\" to `string`", i.path, i.k, kk, kkk)
+				}
+				if amountOfDots == 1 {
+					refColumn = fmt.Sprintf("%s.Entities.%s", i.curDomain, refColumn)
 				}
 
-				refTableName := parts[0]
-				refColumnName := parts[1]
+				refTable := refColumn[:strings.LastIndex(refColumn, ".")]
 
-				if firstTableRefName == "" {
-					firstTableRefName = refTableName
+				if firstRefTable == "" {
+					firstRefTable = refTable
 				}
 
-				if firstTableRefName != refTableName {
+				if firstRefTable != refTable {
 					return "", fmt.Errorf("you can only reference one ref table per foreign key. Error found on \"%s.%s.ForeignKeys.%d.RefColumns.%d\" to `string`", i.path, i.k, kk, kkk)
 				}
 
 				if refTableHash == "" {
-					refTableHash = hashing.String("Entities." + refTableName)
+					refTableHash = hashing.String(refTable)
 				}
-
-				refColumn := "Entities." + refTableName + "." + refColumnName
 
 				refColumnHash := hashing.String(refColumn)
 
