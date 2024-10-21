@@ -44,7 +44,7 @@ func (self *goGrpcParser) ProtoToGo(i *ProtoToGoInput) (*Type, error) {
 		}, nil
 	}
 	if t.Type == schemas.TypeType_Timestamp {
-		self.goTypeParser.AddImport("time")
+		self.goTypeParser.AddUsecaseImport("time")
 
 		pbType := "timestamppb.Timestamp"
 

@@ -44,7 +44,7 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 		}, nil
 	}
 	if t.Type == schemas.TypeType_Timestamp {
-		self.goTypeParser.AddImport("google.golang.org/protobuf/types/known/timestamppb")
+		self.imports["google.golang.org/protobuf/types/known/timestamppb"] = true
 
 		pbType := "timestamppb.Timestamp"
 

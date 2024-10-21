@@ -7,6 +7,8 @@ import (
 type typeParser struct {
 	schema *schemas.AnvpSchema
 
+	moduleName string
+
 	enumsPkg      string
 	typesPkg      string
 	eventsPkg     string
@@ -24,11 +26,17 @@ type typeParser struct {
 	repository []*Type
 	usecase    []*Type
 
-	imports map[string]bool
+	importsTypes      map[string]bool
+	importsEnums      map[string]bool
+	importsEvents     map[string]bool
+	importsEntities   map[string]bool
+	importsRepository map[string]bool
+	importsUsecase    map[string]bool
 }
 
 type NewTypeParserInput struct {
 	Schema        *schemas.AnvpSchema
+	ModuleName    string
 	EnumsPkg      string
 	TypesPkg      string
 	EventsPkg     string
@@ -37,9 +45,11 @@ type NewTypeParserInput struct {
 	UsecasePkg    string
 }
 
-func NewTypeParser(i *NewTypeParserInput) (TypeParser, error) {
+func NewTypeParser(i *NewTypeParserInput) (TypesParser, error) {
 	return &typeParser{
 		schema: i.Schema,
+
+		moduleName: i.ModuleName,
 
 		enumsPkg:      i.EnumsPkg,
 		typesPkg:      i.TypesPkg,
@@ -50,8 +60,19 @@ func NewTypeParser(i *NewTypeParserInput) (TypeParser, error) {
 
 		typesToAvoidDuplication: map[string]*Type{},
 		enumsToAvoidDuplication: map[string]*Enum{},
-		types:                   []*Type{},
-		enums:                   []*Enum{},
-		imports:                 map[string]bool{},
+
+		types:      []*Type{},
+		enums:      []*Enum{},
+		events:     []*Type{},
+		entities:   []*Type{},
+		repository: []*Type{},
+		usecase:    []*Type{},
+
+		importsTypes:      map[string]bool{},
+		importsEnums:      map[string]bool{},
+		importsEvents:     map[string]bool{},
+		importsEntities:   map[string]bool{},
+		importsRepository: map[string]bool{},
+		importsUsecase:    map[string]bool{},
 	}, nil
 }
