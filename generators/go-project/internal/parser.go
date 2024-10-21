@@ -274,6 +274,22 @@ func Parse(schema *schemas.AnvpSchema) ([]*File, error) {
 			Name:    "go.mod",
 			Content: goConfig,
 		},
+		&File{
+			Name:    ".editorconfig",
+			Content: templates.EditorConfigTempl,
+		},
+		&File{
+			Name:    ".gitignore",
+			Content: templates.GitIgnoreTempl,
+		},
+		&File{
+			Name:    "README.md",
+			Content: templates.ReadMeTempl,
+		},
+		&File{
+			Name:    "staticcheck.conf",
+			Content: templates.StaticCheckTempl,
+		},
 	)
 
 	return files, nil

@@ -87,6 +87,15 @@ var GratefullyShutdownTempl string
 //go:embed delivery.txt
 var DeliveryTempl string
 
+//go:embed editorconfig.txt
+var EditorConfigTempl string
+
+//go:embed gitignore.txt
+var GitIgnoreTempl string
+
+//go:embed go-mod.txt
+var GoModTempl string
+
 //go:embed grpc-delivery-module.txt
 var GrpcDeliveryModuleTempl string
 
@@ -99,6 +108,9 @@ var MainTempl string
 //go:embed models.txt
 var ModelsTempl string
 
+//go:embed readme.txt
+var ReadMeTempl string
+
 //go:embed repository-method.txt
 var RepositoryMethodTempl string
 
@@ -107,6 +119,9 @@ var RepositoryStructTempl string
 
 //go:embed repository.txt
 var RepositoryTempl string
+
+//go:embed staticcheck.txt
+var StaticCheckTempl string
 
 //go:embed usecase-method.txt
 var UsecaseMethodTempl string
@@ -125,6 +140,3 @@ var ValidatorTempl string
 
 //go:embed validator-implementation.txt
 var ValidatorImplementationTempl string
-
-//go:embed go-mod.txt
-var GoModTempl string
