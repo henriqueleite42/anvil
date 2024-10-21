@@ -1,6 +1,4 @@
-package templates
-
-const UtilsSyncTempl = `package utils
+package utils
 
 import (
 	"errors"
@@ -24,4 +22,3 @@ func WaitWithTimeout(wg *sync.WaitGroup, timeout time.Duration) error {
 		return errors.New("timeout")
 	}
 }
-`

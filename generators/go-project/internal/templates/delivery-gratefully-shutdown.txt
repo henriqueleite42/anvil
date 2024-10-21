@@ -1,6 +1,4 @@
-package templates
-
-const GratefullyShutdownTempl = `package delivery
+package delivery
 
 import (
 	"os"
@@ -46,4 +44,3 @@ func GracefullyShutdown(i *GracefullyShutdownInput) {
 
 	wg.Wait()
 }
-`

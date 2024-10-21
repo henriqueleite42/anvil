@@ -1,6 +1,3 @@
-package templates
-
-const GrpcDeliveryModuleTempl = `
 {{- define "logger" }}	logger := self.logger.With().
 		Str("dmn", "{{ .Domain }}").
 		Str("mtd", "{{ .MethodName }}").
@@ -188,4 +185,3 @@ func Add{{ .Domain }}Controller(i *Add{{ .Domain }}ControllerInput) {
 		{{ .DomainCamel }}Usecase: i.{{ .Domain }}Usecase,
 	})
 }
-`

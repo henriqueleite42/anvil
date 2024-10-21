@@ -2,6 +2,8 @@ package parser
 
 import (
 	"fmt"
+	"sort"
+	"strings"
 
 	"github.com/henriqueleite42/anvil/generators/go-project/internal/templates"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/formatter"
@@ -9,10 +11,15 @@ import (
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
-func (self *Parser) ResolveGrpcDelivery(dlv *schemas.DeliveryGrpcRpc) error {
+type GrpcDeliveryParsed struct {
+	Imports [][]string
+	Methods []*templates.TemplMethodDelivery
+}
+
+func (self *Parser) resolveGrpcDelivery(dlv *schemas.DeliveryGrpcRpc, curDomain string) error {
 	methodName := dlv.Name
 
-	method, ok := self.Schema.Usecase.Methods.Methods[dlv.UsecaseMethodHash]
+	method, ok := self.Schema.Usecases.Usecases[curDomain].Methods.Methods[dlv.UsecaseMethodHash]
 	if !ok {
 		return fmt.Errorf("usecase method \"%s\" not found", dlv.UsecaseMethodHash)
 	}
@@ -77,9 +84,9 @@ func (self *Parser) ResolveGrpcDelivery(dlv *schemas.DeliveryGrpcRpc) error {
 	}
 
 	self.MethodsGrpcDelivery = append(self.MethodsGrpcDelivery, &templates.TemplMethodDelivery{
-		Domain:      self.Schema.Domain,
-		DomainCamel: formatter.PascalToCamel(self.Schema.Domain),
-		DomainSnake: formatter.PascalToSnake(self.Schema.Domain),
+		Domain:      curDomain,
+		DomainCamel: formatter.PascalToCamel(curDomain),
+		DomainSnake: formatter.PascalToSnake(curDomain),
 		MethodName:  methodName,
 		Input:       input,
 		Output:      output,
@@ -87,4 +94,48 @@ func (self *Parser) ResolveGrpcDelivery(dlv *schemas.DeliveryGrpcRpc) error {
 	})
 
 	return nil
+}
+
+func (self *Parser) ParseDeliveriesGrpc(curDomain string) (*GrpcDeliveryParsed, error) {
+	if self.Schema.Deliveries == nil || self.Schema.Deliveries.Deliveries == nil {
+		return &GrpcDeliveryParsed{}, nil
+	}
+
+	deliveries, ok := self.Schema.Deliveries.Deliveries[curDomain]
+	if !ok {
+		return &GrpcDeliveryParsed{}, nil
+	}
+
+	if deliveries.Grpc == nil {
+		return &GrpcDeliveryParsed{}, nil
+	}
+
+	self.MethodsGrpcDelivery = []*templates.TemplMethodDelivery{}
+
+	for _, v := range deliveries.Grpc.Rpcs {
+		if !strings.HasPrefix(v.Ref, curDomain) {
+			continue
+		}
+
+		err := self.resolveGrpcDelivery(v, curDomain)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	self.GoTypesParserUsecase.AddImport("context")
+	self.GoTypesParserUsecase.AddImport("github.com/rs/xid")
+	self.GoTypesParserUsecase.AddImport("github.com/rs/zerolog")
+	self.GoTypesParserUsecase.AddImport("google.golang.org/grpc")
+	imports := self.GoTypesParserUsecase.GetImports()
+	self.GoTypesParserUsecase.ResetImports()
+
+	sort.Slice(self.MethodsGrpcDelivery, func(i, j int) bool {
+		return self.MethodsGrpcDelivery[i].Order < self.MethodsGrpcDelivery[j].Order
+	})
+
+	return &GrpcDeliveryParsed{
+		Imports: imports,
+		Methods: self.MethodsGrpcDelivery,
+	}, nil
 }

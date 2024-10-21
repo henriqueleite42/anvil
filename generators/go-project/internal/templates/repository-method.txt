@@ -1,14 +1,4 @@
-package templates
-
-type RepositoryMethodTemplInput struct {
-	Domain         string
-	DomainSnake    string
-	MethodName     string
-	InputTypeName  string
-	OutputTypeName string
-}
-
-const RepositoryMethodTempl = `package {{ .DomainSnake }}_repository
+package {{ .DomainSnake }}_repository
 
 import (
 	"context"
@@ -44,4 +34,3 @@ func (self *{{ .Domain }}RepositoryImplementation) {{ .MethodName }}(ctx context
 
 	{{- end }}
 {{- end }}
-`

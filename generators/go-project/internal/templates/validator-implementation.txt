@@ -1,13 +1,4 @@
-package templates
-
-const ValidatorTempl = `package adapters
-
-type Validator interface {
-	Validate(i interface{}) error
-}
-`
-
-const ValidatorImplementationTempl = `package go_validator
+package go_validator
 
 import (
 	"github.com/go-playground/validator/v10"
@@ -30,4 +21,3 @@ func NewGoValidator() (adapters.Validator, error) {
 		validator: vald,
 	}, nil
 }
-`

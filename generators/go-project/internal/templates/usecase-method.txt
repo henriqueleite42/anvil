@@ -1,14 +1,4 @@
-package templates
-
-type UsecaseMethodTemplInput struct {
-	Domain         string
-	DomainSnake    string
-	MethodName     string
-	InputTypeName  string
-	OutputTypeName string
-}
-
-const UsecaseMethodTempl = `package {{ .DomainSnake }}_usecase
+package {{ .DomainSnake }}_usecase
 
 import (
 	"context"
@@ -44,4 +34,3 @@ func (self *{{ .Domain }}UsecaseImplementation) {{ .MethodName }}(ctx context.Co
 
 	{{- end }}
 {{- end }}
-`

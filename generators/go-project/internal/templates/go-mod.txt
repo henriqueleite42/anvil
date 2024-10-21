@@ -1,0 +1,3 @@
+module {{ .PkgName }}
+
+go {{ .GoVersion }}

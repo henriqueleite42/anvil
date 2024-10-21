@@ -1,6 +1,4 @@
-package templates
-
-const DeliveryTempl = `package delivery
+package delivery
 
 import "time"
 
@@ -16,4 +14,3 @@ type Delivery interface {
 	// Can be blocking
 	Cancel(timeout time.Duration)
 }
-`

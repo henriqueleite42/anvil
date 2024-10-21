@@ -1,6 +1,4 @@
-package templates
-
-const RepositoryStructTempl = `package {{ .DomainSnake }}_repository
+package {{ .DomainSnake }}_repository
 
 import (
 	"errors"
@@ -25,4 +23,3 @@ func New{{ .Domain }}Repository(i *New{{ .Domain }}RepositoryInput) ({{ .Domain 
 		logger: i.Logger,
 	}, nil
 }
-`

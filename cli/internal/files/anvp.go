@@ -56,7 +56,7 @@ func WriteAnvpFile(schema *schemas.AnvpSchema, schemaFiles []string) (string, er
 	return filePath, nil
 }
 
-func ReadAnvpFile(anvFilePath string) (*schemas.Schema, error) {
+func ReadAnvpFile(anvFilePath string) (*schemas.AnvpSchema, error) {
 	path, err := GetAnvpFilePath(anvFilePath, false)
 	if err != nil {
 		return nil, err
@@ -68,7 +68,7 @@ func ReadAnvpFile(anvFilePath string) (*schemas.Schema, error) {
 	}
 	defer file.Close()
 
-	schema := schemas.Schema{}
+	schema := schemas.AnvpSchema{}
 	err = yaml.NewDecoder(file).Decode(&schema)
 	if err != nil {
 		return nil, err
