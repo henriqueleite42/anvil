@@ -40,7 +40,10 @@ type ProtoToGoInput struct {
 }
 
 type GrpcParser interface {
+	GetImports() [][]string
+
 	GetProtoTypeName(curDomain string, t *schemas.Type) (string, error)
+
 	GoToProto(i *GoToProtoInput) (*Type, error)
 	ProtoToGo(i *ProtoToGoInput) (*Type, error)
 }

@@ -1,6 +1,7 @@
 package types_parser
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
@@ -14,8 +15,39 @@ func (self *typeParser) ParseEnum(e *schemas.Enum) (*Enum, error) {
 	var eType string
 	if e.Type == schemas.EnumType_String {
 		eType = "string"
-	} else {
+	}
+	if e.Type == schemas.EnumType_Int {
+		eType = "int"
+	}
+	if e.Type == schemas.EnumType_Int8 {
+		eType = "int8"
+	}
+	if e.Type == schemas.EnumType_Int16 {
+		eType = "int16"
+	}
+	if e.Type == schemas.EnumType_Int32 {
 		eType = "int32"
+	}
+	if e.Type == schemas.EnumType_Int64 {
+		eType = "int64"
+	}
+	if e.Type == schemas.EnumType_Uint {
+		eType = "uint"
+	}
+	if e.Type == schemas.EnumType_Uint8 {
+		eType = "uint8"
+	}
+	if e.Type == schemas.EnumType_Uint16 {
+		eType = "uint16"
+	}
+	if e.Type == schemas.EnumType_Uint32 {
+		eType = "uint32"
+	}
+	if e.Type == schemas.EnumType_Uint64 {
+		eType = "uint64"
+	}
+	if eType == "" {
+		return nil, fmt.Errorf("unsupported enum type: \"%s\"", e.Type)
 	}
 
 	enum := &Enum{
