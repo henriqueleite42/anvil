@@ -5,7 +5,7 @@ import (
 )
 
 type typeParser struct {
-	schema *schemas.Schema
+	schema *schemas.AnvpSchema
 
 	enumsPkg      string
 	typesPkg      string
@@ -28,7 +28,7 @@ type typeParser struct {
 }
 
 type NewTypeParserInput struct {
-	Schema        *schemas.Schema
+	Schema        *schemas.AnvpSchema
 	EnumsPkg      string
 	TypesPkg      string
 	EventsPkg     string

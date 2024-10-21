@@ -263,7 +263,7 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 			prepare = append(prepare, r.Prepare...)
 		}
 
-		pbType, err := self.GetProtoTypeName(t)
+		pbType, err := self.GetProtoTypeName(i.CurDomain, t)
 		if err != nil {
 			return nil, err
 		}

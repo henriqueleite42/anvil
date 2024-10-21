@@ -8,13 +8,21 @@ import (
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
-func (self *anvToAnvpParser) usecase(file map[string]any) error {
-	path := "Usecase"
-
+func (self *anvToAnvpParser) usecase(curDomain string, file map[string]any) error {
 	usecaseAny, ok := file["Usecase"]
 	if !ok {
 		return nil
 	}
+
+	if self.schema.Usecases == nil {
+		self.schema.Usecases = &schemas.Usecases{}
+	}
+	if self.schema.Usecases.Usecases == nil {
+		self.schema.Usecases.Usecases = map[string]*schemas.Usecase{}
+	}
+
+	path := curDomain + ".Usecase"
+
 	usecaseMap, ok := usecaseAny.(map[string]any)
 	if !ok {
 		return fmt.Errorf("fail to parse \"%s\" to `map[string]any`", path)
@@ -72,10 +80,12 @@ func (self *anvToAnvpParser) usecase(file map[string]any) error {
 
 			var typeHash string
 			typeHash, err := self.resolveType(&resolveInput{
-				path: fmt.Sprintf("%s.Methods.%s", path, k),
-				ref:  self.getRef("Usecase", k),
-				k:    k + "Input",
-				v:    inputMap,
+				namePrefix: k,
+				curDomain:  curDomain,
+				path:       fmt.Sprintf("%s.Methods.%s", path, k),
+				ref:        self.getRef(curDomain, "Usecase."+k),
+				k:          "Input",
+				v:          inputMap,
 			})
 			if err != nil {
 				return err
@@ -96,10 +106,12 @@ func (self *anvToAnvpParser) usecase(file map[string]any) error {
 
 			var typeHash string
 			typeHash, err := self.resolveType(&resolveInput{
-				path: fmt.Sprintf("%s.Methods.%s", path, k),
-				ref:  self.getRef("Usecase", k),
-				k:    k + "Output",
-				v:    outputMap,
+				namePrefix: k,
+				curDomain:  curDomain,
+				path:       fmt.Sprintf("%s.Methods.%s", path, k),
+				ref:        self.getRef(curDomain, "Usecase."+k),
+				k:          "Output",
+				v:          outputMap,
 			})
 			if err != nil {
 				return err
@@ -112,14 +124,14 @@ func (self *anvToAnvpParser) usecase(file map[string]any) error {
 
 		// TODO implement EventHashes
 
-		ref := self.getRef(path, k)
-		fullPath := fmt.Sprintf("%s.Methods.Methods.%s", path, k)
+		ref := self.getRef(curDomain, "Usecase."+k)
+		fullPath := fmt.Sprintf("%s.Methods.%s", path, k)
 
 		order := len(methods.Methods)
 		method := &schemas.UsecaseMethod{
 			Ref:          ref,
 			OriginalPath: fullPath,
-			Order:        order,
+			Order:        uint(order),
 			Name:         k,
 			Description:  description,
 			Input:        input,
@@ -152,7 +164,7 @@ func (self *anvToAnvpParser) usecase(file map[string]any) error {
 	}
 	usecase.StateHash = usecaseStateHash
 
-	self.schema.Usecase = usecase
+	self.schema.Usecases.Usecases[curDomain] = usecase
 
 	return nil
 }

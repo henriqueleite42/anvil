@@ -10,9 +10,8 @@ import (
 
 var (
 	// Used for flags.
-	schemaFile       string
+	schemaFiles      []string
 	silent           bool
-	generator        string
 	outputFolderPath string
 
 	rootCmd = &cobra.Command{

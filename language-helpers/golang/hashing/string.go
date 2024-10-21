@@ -1,8 +1,11 @@
 package hashing
 
-import "crypto/sha1"
+import (
+	"crypto/sha1"
+	"encoding/hex"
+)
 
 func String(str string) string {
 	hashByte := sha1.Sum([]byte(str))
-	return string(hashByte[:])
+	return hex.EncodeToString(hashByte[:])
 }

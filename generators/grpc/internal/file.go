@@ -4,16 +4,15 @@ import (
 	"os"
 
 	"github.com/henriqueleite42/anvil/language-helpers/golang/formatter"
-	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
-func WriteFile(schema *schemas.Schema, outputFolderPath string, content string) error {
+func WriteFile(curDomain string, outputFolderPath string, content string) error {
 	myDir, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 
-	domainKebab := formatter.PascalToKebab(schema.Domain)
+	domainKebab := formatter.PascalToKebab(curDomain)
 
 	path := myDir
 	if outputFolderPath != "" {

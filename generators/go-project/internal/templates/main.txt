@@ -1,6 +1,4 @@
-package templates
-
-const MainTempl = `package main
+package main
 
 import (
 	"os"
@@ -81,4 +79,3 @@ func main() {
 
 	logger.Info().Msg("shutdown completed")
 }
-`

@@ -109,7 +109,7 @@ func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
 			return existentType, nil
 		}
 
-		props := make([]*MapProp, len(t.ChildTypes), len(t.ChildTypes))
+		props := make([]*MapProp, len(t.ChildTypes))
 
 		for k, v := range t.ChildTypes {
 			if v.PropName == nil {
@@ -179,19 +179,19 @@ func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
 			MapProps:   props,
 		}
 
-		if strings.HasPrefix(t.Ref, "Types") {
+		if t.RootNode == "Types" {
 			result.GolangPkg = &self.typesPkg
 			self.types = append(self.types, result)
-		} else if strings.HasPrefix(t.Ref, "Events") {
+		} else if t.RootNode == "Events" {
 			result.GolangPkg = &self.eventsPkg
 			self.events = append(self.events, result)
-		} else if strings.HasPrefix(t.Ref, "Entities") {
+		} else if t.RootNode == "Entities" {
 			result.GolangPkg = &self.entitiesPkg
 			self.entities = append(self.entities, result)
-		} else if strings.HasPrefix(t.Ref, "Repository") {
+		} else if t.RootNode == "Repository" {
 			result.GolangPkg = &self.repositoryPkg
 			self.repository = append(self.repository, result)
-		} else if strings.HasPrefix(t.Ref, "Usecase") {
+		} else if t.RootNode == "Usecase" {
 			result.GolangPkg = &self.usecasePkg
 			self.usecase = append(self.usecase, result)
 		} else {

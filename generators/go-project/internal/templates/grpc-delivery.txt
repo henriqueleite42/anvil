@@ -1,10 +1,7 @@
-package templates
-
-const GrpcDelivery = `package grpc
+package grpc
 
 import (
 	"fmt"
-	"log"
 	"net"
 	"os"
 	"sync"
@@ -77,4 +74,3 @@ func NewGrpcDelivery(i *NewGrpcDeliveryInput) delivery.Delivery {
 		validator: i.Validator,
 	}
 }
-`

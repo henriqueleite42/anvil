@@ -15,7 +15,7 @@ func (self *anvToAnvpParser) resolveEvent(i *resolveInput) (string, error) {
 		self.schema.Events.Events = map[string]*schemas.Event{}
 	}
 
-	ref := self.getRef(i.ref, "Events."+i.k)
+	ref := self.getDeepRef(i.curDomain, i.ref, "Events."+i.k)
 	refHash := hashing.String(ref)
 
 	_, ok := self.schema.Events.Events[refHash]
@@ -34,6 +34,11 @@ func (self *anvToAnvpParser) resolveEvent(i *resolveInput) (string, error) {
 		if !ok {
 			return "", fmt.Errorf("fail to parse \"%s.%s.$ref\" to `string`", i.path, i.k)
 		}
+		refString = self.anvRefToAnvpRef(
+			i.curDomain,
+			refString,
+		)
+
 		return hashing.String(refString), nil
 	}
 
@@ -59,10 +64,11 @@ func (self *anvToAnvpParser) resolveEvent(i *resolveInput) (string, error) {
 		return "", fmt.Errorf("\"Type\" is a required property to \"%s.%s\"", i.path, i.k)
 	}
 	eventTypeHash, err := self.resolveType(&resolveInput{
-		path: i.path,
-		ref:  "Events",
-		k:    i.k,
-		v:    eventTypeAny,
+		curDomain: i.curDomain,
+		path:      i.path,
+		ref:       "Events",
+		k:         i.k,
+		v:         eventTypeAny,
 	})
 	if err != nil {
 		return "", err
@@ -93,25 +99,26 @@ func (self *anvToAnvpParser) resolveEvent(i *resolveInput) (string, error) {
 	return refHash, nil
 }
 
-func (self *anvToAnvpParser) events(file map[string]any) error {
+func (self *anvToAnvpParser) events(curDomain string, file map[string]any) error {
 	eventsSchema, ok := file["Events"]
 	if !ok {
 		return nil
 	}
 
-	path := "Events"
+	fullPath := curDomain + ".Events"
 
 	eventsMap, ok := eventsSchema.(map[string]any)
 	if !ok {
-		return fmt.Errorf("fail to parse \"%s\" to `map[string]any`", path)
+		return fmt.Errorf("fail to parse \"%s\" to `map[string]any`", fullPath)
 	}
 
 	for k, v := range eventsMap {
 		_, err := self.resolveEvent(&resolveInput{
-			path: path,
-			ref:  "",
-			k:    k,
-			v:    v,
+			curDomain: curDomain,
+			path:      fullPath,
+			ref:       "",
+			k:         k,
+			v:         v,
 		})
 		if err != nil {
 			return err

@@ -9,7 +9,11 @@ import (
 )
 
 func Authentication(logJson bool) {
-	schema, err := parser.ParseAnvToAnvp("../examples/advanced/authentication.anv")
+	schema, err := parser.ParseAnvToAnvp(
+		[]string{
+			"../examples/advanced/authentication.anv",
+		},
+	)
 	if err != nil {
 		log.Fatal(err)
 	}

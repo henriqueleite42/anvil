@@ -1,6 +1,3 @@
-package templates
-
-const UsecaseTempl = `
 {{- $pkg := print .DomainSnake "_usecase" -}}
 package {{ $pkg }}
 
@@ -14,7 +11,7 @@ import (
 {{ range $type := .TypesUsecase }}
 type {{ $type.GolangType }} struct {
 {{- range $prop := $type.MapProps }}
-	{{ $prop.Name }}{{ $prop.Spacing1 }} {{ $prop.Type.GetFullTypeName $pkg }}{{ if $prop.Tags }}{{ $prop.Spacing2 }} ` + "`{{ $prop.GetTagsString }}`" + `{{ end }}
+	{{ $prop.Name }}{{ $prop.Spacing1 }} {{ $prop.Type.GetFullTypeName $pkg }}{{ if $prop.Tags }}{{ $prop.Spacing2 }} `{{ $prop.GetTagsString }}`{{ end }}
 {{- end }}
 }
 {{- end }}
@@ -36,4 +33,3 @@ type {{ .Domain }}Usecase interface {
 {{- end }}
 {{- end }}
 }
-`

@@ -6,7 +6,7 @@ import (
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
-func resolveEnums(schema *schemas.Schema) ([]*schemas.Enum, error) {
+func resolveEnums(schema *schemas.AnvpSchema) ([]*schemas.Enum, error) {
 	if schema.Enums == nil || schema.Enums.Enums == nil {
 		return []*schemas.Enum{}, nil
 	}

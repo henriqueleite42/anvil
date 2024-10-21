@@ -5,13 +5,13 @@ import "fmt"
 type ProtofileTemplInputEnumValue struct {
 	Name    string
 	Spacing string
-	Idx     int32
+	Idx     uint
 }
 
 type ProtofileTemplInputEnum struct {
 	Name             string
 	Values           []*ProtofileTemplInputEnumValue
-	DeprecatedValues []int32
+	DeprecatedValues []uint
 }
 
 func (self *ProtofileTemplInputEnum) GetDeprecatedValues() string {

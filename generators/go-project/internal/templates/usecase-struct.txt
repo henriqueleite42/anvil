@@ -1,0 +1,4 @@
+package {{ .DomainSnake }}_usecase
+
+type {{ .Domain }}UsecaseImplementation struct {
+}

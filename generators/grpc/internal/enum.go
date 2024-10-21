@@ -16,7 +16,7 @@ func (self *parser) resolveEnum(e *schemas.Enum) *templates.ProtofileTemplInputE
 	result := &templates.ProtofileTemplInputEnum{
 		Name:             e.Name,
 		Values:           make([]*templates.ProtofileTemplInputEnumValue, 0, len(e.Values)),
-		DeprecatedValues: []int32{},
+		DeprecatedValues: []uint{},
 	}
 
 	biggest := 0

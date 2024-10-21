@@ -8,14 +8,14 @@ import (
 )
 
 type goGrpcParser struct {
-	schema *schemas.Schema
+	schema *schemas.AnvpSchema
 
 	goTypeParser    types_parser.TypeParser
 	templateManager template.TemplateManager
 }
 
 type NewGrpcParserInput struct {
-	Schema *schemas.Schema
+	Schema *schemas.AnvpSchema
 
 	GoTypeParser types_parser.TypeParser
 }

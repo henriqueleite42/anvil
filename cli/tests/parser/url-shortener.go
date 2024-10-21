@@ -9,7 +9,11 @@ import (
 )
 
 func UrlShortener(logJson bool) {
-	schema, err := parser.ParseAnvToAnvp("../examples/intermediary/url-shortener.anv")
+	schema, err := parser.ParseAnvToAnvp(
+		[]string{
+			"../examples/intermediary/url-shortener.anv",
+		},
+	)
 	if err != nil {
 		log.Fatal(err)
 	}

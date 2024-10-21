@@ -54,7 +54,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	schema := &schemas.Schema{}
+	schema := &schemas.AnvpSchema{}
 	err = yaml.Unmarshal(fileData, &schema)
 	if err != nil {
 		log.Fatal(err)

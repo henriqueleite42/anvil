@@ -9,7 +9,11 @@ import (
 )
 
 func EmailMailer(logJson bool) {
-	schema, err := parser.ParseAnvToAnvp("../examples/advanced/email-mailer.anv")
+	schema, err := parser.ParseAnvToAnvp(
+		[]string{
+			"../examples/advanced/email-mailer.anv",
+		},
+	)
 	if err != nil {
 		log.Fatal(err)
 	}

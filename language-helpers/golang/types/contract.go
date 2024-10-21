@@ -63,7 +63,7 @@ func (self *Type) GetFullTypeName(curPkg string) string {
 }
 
 type EnumValue struct {
-	Idx     int32
+	Idx     uint
 	Name    string
 	Spacing string
 	Value   string
@@ -87,6 +87,12 @@ func (self *Enum) GetFullEnumName(curPkg string) string {
 	return enumName
 }
 
+// The types parser must be used per domain, and not per schema!
+//
+// Each domain that you want to parse must have it's own instance of types parser,
+// to ensure that the imports, types, etc will not mix
+//
+// Of course, if you want to mix they, so you can use a single instance
 type TypeParser interface {
 	// Parse a type and all it's children (if any), then adds them all to the list and returns the root parsed type
 	ParseType(t *schemas.Type) (*Type, error)

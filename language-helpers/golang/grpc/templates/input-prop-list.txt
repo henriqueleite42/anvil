@@ -1,0 +1,19 @@
+	var {{ .VarName }} []{{ .Type }} = nil
+	if {{ .OriginalVariableName }} != nil {
+		{{ .VarName }} = make([]{{ .Type }}, 0, len({{ .OriginalVariableName }}))
+		for _, v := range {{ .OriginalVariableName }} {
+			{{- if .ChildOptional }}
+			if v == nil {
+				continue
+			}
+			{{- end }}
+			{{- if .Prepare }}
+				{{- range .Prepare }}
+{{ . }}
+				{{- end }}
+			{{- end }}
+			{{ .VarName }} = append({{ .VarName }}, {{ .ValueToAppend }})
+		}
+	}{{ if not .Optional }} else {
+		return {{ if .HasOutput }}nil, {{ end }}errors.New("\"{{ .MethodName }}\": \"{{ .OriginalVariableName }}\" must not be nil")
+	}{{ end }}

@@ -32,7 +32,6 @@ Be sure to replace the schema version to the latest version.
 ## Parts
 
 - Domain: Name of the domain being documented
-- Relationships: The relationships that your domain have with other domains and micro-services
 - Types: Generic types to be used as Input or Output for `Repository` and `Usecase` methods
 - Enums: Enums to be used as types for `Entity`, `Events` and `Repository` and `Usecase` methods
 - Entities: Tables on your database
@@ -47,6 +46,3 @@ Be sure to replace the schema version to the latest version.
 - Medium: Can only be accessed by services with special permission, cannot be logged or send in events
 - High: Can only be accessed inside the domain, cannot be accessed by other services, logged or send in events
 
-## `$ref`
-
-- The only things that you can `$ref` from relationships are `Events` and `Entities`, using the format: `Relationships.Foo.Entities.Bar`. `Foo` must be replaced by the name of the relationship, and **NOT** the `Domain` specified in the relationship file.
