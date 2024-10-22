@@ -36,16 +36,18 @@ func readFile(uri string) ([]byte, error) {
 
 func addInstallCommand(rootCmd *cobra.Command) {
 	buildCmd := &cobra.Command{
-		Use: "install [generator name] [generator uri]",
+		Use: "install [generator name] [generator uri] [generator version]",
 		Aliases: []string{
+			"install",
 			"add",
 			"i",
 		},
 		Short: "Install generators for Anvil",
-		Args:  cobra.MatchAll(cobra.ExactArgs(2), cobra.OnlyValidArgs),
+		Args:  cobra.MatchAll(cobra.ExactArgs(3), cobra.OnlyValidArgs),
 		Run: func(cmd *cobra.Command, args []string) {
 			name := args[0]
 			uri := args[1]
+			version := args[2]
 
 			fileData, err := readFile(uri)
 			if err != nil {
@@ -53,13 +55,14 @@ func addInstallCommand(rootCmd *cobra.Command) {
 			}
 
 			dir := config.GetConfigPath()
+			path := fmt.Sprintf("%s/generators/%s/%s", dir, name, version)
 
-			err = os.MkdirAll(dir+"/generators", os.ModePerm)
+			err = os.MkdirAll(path, os.ModePerm)
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			err = os.WriteFile(dir+"/generators/"+name, fileData, os.ModePerm)
+			err = os.WriteFile(path+"/bin", fileData, os.ModePerm)
 			if err != nil {
 				log.Fatal(err)
 			}

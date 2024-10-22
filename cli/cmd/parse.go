@@ -9,6 +9,11 @@ import (
 	"github.com/spf13/viper"
 )
 
+var (
+	// Used for flags.
+	schemaFiles []string
+)
+
 func addParseCommand(rootCmd *cobra.Command) {
 	parseCmd := &cobra.Command{
 		Use:   "parse",

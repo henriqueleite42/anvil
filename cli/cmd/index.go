@@ -10,9 +10,7 @@ import (
 
 var (
 	// Used for flags.
-	schemaFiles      []string
-	silent           bool
-	outputFolderPath string
+	silent bool
 
 	rootCmd = &cobra.Command{
 		Use:   "anvil",
