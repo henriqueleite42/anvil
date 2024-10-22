@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -15,12 +16,20 @@ import (
 
 func addBuildCommand(rootCmd *cobra.Command) {
 	buildCmd := &cobra.Command{
-		Use:     "generate",
-		Aliases: []string{"gen"},
-		Args:    cobra.ExactArgs(1),
-		Short:   "Generate the file to check for errors",
+		Use: "generate [config file path]",
+		Aliases: []string{
+			"generate",
+			"gen",
+		},
+		Args:  cobra.ExactArgs(1),
+		Short: "Run generators based on a config file",
 		Run: func(cmd *cobra.Command, args []string) {
-			generator := args[0]
+			configFilePath := args[0]
+
+			configFile, err := files.ReadConfigFile(configFilePath)
+			if err != nil {
+				log.Fatal(err)
+			}
 
 			argsToGenerator := []string{
 				"gen",
@@ -37,6 +46,10 @@ func addBuildCommand(rootCmd *cobra.Command) {
 			}
 
 			argsToGenerator = append(argsToGenerator,
+				"--config",
+				configFilePath,
+			)
+			argsToGenerator = append(argsToGenerator,
 				"--schema",
 				anvpPath,
 			)
@@ -45,22 +58,25 @@ func addBuildCommand(rootCmd *cobra.Command) {
 				argsToGenerator = append(argsToGenerator, "--silent")
 			}
 
-			if outputFolderPath != "" {
-				argsToGenerator = append(argsToGenerator, "--outDir", outputFolderPath)
-			}
+			for _, v := range configFile.Generators {
+				generatorPath := fmt.Sprintf(
+					"%s/generators/%s/%s/bin",
+					config.GetConfigPath(),
+					v.Name,
+					v.Version,
+				)
 
-			generatorPath := config.GetConfigPath() + "/generators/" + generator
+				if _, err := os.Stat(generatorPath); errors.Is(err, os.ErrNotExist) {
+					log.Fatalf("generator \"%s\" isn't installed. Run `anvil i %s <generator download uri> %s` to install it and run the command again", v.Name, v.Name, v.Version)
+				}
 
-			if _, err := os.Stat(generatorPath); errors.Is(err, os.ErrNotExist) {
-				log.Fatalf("generator \"%s\" isn't installed. Run `anvil install %s <generator download uri>` to install it and run the command again", generator, generator)
-			}
-
-			generatorCmd := exec.Command(generatorPath, argsToGenerator...)
-			generatorCmd.Stdout = os.Stdout
-			generatorCmd.Stderr = os.Stderr
-			err = generatorCmd.Run()
-			if err != nil {
-				log.Fatal(err)
+				generatorCmd := exec.Command(generatorPath, argsToGenerator...)
+				generatorCmd.Stdout = os.Stdout
+				generatorCmd.Stderr = os.Stderr
+				err = generatorCmd.Run()
+				if err != nil {
+					log.Fatal(err)
+				}
 			}
 		},
 	}
