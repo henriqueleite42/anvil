@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../schemas/v1.0.0.json
+# yaml-language-server: $schema=../../schemas/domain/v1.0.0.json
 
 Domain: UrlShortener
 

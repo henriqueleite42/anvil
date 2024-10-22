@@ -1,0 +1,51 @@
+{
+	"$schema": "https://json-schemas.org/draft/2020-12/schema",
+	"$id": "https://github.com/henriqueleite42/anvil/cli/blob/master/schemas/v1.0.0.json",
+	"title": "Anvil - Config",
+	"description": "Anvil config file",
+	"type": "object",
+	"properties": {
+		"AnvilVersion": {
+			"type": "string",
+			"description": "Version of Anvil CLI/Schema"
+		},
+		"Schemas": {
+			"type": "List",
+			"items": {
+				"type": "string"
+			}
+		},
+		"Generators": {
+			"type": "array",
+			"description": "List of generators to run",
+			"items": {
+				"type": "object",
+				"properties": {
+					"Name": {
+						"type": "string",
+						"description": "Generator name"
+					},
+					"Version": {
+						"type": "string",
+						"description": "Generator version"
+					},
+					"Parameters": {
+						"type": "object",
+						"description": "Parameters for the generator"
+					}
+				},
+				"required": [
+					"Name",
+					"Version",
+					"Parameters"
+				]
+			}
+		}
+	},
+	"required": [
+		"AnvilVersion",
+		"Schemas",
+		"Generators"
+	],
+	"additionalProperties": false
+}
