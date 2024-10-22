@@ -1,12 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"log/slog"
 	"os"
 	"strings"
 
+	generator_config "github.com/henriqueleite42/anvil/generators/go-project/config"
 	"github.com/henriqueleite42/anvil/generators/go-project/internal"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 	"gopkg.in/yaml.v3"
@@ -19,11 +19,11 @@ func main() {
 
 	command := os.Args[1]
 	if command != "gen" {
-		log.Fatal(fmt.Sprintf("invalid command \"%s\"", command))
+		log.Fatalf("invalid command \"%s\"", command)
 	}
 
 	var schemaPath string
-	var outputFolderPath string
+	var configPath string
 	var silent bool
 	for idx, arg := range os.Args {
 		if !strings.HasPrefix(arg, "--") {
@@ -35,8 +35,8 @@ func main() {
 			continue
 		}
 
-		if arg == "--outDir" {
-			outputFolderPath = os.Args[idx+1]
+		if arg == "--config" {
+			configPath = os.Args[idx+1]
 			continue
 		}
 
@@ -61,7 +61,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	files, err := internal.Parse(schema)
+	config := generator_config.GetConfig(configPath)
+
+	files, err := internal.Parse(schema, config)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -71,7 +73,7 @@ func main() {
 	}
 
 	for _, v := range files {
-		err = internal.WriteFile(outputFolderPath, v.Name, v.Content, v.Overwrite)
+		err = internal.WriteFile(config.OutDir, v.Name, v.Content, v.Overwrite)
 		if err != nil {
 			if strings.Contains(err.Error(), "already exists") {
 				slog.Warn(err.Error())

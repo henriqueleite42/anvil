@@ -14,7 +14,7 @@ func fileExists(path string) bool {
 	return true
 }
 
-func WriteFile(path string, fileNameWithPath string, content string, overwrite bool) error {
+func WriteFile(outputFilePath *string, fileNameWithPath string, content string, overwrite bool) error {
 	myDir, err := os.Getwd()
 	if err != nil {
 		return err
@@ -25,10 +25,11 @@ func WriteFile(path string, fileNameWithPath string, content string, overwrite b
 	partsToFile = partsToFile[:len(partsToFile)-1]
 	pathToFile := strings.Join(partsToFile, "/")
 
-	if path == "" {
+	path := ""
+	if outputFilePath == nil {
 		path = fmt.Sprintf("%s/%s", myDir, pathToFile)
 	} else {
-		path = fmt.Sprintf("%s/%s/%s", myDir, path, pathToFile)
+		path = fmt.Sprintf("%s/%s/%s", myDir, *outputFilePath, pathToFile)
 	}
 
 	err = os.MkdirAll(path, os.ModePerm)

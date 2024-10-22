@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	generator_config "github.com/henriqueleite42/anvil/generators/go-project/config"
 	"github.com/henriqueleite42/anvil/generators/go-project/internal/parser"
 	"github.com/henriqueleite42/anvil/generators/go-project/internal/templates"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/formatter"
@@ -30,7 +31,7 @@ type File struct {
 	Overwrite bool
 }
 
-func Parse(schema *schemas.AnvpSchema) ([]*File, error) {
+func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig) ([]*File, error) {
 	files := []*File{}
 
 	templateManager := template.NewTemplateManager()

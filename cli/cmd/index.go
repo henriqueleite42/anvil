@@ -10,7 +10,7 @@ import (
 
 var (
 	// Used for flags.
-	silent bool
+	global_Silent bool
 
 	rootCmd = &cobra.Command{
 		Use:   "anvil",
@@ -31,7 +31,7 @@ func init() {
 
 	addVersionCommand(rootCmd)
 	addParseCommand(rootCmd)
-	addBuildCommand(rootCmd)
+	addGenerateCommand(rootCmd)
 	addInstallCommand(rootCmd)
 }
 

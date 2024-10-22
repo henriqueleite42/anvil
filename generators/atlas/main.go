@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"strings"
 
+	generator_config "github.com/henriqueleite42/anvil/generators/atlas/config"
 	"github.com/henriqueleite42/anvil/generators/atlas/internal/postgres"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 	"gopkg.in/yaml.v3"
@@ -18,11 +18,11 @@ func main() {
 
 	command := os.Args[1]
 	if command != "gen" {
-		log.Fatal(fmt.Sprintf("invalid command \"%s\"", command))
+		log.Fatalf("invalid command \"%s\"", command)
 	}
 
 	var schemaPath string
-	var outputFolderPath string
+	var configPath string
 	var silent bool
 	for idx, arg := range os.Args {
 		if !strings.HasPrefix(arg, "--") {
@@ -34,8 +34,8 @@ func main() {
 			continue
 		}
 
-		if arg == "--outDir" {
-			outputFolderPath = os.Args[idx+1]
+		if arg == "--config" {
+			configPath = os.Args[idx+1]
 			continue
 		}
 
@@ -60,7 +60,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = postgres.Parse(schema, silent, outputFolderPath)
+	config := generator_config.GetConfig(configPath)
+
+	err = postgres.Parse(schema, silent, config.OutDir)
 	if err != nil {
 		log.Fatal(err)
 	}

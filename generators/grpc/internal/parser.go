@@ -26,7 +26,7 @@ var templatesNamesValues = map[string]string{
 	"protofile": templates.ProtofileTempl,
 }
 
-func Parse(schema *schemas.AnvpSchema, silent bool, outputFolderPath string) error {
+func Parse(schema *schemas.AnvpSchema, silent bool, outputFolderPath *string) error {
 	if schema.Deliveries == nil || schema.Deliveries.Deliveries == nil {
 		return fmt.Errorf("no delivery specified")
 	}

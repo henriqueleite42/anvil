@@ -14,8 +14,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-func addBuildCommand(rootCmd *cobra.Command) {
-	buildCmd := &cobra.Command{
+func addGenerateCommand(rootCmd *cobra.Command) {
+	generateCmd := &cobra.Command{
 		Use: "generate [config file path]",
 		Aliases: []string{
 			"generate",
@@ -35,12 +35,12 @@ func addBuildCommand(rootCmd *cobra.Command) {
 				"gen",
 			}
 
-			schema, err := parser.ParseAnvToAnvp(schemaFiles)
+			schema, err := parser.ParseAnvToAnvp(configFile.Schemas)
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			anvpPath, err := files.WriteAnvpFile(schema, schemaFiles)
+			anvpPath, err := files.WriteAnvpFile(schema, configFile.Schemas)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -54,7 +54,7 @@ func addBuildCommand(rootCmd *cobra.Command) {
 				anvpPath,
 			)
 
-			if silent {
+			if global_Silent {
 				argsToGenerator = append(argsToGenerator, "--silent")
 			}
 
@@ -81,8 +81,8 @@ func addBuildCommand(rootCmd *cobra.Command) {
 		},
 	}
 
-	buildCmd.PersistentFlags().BoolVar(&silent, "silent", false, "if it should have an effect or only run it silently")
+	generateCmd.PersistentFlags().BoolVar(&global_Silent, "silent", false, "if it should have an effect or only run it silently")
 	viper.BindPFlag("silent", rootCmd.PersistentFlags().Lookup("silent"))
 
-	rootCmd.AddCommand(buildCmd)
+	rootCmd.AddCommand(generateCmd)
 }
