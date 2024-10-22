@@ -1,6 +1,9 @@
 package templates
 
-import "fmt"
+import (
+	_ "embed"
+	"fmt"
+)
 
 type ProtofileTemplInputEnumValue struct {
 	Name    string
@@ -54,44 +57,5 @@ type ProtofileTemplInput struct {
 	Types   []*ProtofileTemplInputType
 }
 
-const ProtofileTempl = `syntax = "proto3";
-
-{{ range .Imports -}}
-import "{{ . }}";
-{{ end }}
-service {{ .Domain }}Api {
-	{{- range .Methods -}}
-		{{- if .Input }}
-			{{- if .Output }}
-	rpc {{ .Name }}({{ .Input }}) returns ({{ .Output }}) {}
-			{{- else }}
-	rpc {{ .Name }}({{ .Input }}) {}
-			{{- end }}
-		{{- else }}
-			{{- if .Output }}
-	rpc {{ .Name }}() returns ({{ .Output }}) {}
-			{{- else }}
-	rpc {{ .Name }}() {}
-			{{- end }}
-		{{- end }}
-	{{- end }}
-}
-
-{{ range .Enums -}}
-enum {{ .Name }} {
-	{{- range .Values }}
-	{{ .Name }}{{ .Spacing }} = {{ .Idx }};
-	{{- end }}
-	{{- if .DeprecatedValues }}
-
-	reserved {{ .GetDeprecatedValues }};
-	{{- end }}
-}
-{{ end }}
-{{ range .Types -}}
-message {{ .Name }} {
-	{{- range .Props }}
-	{{ .Type }}{{ .Spacing1 }} {{ .Name }}{{ .Spacing2 }} = {{ .Idx }};
-	{{- end}}
-}
-{{ end }}`
+//go:embed protofile.txt
+var ProtofileTempl string
