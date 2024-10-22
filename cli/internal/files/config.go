@@ -7,10 +7,11 @@ import (
 	"os"
 	"strings"
 
+	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 	"gopkg.in/yaml.v3"
 )
 
-func readAnvRemoteFile(uri string) (map[string]any, error) {
+func readConfigRemoteFile(uri string) (*schemas.Config, error) {
 	// TODO do something to accept remote repository requests and use ssh keys to authenticate, like go does
 	res, err := http.Get(uri)
 	if err != nil {
@@ -22,8 +23,8 @@ func readAnvRemoteFile(uri string) (map[string]any, error) {
 		log.Fatal(err)
 	}
 
-	data := map[string]any{}
-	err = yaml.Unmarshal(fileData, &data)
+	data := &schemas.Config{}
+	err = yaml.Unmarshal(fileData, data)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -31,14 +32,14 @@ func readAnvRemoteFile(uri string) (map[string]any, error) {
 	return data, nil
 }
 
-func readAnvLocalFile(uri string) (map[string]any, error) {
+func readConfigLocalFile(uri string) (*schemas.Config, error) {
 	fileData, err := os.ReadFile(uri)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	data := map[string]any{}
-	err = yaml.Unmarshal(fileData, &data)
+	data := &schemas.Config{}
+	err = yaml.Unmarshal(fileData, data)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -46,10 +47,10 @@ func readAnvLocalFile(uri string) (map[string]any, error) {
 	return data, nil
 }
 
-func ReadAnvFile(uri string) (map[string]any, error) {
+func ReadConfigFile(uri string) (*schemas.Config, error) {
 	if strings.HasPrefix(uri, "http") {
-		return readAnvRemoteFile(uri)
+		return readConfigRemoteFile(uri)
 	}
 
-	return readAnvLocalFile(uri)
+	return readConfigLocalFile(uri)
 }

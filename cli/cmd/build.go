@@ -65,15 +65,8 @@ func addBuildCommand(rootCmd *cobra.Command) {
 		},
 	}
 
-	buildCmd.PersistentFlags().StringSliceVar(&schemaFiles, "schema", []string{}, "config files")
-	buildCmd.MarkPersistentFlagRequired("schema")
-	viper.BindPFlag("schema", buildCmd.PersistentFlags().Lookup("schema"))
-
 	buildCmd.PersistentFlags().BoolVar(&silent, "silent", false, "if it should have an effect or only run it silently")
 	viper.BindPFlag("silent", rootCmd.PersistentFlags().Lookup("silent"))
-
-	buildCmd.PersistentFlags().StringVar(&outputFolderPath, "outDir", "", "output directory path")
-	viper.BindPFlag("outDir", rootCmd.PersistentFlags().Lookup("outDir"))
 
 	rootCmd.AddCommand(buildCmd)
 }
