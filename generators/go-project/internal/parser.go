@@ -258,8 +258,8 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 	}
 
 	goConfig, err := templateManager.Parse("go-mod", &templates.GoConfig{
-		PkgName:   "",
-		GoVersion: "1.22.4",
+		PkgName:   config.ModuleName,
+		GoVersion: config.GoVersion,
 	})
 	if err != nil {
 		return nil, err
