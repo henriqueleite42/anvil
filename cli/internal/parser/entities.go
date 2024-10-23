@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"slices"
 	"sort"
 	"strings"
 
@@ -171,6 +172,11 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 		}
 		columnRef := fmt.Sprintf("%s.Entities.%s.%s", i.curDomain, i.k, columnName)
 		hash := hashing.String(columnRef)
+
+		if slices.Contains(pkColumnsHashes, hash) {
+			return "", fmt.Errorf("duplicated column \"%s\" in \"%s.%s.PrimaryKey.%d\"", columnName, i.path, i.k, cni)
+		}
+
 		pkColumnsHashes = append(pkColumnsHashes, hash)
 	}
 	primaryKey := &schemas.EntityPrimaryKey{
@@ -193,6 +199,7 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 
 		indexes = map[string]*schemas.EntityIndex{}
 
+		indexesNamesToAvoidDuplication := map[string]bool{}
 		for kk, vv := range indexesArr {
 			vvMap, ok := vv.(map[string]any)
 			if !ok {
@@ -255,6 +262,11 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 				unique = uniqueBool
 			}
 
+			if indexesNamesToAvoidDuplication[name] {
+				return "", fmt.Errorf("duplicated index \"%s\" in \"%s.%s.Indexes.%d\"", name, i.path, i.k, kk)
+			}
+			indexesNamesToAvoidDuplication[name] = true
+
 			indexPath := fmt.Sprintf("%s.Indexes.%d", path, kk)
 			indexHash := hashing.String(indexPath)
 
@@ -286,6 +298,7 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 
 		foreignKeys = map[string]*schemas.EntityForeignKey{}
 
+		foreignKeysNamesToAvoidDuplication := map[string]bool{}
 		for kk, vv := range foreignKeysArr {
 			vvMap, ok := vv.(map[string]any)
 			if !ok {
@@ -386,6 +399,11 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 			} else {
 				name = fmt.Sprintf("%s_%s_fk", tableName, strings.Join(columnsNamesForFkName, "_"))
 			}
+
+			if foreignKeysNamesToAvoidDuplication[name] {
+				return "", fmt.Errorf("duplicated index \"%s\" in \"%s.%s.ForeignKeys.%d\"", name, i.path, i.k, kk)
+			}
+			foreignKeysNamesToAvoidDuplication[name] = true
 
 			var onDelete *string = nil
 			onDeleteAny, ok := vvMap["OnDelete"]
