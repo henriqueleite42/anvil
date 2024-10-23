@@ -51,7 +51,27 @@ func GetConfig(filePath string) *GeneratorConfig {
 		outDir = &outDirString
 	}
 
+	moduleNameAny, ok := params["ModuleName"]
+	if !ok {
+		log.Fatalf("%s: ModuleName is a required parameter", GENERATOR_NAME)
+	}
+	moduleName, ok := moduleNameAny.(string)
+	if !ok {
+		log.Fatalf("%s: fail to parse ModuleName to string", GENERATOR_NAME)
+	}
+
+	goVersionAny, ok := params["GoVersion"]
+	if !ok {
+		log.Fatalf("%s: GoVersion is a required parameter", GENERATOR_NAME)
+	}
+	goVersion, ok := goVersionAny.(string)
+	if !ok {
+		log.Fatalf("%s: fail to parse GoVersion to string", GENERATOR_NAME)
+	}
+
 	return &GeneratorConfig{
-		OutDir: outDir,
+		OutDir:     outDir,
+		ModuleName: moduleName,
+		GoVersion:  goVersion,
 	}
 }

@@ -101,7 +101,7 @@ func Parse(schema *schemas.AnvpSchema, silent bool, outputFolderPath *string) er
 
 		if schema.Types != nil && schema.Types.Types != nil {
 			for _, v := range schema.Types.Types {
-				if strings.HasPrefix(v.Ref, curDomain) {
+				if strings.HasPrefix(v.Ref, curDomain) && v.RootNode == "Types" {
 					parserInstance.resolveType(curDomain, v)
 				}
 			}

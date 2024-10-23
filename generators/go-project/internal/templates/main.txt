@@ -4,7 +4,6 @@ import (
 	"os"
 
 	"github.com/rs/zerolog"
-	_ "github.com/lib/pq"
 )
 
 func main() {
