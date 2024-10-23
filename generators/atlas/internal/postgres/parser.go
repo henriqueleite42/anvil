@@ -8,7 +8,7 @@ import (
 	"github.com/henriqueleite42/anvil/language-helpers/golang/template"
 )
 
-func Parse(schema *schemas.AnvpSchema, silent bool, outputFolderPath string) error {
+func Parse(schema *schemas.AnvpSchema, silent bool, outputFolderPath *string) error {
 	if schema.Entities == nil || schema.Entities.Entities == nil {
 		return fmt.Errorf("no entities to create tables")
 	}

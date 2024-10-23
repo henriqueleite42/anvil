@@ -6,15 +6,15 @@ import (
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
-func WriteFile(schema *schemas.AnvpSchema, outputFolderPath string, content string) error {
+func WriteFile(schema *schemas.AnvpSchema, outputFolderPath *string, content string) error {
 	myDir, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 
 	path := myDir
-	if outputFolderPath != "" {
-		path = myDir + "/" + outputFolderPath
+	if outputFolderPath != nil {
+		path = myDir + "/" + *outputFolderPath
 	}
 
 	err = os.MkdirAll(path, os.ModePerm)

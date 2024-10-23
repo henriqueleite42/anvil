@@ -11,7 +11,7 @@ import (
 
 var (
 	// Used for flags.
-	schemaFiles []string
+	parse_SchemaFiles []string
 )
 
 func addParseCommand(rootCmd *cobra.Command) {
@@ -19,27 +19,27 @@ func addParseCommand(rootCmd *cobra.Command) {
 		Use:   "parse",
 		Short: "Parse the file to create the formatted version",
 		Run: func(cmd *cobra.Command, args []string) {
-			schema, err := parser.ParseAnvToAnvp(schemaFiles)
+			schema, err := parser.ParseAnvToAnvp(parse_SchemaFiles)
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			if silent {
+			if global_Silent {
 				return
 			}
 
-			_, err = files.WriteAnvpFile(schema, schemaFiles)
+			_, err = files.WriteAnvpFile(schema, parse_SchemaFiles)
 			if err != nil {
 				log.Fatal(err)
 			}
 		},
 	}
 
-	parseCmd.PersistentFlags().StringSliceVar(&schemaFiles, "schema", []string{}, "config files")
+	parseCmd.PersistentFlags().StringSliceVar(&parse_SchemaFiles, "schema", []string{}, "config files")
 	parseCmd.MarkPersistentFlagRequired("schema")
 	viper.BindPFlag("schema", parseCmd.PersistentFlags().Lookup("schema"))
 
-	parseCmd.PersistentFlags().BoolVar(&silent, "silent", false, "if it should have an effect or only run it silently")
+	parseCmd.PersistentFlags().BoolVar(&global_Silent, "silent", false, "if it should have an effect or only run it silently")
 	viper.BindPFlag("silent", rootCmd.PersistentFlags().Lookup("silent"))
 
 	rootCmd.AddCommand(parseCmd)

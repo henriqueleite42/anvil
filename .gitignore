@@ -8,12 +8,13 @@
 *.so
 *.dylib
 /bin
-/cli/cli
+/cli/anvil
 
-# Test binary, built with `go test -c`
+# Testing things
 *.test
 /test
 /test-all
+/anvil.yaml
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out

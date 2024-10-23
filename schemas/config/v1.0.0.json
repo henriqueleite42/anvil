@@ -10,7 +10,7 @@
 			"description": "Version of Anvil CLI/Schema"
 		},
 		"Schemas": {
-			"type": "List",
+			"type": "array",
 			"items": {
 				"type": "string"
 			}

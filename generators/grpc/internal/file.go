@@ -6,7 +6,7 @@ import (
 	"github.com/henriqueleite42/anvil/language-helpers/golang/formatter"
 )
 
-func WriteFile(curDomain string, outputFolderPath string, content string) error {
+func WriteFile(curDomain string, outputFolderPath *string, content string) error {
 	myDir, err := os.Getwd()
 	if err != nil {
 		return err
@@ -15,8 +15,8 @@ func WriteFile(curDomain string, outputFolderPath string, content string) error 
 	domainKebab := formatter.PascalToKebab(curDomain)
 
 	path := myDir
-	if outputFolderPath != "" {
-		path = myDir + "/" + outputFolderPath
+	if outputFolderPath != nil {
+		path = myDir + "/" + *outputFolderPath
 	}
 
 	err = os.MkdirAll(path, os.ModePerm)

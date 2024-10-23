@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	generator_config "github.com/henriqueleite42/anvil/generators/go-project/config"
 	"github.com/henriqueleite42/anvil/generators/go-project/internal/parser"
 	"github.com/henriqueleite42/anvil/generators/go-project/internal/templates"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/formatter"
@@ -30,7 +31,7 @@ type File struct {
 	Overwrite bool
 }
 
-func Parse(schema *schemas.AnvpSchema) ([]*File, error) {
+func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig) ([]*File, error) {
 	files := []*File{}
 
 	templateManager := template.NewTemplateManager()
@@ -113,7 +114,7 @@ func Parse(schema *schemas.AnvpSchema) ([]*File, error) {
 				return nil, err
 			}
 			files = append(files, &File{
-				Name:      "models/" + domainKebab + ".go",
+				Name:      "internal/models/" + domainKebab + ".go",
 				Content:   models,
 				Overwrite: true,
 			})
@@ -125,7 +126,7 @@ func Parse(schema *schemas.AnvpSchema) ([]*File, error) {
 				return nil, err
 			}
 			files = append(files, &File{
-				Name:      fmt.Sprintf("repository/%s/%s.go", domainKebab, domainKebab),
+				Name:      fmt.Sprintf("internal/repository/%s/%s.go", domainKebab, domainKebab),
 				Content:   repository,
 				Overwrite: true,
 			})
@@ -135,7 +136,7 @@ func Parse(schema *schemas.AnvpSchema) ([]*File, error) {
 				return nil, err
 			}
 			files = append(files, &File{
-				Name:    fmt.Sprintf("repository/%s/implementation.go", domainKebab),
+				Name:    fmt.Sprintf("internal/repository/%s/implementation.go", domainKebab),
 				Content: repositoryStruct,
 			})
 
@@ -152,7 +153,7 @@ func Parse(schema *schemas.AnvpSchema) ([]*File, error) {
 				}
 				methodNameKebab := formatter.PascalToKebab(v.MethodName)
 				files = append(files, &File{
-					Name:    fmt.Sprintf("repository/%s/%s.go", domainKebab, methodNameKebab),
+					Name:    fmt.Sprintf("internal/repository/%s/%s.go", domainKebab, methodNameKebab),
 					Content: repositoryMethod,
 				})
 			}
@@ -164,7 +165,7 @@ func Parse(schema *schemas.AnvpSchema) ([]*File, error) {
 				return nil, err
 			}
 			files = append(files, &File{
-				Name:      fmt.Sprintf("usecase/%s/%s.go", domainKebab, domainKebab),
+				Name:      fmt.Sprintf("internal/usecase/%s/%s.go", domainKebab, domainKebab),
 				Content:   usecase,
 				Overwrite: true,
 			})
@@ -174,7 +175,7 @@ func Parse(schema *schemas.AnvpSchema) ([]*File, error) {
 				return nil, err
 			}
 			files = append(files, &File{
-				Name:    fmt.Sprintf("usecase/%s/implementation.go", domainKebab),
+				Name:    fmt.Sprintf("internal/usecase/%s/implementation.go", domainKebab),
 				Content: usecaseStruct,
 			})
 
@@ -191,7 +192,7 @@ func Parse(schema *schemas.AnvpSchema) ([]*File, error) {
 				}
 				methodNameKebab := formatter.PascalToKebab(v.MethodName)
 				files = append(files, &File{
-					Name:    fmt.Sprintf("usecase/%s/%s.go", domainKebab, methodNameKebab),
+					Name:    fmt.Sprintf("internal/usecase/%s/%s.go", domainKebab, methodNameKebab),
 					Content: usecaseMethod,
 				})
 			}
@@ -208,7 +209,7 @@ func Parse(schema *schemas.AnvpSchema) ([]*File, error) {
 			files = append(
 				files,
 				&File{
-					Name:      fmt.Sprintf("delivery/grpc/%s/%s.go", templInput.DomainSnake, domainKebab),
+					Name:      fmt.Sprintf("internal/delivery/grpc/%s/%s.go", templInput.DomainSnake, domainKebab),
 					Content:   grpcModule,
 					Overwrite: true,
 				},
@@ -220,26 +221,26 @@ func Parse(schema *schemas.AnvpSchema) ([]*File, error) {
 		files = append(
 			files,
 			&File{
-				Name:      "adapters/validator.go",
+				Name:      "internal/adapters/validator.go",
 				Content:   templates.ValidatorTempl,
 				Overwrite: true,
 			},
 			&File{
-				Name:    "adapters/go-validator/go-validator.go",
+				Name:    "internal/adapters/go-validator/go-validator.go",
 				Content: templates.ValidatorImplementationTempl,
 			},
 			&File{
-				Name:      "delivery/delivery.go",
+				Name:      "internal/delivery/delivery.go",
 				Content:   templates.DeliveryTempl,
 				Overwrite: true,
 			},
 			&File{
-				Name:      "delivery/gratefully-shutdown.go",
+				Name:      "internal/delivery/gratefully-shutdown.go",
 				Content:   templates.GratefullyShutdownTempl,
 				Overwrite: true,
 			},
 			&File{
-				Name:      "utils/sync.go",
+				Name:      "internal/utils/sync.go",
 				Content:   templates.UtilsSyncTempl,
 				Overwrite: true,
 			},
@@ -250,7 +251,7 @@ func Parse(schema *schemas.AnvpSchema) ([]*File, error) {
 		files = append(
 			files,
 			&File{
-				Name:    "delivery/grpc/grpc.go",
+				Name:    "internal/delivery/grpc/grpc.go",
 				Content: templates.GrpcDeliveryTempl,
 			},
 		)
