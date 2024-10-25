@@ -2,7 +2,6 @@ package types_parser
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
@@ -51,29 +50,18 @@ func (self *typeParser) ParseEnum(e *schemas.Enum) (*Enum, error) {
 	}
 
 	enum := &Enum{
-		GolangPkg:        self.enumsPkg,
+		Import:           self.getEnumsImport(e),
 		GolangName:       e.Name,
 		GolangType:       eType,
 		Values:           make([]*EnumValue, 0, len(e.Values)),
 		DeprecatedValues: []*EnumValue{},
 	}
 
-	biggest := len(e.Values[0].Name)
 	for _, v := range e.Values {
-		newLen := len(v.Name)
-		if newLen > biggest {
-			biggest = newLen
-		}
-	}
-
-	for _, v := range e.Values {
-		targetLen := biggest - len(v.Name)
-
 		value := &EnumValue{
-			Idx:     v.Index,
-			Name:    v.Name,
-			Spacing: strings.Repeat(" ", targetLen),
-			Value:   v.Value,
+			Idx:   v.Index,
+			Name:  v.Name,
+			Value: v.Value,
 		}
 
 		if v.Deprecated {

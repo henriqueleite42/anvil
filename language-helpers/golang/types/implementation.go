@@ -1,20 +1,22 @@
 package types_parser
 
 import (
+	"github.com/henriqueleite42/anvil/language-helpers/golang/imports"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
+
+type GetEnumImport func(e *schemas.Enum) *imports.Import
+type GetTypeImport func(t *schemas.Type) *imports.Import
 
 type typeParser struct {
 	schema *schemas.AnvpSchema
 
-	moduleName string
-
-	enumsPkg      string
-	typesPkg      string
-	eventsPkg     string
-	entitiesPkg   string
-	repositoryPkg string
-	usecasePkg    string
+	getEnumsImport      GetEnumImport
+	getTypesImport      GetTypeImport
+	getEventsImport     GetTypeImport
+	getEntitiesImport   GetTypeImport
+	getRepositoryImport GetTypeImport
+	getUsecaseImport    GetTypeImport
 
 	typesToAvoidDuplication map[string]*Type
 	enumsToAvoidDuplication map[string]*Enum
@@ -25,38 +27,29 @@ type typeParser struct {
 	entities   []*Type
 	repository []*Type
 	usecase    []*Type
-
-	importsTypes      map[string]bool
-	importsEnums      map[string]bool
-	importsEvents     map[string]bool
-	importsEntities   map[string]bool
-	importsRepository map[string]bool
-	importsUsecase    map[string]bool
 }
 
 type NewTypeParserInput struct {
-	Schema        *schemas.AnvpSchema
-	ModuleName    string
-	EnumsPkg      string
-	TypesPkg      string
-	EventsPkg     string
-	EntitiesPkg   string
-	RepositoryPkg string
-	UsecasePkg    string
+	Schema *schemas.AnvpSchema
+
+	GetEnumsImport      GetEnumImport
+	GetTypesImport      GetTypeImport
+	GetEventsImport     GetTypeImport
+	GetEntitiesImport   GetTypeImport
+	GetRepositoryImport GetTypeImport
+	GetUsecaseImport    GetTypeImport
 }
 
 func NewTypeParser(i *NewTypeParserInput) (TypesParser, error) {
 	return &typeParser{
 		schema: i.Schema,
 
-		moduleName: i.ModuleName,
-
-		enumsPkg:      i.EnumsPkg,
-		typesPkg:      i.TypesPkg,
-		eventsPkg:     i.EventsPkg,
-		entitiesPkg:   i.EntitiesPkg,
-		repositoryPkg: i.RepositoryPkg,
-		usecasePkg:    i.UsecasePkg,
+		getEnumsImport:      i.GetEnumsImport,
+		getTypesImport:      i.GetTypesImport,
+		getEventsImport:     i.GetEventsImport,
+		getEntitiesImport:   i.GetEntitiesImport,
+		getRepositoryImport: i.GetRepositoryImport,
+		getUsecaseImport:    i.GetUsecaseImport,
 
 		typesToAvoidDuplication: map[string]*Type{},
 		enumsToAvoidDuplication: map[string]*Enum{},
@@ -67,12 +60,5 @@ func NewTypeParser(i *NewTypeParserInput) (TypesParser, error) {
 		entities:   []*Type{},
 		repository: []*Type{},
 		usecase:    []*Type{},
-
-		importsTypes:      map[string]bool{},
-		importsEnums:      map[string]bool{},
-		importsEvents:     map[string]bool{},
-		importsEntities:   map[string]bool{},
-		importsRepository: map[string]bool{},
-		importsUsecase:    map[string]bool{},
 	}, nil
 }

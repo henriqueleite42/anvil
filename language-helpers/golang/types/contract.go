@@ -1,8 +1,48 @@
 package types_parser
 
 import (
+	"github.com/henriqueleite42/anvil/language-helpers/golang/imports"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
+
+type MapProp struct {
+	Name string
+	Type *Type
+	Tags []string
+}
+
+type Type struct {
+	ModuleImport *imports.Import // Import of the module of the type, only Maps, Enums and Lists (of Maps nad Enums) will have one
+	GolangType   string
+	AnvilType    schemas.TypeType
+	Optional     bool
+	MapProps     []*MapProp
+
+	// Internal use, handles all the imports necessary to
+	// create the struct declaration of the type
+	//
+	// Ex: Id it's a Map that has a prop with type `time.Time`, it will add
+	// "time" to the imports list.
+	//
+	// It doesn't work atr a deep level: If it's a Map with a child Map,
+	// The imports will not have the necessary imports for the child Map or
+	// the import for the child's module. They will be at the child's type.
+	imports imports.ImportsManager
+}
+
+type EnumValue struct {
+	Idx   uint
+	Name  string
+	Value string
+}
+
+type Enum struct {
+	Import           *imports.Import
+	GolangName       string // Enum name
+	GolangType       string // string, int, etc
+	Values           []*EnumValue
+	DeprecatedValues []*EnumValue
+}
 
 // The objective of the types parser is to help you to convert
 // Anvil types to Golang types.
@@ -15,27 +55,6 @@ import (
 // Note that the types parser must be used **per domain**, and not per schema,
 // since a single schema can have multiple domains.
 type TypesParser interface {
-	// Add an import to the list (already handles duplicated imports)
-	AddTypesImport(impt string)
-	// Returns imports divided by groups (like the formatter does), each group is sorted alphabetically
-	GetTypesImports(curPkg string) [][]string
-	// Add an import to the list (already handles duplicated imports)
-	AddEventsImport(impt string)
-	// Returns imports divided by groups (like the formatter does), each group is sorted alphabetically
-	GetEventsImports(curPkg string) [][]string
-	// Add an import to the list (already handles duplicated imports)
-	AddEntitiesImport(impt string)
-	// Returns imports divided by groups (like the formatter does), each group is sorted alphabetically
-	GetEntitiesImports(curPkg string) [][]string
-	// Add an import to the list (already handles duplicated imports)
-	AddRepositoryImport(impt string)
-	// Returns imports divided by groups (like the formatter does), each group is sorted alphabetically
-	GetRepositoryImports(curPkg string) [][]string
-	// Add an import to the list (already handles duplicated imports)
-	AddUsecaseImport(impt string)
-	// Returns imports divided by groups (like the formatter does), each group is sorted alphabetically
-	GetUsecaseImports(curPkg string) [][]string
-
 	// Parse an enum, then adds it to the list and returns the parsed enum
 	ParseEnum(e *schemas.Enum) (*Enum, error)
 	// Parse a type and all it's children (if any), then adds them all to the list and returns the root parsed type

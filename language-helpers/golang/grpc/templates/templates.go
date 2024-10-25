@@ -25,9 +25,6 @@ type InputPropMapTemplProp struct {
 type InputPropMapTemplInput struct {
 	IndentationLvl int // internal use, controls sub levels
 
-	HasOutput            bool
-	MethodName           string
-	Optional             bool
 	OriginalVariableName string
 	Prepare              []string
 	Props                []*InputPropMapTemplProp
@@ -47,9 +44,6 @@ type InputPropListTemplInput struct {
 	IndentationLvl int // internal use, controls sub levels
 
 	ChildOptional        bool
-	HasOutput            bool
-	MethodName           string
-	Optional             bool
 	OriginalVariableName string
 	Prepare              []string
 	Type                 string

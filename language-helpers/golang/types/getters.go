@@ -1,6 +1,19 @@
 package types_parser
 
-import "sort"
+import (
+	"sort"
+
+	"github.com/henriqueleite42/anvil/language-helpers/golang/imports"
+)
+
+// Get ALL imports from type and child types recursively
+func GetImports(t *Type) []*imports.Import {
+	if t == nil || t.imports == nil {
+		return []*imports.Import{}
+	}
+
+	return t.imports.GetImportsUnorganized()
+}
 
 func (self *typeParser) GetEnums() []*Enum {
 	sort.Slice(self.enums, func(i, j int) bool {

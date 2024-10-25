@@ -5,34 +5,13 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/henriqueleite42/anvil/language-helpers/golang/imports"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
-func (self *typeParser) getNodePkg(node string) (string, error) {
-	if node == "Enums" {
-		return self.enumsPkg, nil
-	} else if node == "Types" {
-		return self.typesPkg, nil
-	} else if node == "Events" {
-		return self.eventsPkg, nil
-	} else if node == "Entities" {
-		return self.entitiesPkg, nil
-	} else if node == "Repository" {
-		return self.repositoryPkg, nil
-	} else if node == "Usecase" {
-		return self.usecasePkg, nil
-	} else {
-		return "", fmt.Errorf("unable to get package  node \"%s\"", node)
-	}
-}
-
 // originalRootNode is used so we can pass to the child types their parent module
 // and see if it need to be imported or not
-func (self *typeParser) parseType(t *schemas.Type, originalRootNode string) (*Type, error) {
-	if originalRootNode == "" {
-		originalRootNode = t.RootNode
-	}
-
+func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
 	result := &Type{
 		Optional:  t.Optional,
 		AnvilType: t.Type,
@@ -91,20 +70,9 @@ func (self *typeParser) parseType(t *schemas.Type, originalRootNode string) (*Ty
 	}
 	if t.Type == schemas.TypeType_Timestamp {
 		result.GolangType = "time.Time"
-
-		if t.RootNode == "Types" {
-			self.AddTypesImport("time")
-		} else if t.RootNode == "Events" {
-			self.AddEventsImport("time")
-		} else if t.RootNode == "Entities" {
-			self.AddEntitiesImport("time")
-		} else if t.RootNode == "Repository" {
-			self.AddRepositoryImport("time")
-		} else if t.RootNode == "Usecase" {
-			self.AddUsecaseImport("time")
-		} else {
-			return nil, fmt.Errorf("unable to get package for \"%s\"", t.Ref)
-		}
+		result.ModuleImport = imports.NewImport("time", nil)
+		result.imports = imports.NewImportsManager()
+		result.imports.AddImport("time", nil)
 	}
 
 	// ----------------------
@@ -120,24 +88,10 @@ func (self *typeParser) parseType(t *schemas.Type, originalRootNode string) (*Ty
 			return nil, err
 		}
 
-		result.GolangPkg = &enum.GolangPkg
 		result.GolangType = enum.GolangName
-
-		if schemaEnum.RootNode != originalRootNode {
-			if originalRootNode == "Types" {
-				self.AddTypesImport(self.enumsPkg)
-			} else if originalRootNode == "Events" {
-				self.AddEventsImport(self.enumsPkg)
-			} else if originalRootNode == "Entities" {
-				self.AddEntitiesImport(self.enumsPkg)
-			} else if originalRootNode == "Repository" {
-				self.AddRepositoryImport(self.enumsPkg)
-			} else if originalRootNode == "Usecase" {
-				self.AddUsecaseImport(self.enumsPkg)
-			} else {
-				return nil, fmt.Errorf("unable to get package for \"%s\"", t.Ref)
-			}
-		}
+		result.ModuleImport = self.getEnumsImport(schemaEnum)
+		result.imports = imports.NewImportsManager()
+		result.imports.MergeImport(result.ModuleImport)
 	}
 	if t.Type == schemas.TypeType_List {
 		childType, ok := self.schema.Types.Types[t.ChildTypes[0].TypeHash]
@@ -145,7 +99,7 @@ func (self *typeParser) parseType(t *schemas.Type, originalRootNode string) (*Ty
 			return nil, fmt.Errorf("type \"%s\" not found", t.ChildTypes[0].TypeHash)
 		}
 
-		resolvedChildType, err := self.parseType(childType, t.RootNode)
+		resolvedChildType, err := self.ParseType(childType)
 		if err != nil {
 			return nil, err
 		}
@@ -158,29 +112,9 @@ func (self *typeParser) parseType(t *schemas.Type, originalRootNode string) (*Ty
 			golangType = "[]" + resolvedChildType.GolangType
 		}
 
-		if childType.RootNode != originalRootNode {
-			pkgToImport, err := self.getNodePkg(childType.RootNode)
-			if err != nil {
-				return nil, err
-			}
-
-			if originalRootNode == "Types" {
-				self.AddTypesImport(pkgToImport)
-			} else if originalRootNode == "Events" {
-				self.AddEventsImport(pkgToImport)
-			} else if originalRootNode == "Entities" {
-				self.AddEntitiesImport(pkgToImport)
-			} else if originalRootNode == "Repository" {
-				self.AddRepositoryImport(pkgToImport)
-			} else if originalRootNode == "Usecase" {
-				self.AddUsecaseImport(pkgToImport)
-			} else {
-				return nil, fmt.Errorf("unable to get package for \"%s\"", t.Ref)
-			}
-		}
-
-		result.GolangPkg = resolvedChildType.GolangPkg
 		result.GolangType = golangType
+		result.ModuleImport = resolvedChildType.ModuleImport
+		result.imports = resolvedChildType.imports
 	}
 
 	// ----------------------
@@ -196,6 +130,8 @@ func (self *typeParser) parseType(t *schemas.Type, originalRootNode string) (*Ty
 
 		props := make([]*MapProp, len(t.ChildTypes))
 
+		result.imports = imports.NewImportsManager()
+
 		for k, v := range t.ChildTypes {
 			if v.PropName == nil {
 				return nil, fmt.Errorf("ChildType \"%s.%d\" must have a PropName", t.Name, k)
@@ -206,30 +142,14 @@ func (self *typeParser) parseType(t *schemas.Type, originalRootNode string) (*Ty
 				return nil, fmt.Errorf("type \"%s\" not found", v.TypeHash)
 			}
 
-			if childType.RootNode != originalRootNode {
-				pkgToImport, err := self.getNodePkg(childType.RootNode)
-				if err != nil {
-					return nil, err
-				}
-
-				if originalRootNode == "Types" {
-					self.AddTypesImport(pkgToImport)
-				} else if originalRootNode == "Events" {
-					self.AddEventsImport(pkgToImport)
-				} else if originalRootNode == "Entities" {
-					self.AddEntitiesImport(pkgToImport)
-				} else if originalRootNode == "Repository" {
-					self.AddRepositoryImport(pkgToImport)
-				} else if originalRootNode == "Usecase" {
-					self.AddUsecaseImport(pkgToImport)
-				} else {
-					return nil, fmt.Errorf("unable to get package for \"%s\"", t.Ref)
-				}
-			}
-
-			propType, err := self.parseType(childType, childType.RootNode)
+			propType, err := self.ParseType(childType)
 			if err != nil {
 				return nil, err
+			}
+
+			if propType.ModuleImport != nil {
+				// Maps should import all of their properties modules
+				result.imports.MergeImport(propType.ModuleImport)
 			}
 
 			prop := &MapProp{
@@ -256,48 +176,33 @@ func (self *typeParser) parseType(t *schemas.Type, originalRootNode string) (*Ty
 			props[k] = prop
 		}
 
-		if len(props) > 0 {
-			biggestName := 0
-			biggestType := 0
-			for _, v := range props {
-				newLenName := len(v.Name)
-				if newLenName > biggestName {
-					biggestName = newLenName
-				}
-
-				newLenType := len(v.Type.GolangType)
-				if newLenType > biggestType {
-					biggestType = newLenType
-				}
-			}
-
-			for _, v := range props {
-				targetLenName := biggestName - len(v.Name)
-				v.Spacing1 = strings.Repeat(" ", targetLenName)
-
-				targetLenType := biggestType - len(v.Type.GolangType)
-				v.Spacing2 = strings.Repeat(" ", targetLenType)
-			}
-		}
-
 		result.GolangType = t.Name
 		result.MapProps = props
+
+		if t.RootNode == "Types" {
+			result.ModuleImport = self.getTypesImport(t)
+		} else if t.RootNode == "Events" {
+			result.ModuleImport = self.getEventsImport(t)
+		} else if t.RootNode == "Entities" {
+			result.ModuleImport = self.getEntitiesImport(t)
+		} else if t.RootNode == "Repository" {
+			result.ModuleImport = self.getRepositoryImport(t)
+		} else if t.RootNode == "Usecase" {
+			result.ModuleImport = self.getUsecaseImport(t)
+		}
+
+		result.imports.AddImport(result.ModuleImport.Path, &result.ModuleImport.Alias)
 	}
 
 	if t.RootNode == "Types" {
-		result.GolangPkg = &self.typesPkg
 		self.types = append(self.types, result)
 	} else if t.RootNode == "Events" {
-		result.GolangPkg = &self.eventsPkg
 		self.events = append(self.events, result)
 	} else if t.RootNode == "Entities" {
-		result.GolangPkg = &self.entitiesPkg
 		self.entities = append(self.entities, result)
 	} else if t.RootNode == "Repository" {
-		result.GolangPkg = &self.repositoryPkg
 		self.repository = append(self.repository, result)
 	} else if t.RootNode == "Usecase" {
-		result.GolangPkg = &self.usecasePkg
 		self.usecase = append(self.usecase, result)
 	} else {
 		return nil, fmt.Errorf("unable to get package for \"%s\"", t.Ref)
@@ -306,8 +211,4 @@ func (self *typeParser) parseType(t *schemas.Type, originalRootNode string) (*Ty
 	self.typesToAvoidDuplication[t.Ref] = result
 
 	return result, nil
-}
-
-func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
-	return self.parseType(t, "")
 }

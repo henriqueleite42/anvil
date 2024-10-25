@@ -1,24 +1,5 @@
 package schemas
 
-// Common
-
-type Dependency struct {
-	OriginalPath string `yaml:"OriginalPath"`
-	Name         string `yaml:"Name"`
-	StateHash    string `yaml:"StateHash"`
-	ImportHash   string `yaml:"ImportHash"`
-}
-
-type Dependencies struct {
-	StateHash    string                 `yaml:"StateHash"`
-	Dependencies map[string]*Dependency `yaml:"Dependencies"`
-}
-
-type Inputs struct {
-	StateHash string                 `yaml:"StateHash"`
-	Inputs    map[string]*Dependency `yaml:"Inputs"`
-}
-
 // Schema
 
 type Schema struct {
@@ -34,6 +15,7 @@ type Auth struct {
 	Ref          string `yaml:"Ref"`
 	OriginalPath string `yaml:"OriginalPath"`
 	RootNode     string `yaml:"RootNode"`
+	Domain       string `yaml:"Domain"`
 	StateHash    string `yaml:"StateHash"`
 
 	Name             string  `yaml:"Name"`
@@ -58,15 +40,17 @@ type EnumValue struct {
 }
 
 type Enum struct {
-	Ref          string       `yaml:"Ref"`
-	OriginalPath string       `yaml:"OriginalPath"`
-	Name         string       `yaml:"Name"`
-	DbName       string       `yaml:"DbName"`
-	DbType       string       `yaml:"DbType"`
-	RootNode     string       `yaml:"RootNode"`
-	StateHash    string       `yaml:"StateHash"`
-	Type         EnumType     `yaml:"Type"`
-	Values       []*EnumValue `yaml:"Values"`
+	Ref          string `yaml:"Ref"`
+	OriginalPath string `yaml:"OriginalPath"`
+	RootNode     string `yaml:"RootNode"`
+	Domain       string `yaml:"Domain"`
+	StateHash    string `yaml:"StateHash"`
+
+	Name   string       `yaml:"Name"`
+	DbName string       `yaml:"DbName"`
+	DbType string       `yaml:"DbType"`
+	Type   EnumType     `yaml:"Type"`
+	Values []*EnumValue `yaml:"Values"`
 }
 
 type Enums struct {
@@ -82,11 +66,13 @@ type TypeChild struct {
 }
 
 type Type struct {
-	Ref             string              `yaml:"Ref"`
-	OriginalPath    string              `yaml:"OriginalPath"`
+	Ref          string `yaml:"Ref"`
+	OriginalPath string `yaml:"OriginalPath"`
+	RootNode     string `yaml:"RootNode"`
+	Domain       string `yaml:"Domain"`
+	StateHash    string `yaml:"StateHash"`
+
 	Name            string              `yaml:"Name"` // This is the TYPE name, not the property name or variable name
-	RootNode        string              `yaml:"RootNode"`
-	StateHash       string              `yaml:"StateHash"`
 	Confidentiality TypeConfidentiality `yaml:"Confidentiality"`
 	Optional        bool                `yaml:"Optional"`
 	Format          *string             `yaml:"Format,omitempty" json:"Format,omitempty"`
@@ -110,13 +96,15 @@ type Types struct {
 // Events
 
 type Event struct {
-	Ref          string   `yaml:"Ref"`
-	OriginalPath string   `yaml:"OriginalPath"`
-	Name         string   `yaml:"Name"`
-	RootNode     string   `yaml:"RootNode"`
-	StateHash    string   `yaml:"StateHash"`
-	Formats      []string `yaml:"Formats"`
-	TypeHash     string   `yaml:"TypeHash"`
+	Ref          string `yaml:"Ref"`
+	OriginalPath string `yaml:"OriginalPath"`
+	RootNode     string `yaml:"RootNode"`
+	Domain       string `yaml:"Domain"`
+	StateHash    string `yaml:"StateHash"`
+
+	Name     string   `yaml:"Name"`
+	Formats  []string `yaml:"Formats"`
+	TypeHash string   `yaml:"TypeHash"`
 }
 
 type Events struct {
@@ -172,14 +160,15 @@ type EntityForeignKey struct {
 type Entity struct {
 	Ref          string `yaml:"Ref"`
 	OriginalPath string `yaml:"OriginalPath"`
-	Name         string `yaml:"Name"`
+	Domain       string `yaml:"Domain"`
 	RootNode     string `yaml:"RootNode"`
-	TypeHash     string `yaml:"TypeHash"`
+	StateHash    string `yaml:"StateHash"`
 	Order        uint   `yaml:"Order"`
 
+	Name        string                       `yaml:"Name"`
+	TypeHash    string                       `yaml:"TypeHash"`
 	DbSchema    *string                      `yaml:"DbSchema,omitempty" json:"DbSchema,omitempty"`
 	DbName      string                       `yaml:"DbName"`
-	StateHash   string                       `yaml:"StateHash"`
 	Columns     map[string]*EntityColumn     `yaml:"Columns"`
 	PrimaryKey  *EntityPrimaryKey            `yaml:"PrimaryKey"`
 	Indexes     map[string]*EntityIndex      `yaml:"Indexes,omitempty" json:"Indexes,omitempty"`
@@ -205,6 +194,7 @@ type RepositoryMethodOutput struct {
 type RepositoryMethod struct {
 	Ref          string `yaml:"Ref"`
 	OriginalPath string `yaml:"OriginalPath"`
+	Domain       string `yaml:"Domain"`
 	StateHash    string `yaml:"StateHash"`
 	Order        uint   `yaml:"Order"`
 
@@ -220,10 +210,8 @@ type RepositoryMethods struct {
 }
 
 type Repository struct {
-	StateHash    string             `yaml:"StateHash"`
-	Dependencies *Dependencies      `yaml:"Dependencies,omitempty" json:"Dependencies,omitempty"`
-	Inputs       *Inputs            `yaml:"Inputs,omitempty" json:"Inputs,omitempty"`
-	Methods      *RepositoryMethods `yaml:"Methods"`
+	StateHash string             `yaml:"StateHash"`
+	Methods   *RepositoryMethods `yaml:"Methods"`
 }
 
 type Repositories struct {
@@ -242,15 +230,17 @@ type UsecaseMethodOutput struct {
 }
 
 type UsecaseMethod struct {
-	Ref          string               `yaml:"Ref"`
-	OriginalPath string               `yaml:"OriginalPath"`
-	Order        uint                 `yaml:"Order"`
-	Name         string               `yaml:"Name"`
-	Description  *string              `yaml:"Description,omitempty" json:"Description,omitempty"`
-	StateHash    string               `yaml:"StateHash"`
-	Input        *UsecaseMethodInput  `yaml:"Input,omitempty" json:"Input,omitempty"`
-	Output       *UsecaseMethodOutput `yaml:"Output,omitempty" json:"Output,omitempty"`
-	EventHashes  []string             `yaml:"EventHashes,omitempty" json:"EventHashes,omitempty"`
+	Ref          string `yaml:"Ref"`
+	OriginalPath string `yaml:"OriginalPath"`
+	Domain       string `yaml:"Domain"`
+	StateHash    string `yaml:"StateHash"`
+	Order        uint   `yaml:"Order"`
+
+	Name        string               `yaml:"Name"`
+	Description *string              `yaml:"Description,omitempty" json:"Description,omitempty"`
+	Input       *UsecaseMethodInput  `yaml:"Input,omitempty" json:"Input,omitempty"`
+	Output      *UsecaseMethodOutput `yaml:"Output,omitempty" json:"Output,omitempty"`
+	EventHashes []string             `yaml:"EventHashes,omitempty" json:"EventHashes,omitempty"`
 }
 
 type UsecaseMethods struct {
@@ -259,10 +249,8 @@ type UsecaseMethods struct {
 }
 
 type Usecase struct {
-	StateHash    string          `yaml:"StateHash"`
-	Dependencies *Dependencies   `yaml:"Dependencies,omitempty" json:"Dependencies,omitempty"`
-	Inputs       *Inputs         `yaml:"Inputs,omitempty" json:"Inputs,omitempty"`
-	Methods      *UsecaseMethods `yaml:"Methods"`
+	StateHash string          `yaml:"StateHash"`
+	Methods   *UsecaseMethods `yaml:"Methods"`
 }
 
 type Usecases struct {
@@ -278,20 +266,24 @@ type DeliveryServers struct {
 
 type DeliveryGrpcRpcExample struct {
 	OriginalPath string `yaml:"OriginalPath"`
-	Name         string `yaml:"Name"`
+	Domain       string `yaml:"Domain"`
 	StateHash    string `yaml:"StateHash"`
-	StatusCode   uint   `yaml:"StatusCode"`
-	Message      any    `yaml:"Message"`
-	Returns      any    `yaml:"Returns"`
+
+	Name       string `yaml:"Name"`
+	StatusCode uint   `yaml:"StatusCode"`
+	Message    any    `yaml:"Message"`
+	Returns    any    `yaml:"Returns"`
 }
 
 type DeliveryGrpcRpc struct {
-	Ref               string                             `yaml:"Ref"`
-	OriginalPath      string                             `yaml:"OriginalPath"`
-	StateHash         string                             `yaml:"StateHash"`
+	Ref          string `yaml:"Ref"`
+	OriginalPath string `yaml:"OriginalPath"`
+	Domain       string `yaml:"Domain"`
+	StateHash    string `yaml:"StateHash"`
+	Order        uint   `yaml:"Order"`
+
 	Name              string                             `yaml:"Name"`
 	UsecaseMethodHash string                             `yaml:"UsecaseMethodHash"`
-	Order             uint                               `yaml:"Order"`
 	Examples          map[string]*DeliveryGrpcRpcExample `yaml:"Examples,omitempty" json:"Examples,omitempty"`
 }
 
@@ -302,17 +294,21 @@ type DeliveryGrpc struct {
 
 type DeliveryHttpRouteExample struct {
 	OriginalPath string `yaml:"OriginalPath"`
-	Name         string `yaml:"Name"`
+	Domain       string `yaml:"Domain"`
 	StateHash    string `yaml:"StateHash"`
+
+	Name string `yaml:"Name"`
 	// TODO
 }
 
 type DeliveryHttpRoute struct {
-	Ref                string                               `yaml:"Ref"`
-	OriginalPath       string                               `yaml:"OriginalPath"`
-	StateHash          string                               `yaml:"StateHash"`
+	Ref          string `yaml:"Ref"`
+	OriginalPath string `yaml:"OriginalPath"`
+	Domain       string `yaml:"Domain"`
+	StateHash    string `yaml:"StateHash"`
+	Order        uint   `yaml:"Order"`
+
 	UsecaseMethodHash  string                               `yaml:"UsecaseMethodHash"`
-	Order              uint                                 `yaml:"Order"`
 	StatusCode         uint                                 `yaml:"StatusCode"`
 	HttpMethod         string                               `yaml:"HttpMethod"`
 	Path               string                               `yaml:"Path"`
@@ -329,16 +325,20 @@ type DeliveryHttp struct {
 
 type DeliveryQueueQueueExample struct {
 	OriginalPath string `yaml:"OriginalPath"`
-	Name         string `yaml:"Name"`
+	Domain       string `yaml:"Domain"`
 	StateHash    string `yaml:"StateHash"`
 	Order        uint   `yaml:"Order"`
+
+	Name string `yaml:"Name"`
 	// TODO
 }
 
 type DeliveryQueueQueue struct {
-	Ref               string                                `yaml:"Ref"`
-	OriginalPath      string                                `yaml:"OriginalPath"`
-	StateHash         string                                `yaml:"StateHash"`
+	Ref          string `yaml:"Ref"`
+	OriginalPath string `yaml:"OriginalPath"`
+	Domain       string `yaml:"Domain"`
+	StateHash    string `yaml:"StateHash"`
+
 	UsecaseMethodHash string                                `yaml:"UsecaseMethodHash"`
 	QueueId           string                                `yaml:"QueueId"`
 	Bulk              bool                                  `yaml:"Bulk"`
@@ -351,12 +351,11 @@ type DeliveryQueue struct {
 }
 
 type Delivery struct {
-	StateHash    string                      `yaml:"StateHash"`
-	Dependencies *Dependencies               `yaml:"Dependencies,omitempty" json:"Dependencies,omitempty"`
-	Servers      map[string]*DeliveryServers `yaml:"Servers"`
-	Grpc         *DeliveryGrpc               `yaml:"Grpc,omitempty" json:"Grpc,omitempty"`
-	Http         *DeliveryHttp               `yaml:"Http,omitempty" json:"Http,omitempty"`
-	Queue        *DeliveryQueue              `yaml:"Queue,omitempty" json:"Queue,omitempty"`
+	StateHash string                      `yaml:"StateHash"`
+	Servers   map[string]*DeliveryServers `yaml:"Servers"`
+	Grpc      *DeliveryGrpc               `yaml:"Grpc,omitempty" json:"Grpc,omitempty"`
+	Http      *DeliveryHttp               `yaml:"Http,omitempty" json:"Http,omitempty"`
+	Queue     *DeliveryQueue              `yaml:"Queue,omitempty" json:"Queue,omitempty"`
 }
 
 type Deliveries struct {

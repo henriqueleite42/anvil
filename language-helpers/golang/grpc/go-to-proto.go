@@ -6,21 +6,27 @@ import (
 
 	"github.com/henriqueleite42/anvil/language-helpers/golang/formatter"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/grpc/templates"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/imports"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
-func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
-	if i == nil {
+func (self *goGrpcParser) goToProto(i *convertingInput) (*convertingValue, error) {
+	if i == nil || i.input == nil {
 		return nil, fmt.Errorf("GoToProto: input is required")
 	}
-	if i.Type == nil {
+	if i.input.Type == nil {
 		return nil, fmt.Errorf("GoToProto: \"Type\" is required")
 	}
-	t := i.Type
+	oi := i.input
+	t := oi.Type
 
-	name := i.TypeName
-	if name == "" {
-		name = t.Name
+	name := t.Name
+	if i.overwriteTypeName != nil {
+		name = *i.overwriteTypeName
+	}
+	nameWithPrefix := name
+	if i.prefixForVariableNaming != nil {
+		nameWithPrefix = *i.prefixForVariableNaming + name
 	}
 
 	parsedType, err := self.goTypeParser.ParseType(t)
@@ -28,54 +34,54 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 		return nil, err
 	}
 
-	golangType := parsedType.GetFullTypeName(i.CurPkg)
-	golangTypeName := parsedType.GetTypeName(i.CurPkg)
+	golangType := parsedType.GetFullTypeName(oi.CurModuleImport.Path)
+	golangTypeName := parsedType.GetTypeName(oi.CurModuleImport.Path)
 
-	if t.Type == schemas.TypeType_String ||
-		t.Type == schemas.TypeType_Int ||
-		t.Type == schemas.TypeType_Float ||
-		t.Type == schemas.TypeType_Bool {
-		return &Type{
+	if isBasicType(t.Type) {
+		// Doesn't need conversion
+		return &convertingValue{
 			GolangType:     golangType,
 			GolangTypeName: golangTypeName,
 			ProtoType:      golangType,
 			ProtoTypeName:  golangTypeName,
-			Value:          i.VariableToAccessTheValue,
+			Value:          oi.VarToConvert,
 		}, nil
 	}
 	if t.Type == schemas.TypeType_Timestamp {
-		self.imports["google.golang.org/protobuf/types/known/timestamppb"] = true
+		importsManager := imports.NewImportsManager()
+		importsManager.AddImport("google.golang.org/protobuf/types/known/timestamppb", nil)
 
 		pbType := "timestamppb.Timestamp"
 
+		val := &convertingValue{
+			GolangType:     golangType,
+			GolangTypeName: golangTypeName,
+			ProtoType:      "*" + pbType,
+			ProtoTypeName:  pbType,
+
+			imports: importsManager,
+		}
+
 		if t.Optional {
-			varName := formatter.PascalToCamel(i.PrefixForVariableNaming + name)
+			varName := formatter.PascalToCamel(nameWithPrefix)
 			prepareOptional, err := self.templateManager.Parse("input-prop-optional", &templates.InputPropOptionalTemplInput{
 				VarName:              varName,
-				OriginalVariableName: i.VariableToAccessTheValue,
+				OriginalVariableName: oi.VarToConvert,
 				Type:                 "*" + pbType,
-				ValueToAssign:        fmt.Sprintf("timestamppb.New(*%s)", i.VariableToAccessTheValue),
+				ValueToAssign:        fmt.Sprintf("timestamppb.New(*%s)", oi.VarToConvert),
 			})
 			if err != nil {
 				return nil, err
 			}
 
-			return &Type{
-				GolangType:     golangType,
-				GolangTypeName: golangTypeName,
-				ProtoType:      "*" + pbType,
-				ProtoTypeName:  pbType,
-				Value:          varName,
-				Prepare:        []string{prepareOptional},
-			}, nil
+			val.Value = varName
+			val.Prepare = []string{prepareOptional}
+
+			return val, nil
 		} else {
-			return &Type{
-				GolangType:     golangType,
-				GolangTypeName: golangTypeName,
-				ProtoType:      "*" + pbType,
-				ProtoTypeName:  pbType,
-				Value:          fmt.Sprintf("timestamppb.New(%s)", i.VariableToAccessTheValue),
-			}, nil
+			val.Value = fmt.Sprintf("timestamppb.New(%s)", oi.VarToConvert)
+
+			return val, nil
 		}
 	}
 	if t.Type == schemas.TypeType_Enum {
@@ -92,37 +98,39 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 			return nil, err
 		}
 
-		pbType := "pb." + enum.GolangName
+		importsManager := imports.NewImportsManager()
+		importsManager.MergeImport(oi.PbModuleImport)
+
+		pbType := oi.PbModuleImport.Alias + "." + enum.GolangName
+
+		val := &convertingValue{
+			GolangType:     golangType,
+			GolangTypeName: golangTypeName,
+			ProtoType:      "*" + pbType,
+			ProtoTypeName:  pbType,
+		}
 
 		if t.Optional {
-			varName := formatter.PascalToCamel(i.PrefixForVariableNaming + name)
+			varName := formatter.PascalToCamel(nameWithPrefix)
 			prepareOptional, err := self.templateManager.Parse("input-prop-optional", &templates.InputPropOptionalTemplInput{
 				VarName:              varName,
-				OriginalVariableName: i.VariableToAccessTheValue,
+				OriginalVariableName: oi.VarToConvert,
 				Type:                 "*" + pbType,
-				ValueToAssign:        fmt.Sprintf("convert%sToPb(*%s)", enum.GolangName, i.VariableToAccessTheValue),
+				ValueToAssign:        fmt.Sprintf("convert%sToPb(*%s)", enum.GolangName, oi.VarToConvert),
 				NeedsPointer:         true,
 			})
 			if err != nil {
 				return nil, err
 			}
 
-			return &Type{
-				GolangType:     golangType,
-				GolangTypeName: golangTypeName,
-				ProtoType:      "*" + pbType,
-				ProtoTypeName:  pbType,
-				Prepare:        []string{prepareOptional},
-				Value:          varName,
-			}, nil
+			val.Value = varName
+			val.Prepare = []string{prepareOptional}
+
+			return val, nil
 		} else {
-			return &Type{
-				GolangType:     golangType,
-				GolangTypeName: golangTypeName,
-				ProtoType:      pbType,
-				ProtoTypeName:  pbType,
-				Value:          fmt.Sprintf("convert%sToPb(%s)", enum.GolangName, i.VariableToAccessTheValue),
-			}, nil
+			val.Value = fmt.Sprintf("convert%sToPb(%s)", enum.GolangName, oi.VarToConvert)
+
+			return val, nil
 		}
 	}
 	if t.Type == schemas.TypeType_List {
@@ -138,59 +146,54 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 			return nil, fmt.Errorf("type \"%s\" not found", t.ChildTypes[0].TypeHash)
 		}
 
-		if childType.Type == schemas.TypeType_String ||
-			childType.Type == schemas.TypeType_Int ||
-			childType.Type == schemas.TypeType_Float ||
-			childType.Type == schemas.TypeType_Bool {
-			return &Type{
-				GolangType:     golangType,
-				GolangTypeName: golangTypeName,
-				ProtoType:      golangType,
-				ProtoTypeName:  golangTypeName,
-				Value:          i.VariableToAccessTheValue,
-			}, nil
+		if isBasicType(childType.Type) {
+			return self.goToProto(&convertingInput{
+				input: &ConverterInput{
+					CurModuleImport: oi.CurModuleImport,
+					PbModuleImport:  oi.PbModuleImport,
+					Type:            childType,
+					VarToConvert:    oi.VarToConvert,
+				},
+			})
 		}
 
-		varNamePascal := i.PrefixForVariableNaming + name
-		varName := formatter.PascalToCamel(varNamePascal)
+		varName := formatter.PascalToCamel(nameWithPrefix)
 
-		r, err := self.GoToProto(&GoToProtoInput{
-			indentationLvl: i.indentationLvl + 1,
-			MethodName:     i.MethodName,
-			HasOutput:      i.HasOutput,
-			CurPkg:         i.CurPkg,
-
-			Type:                     childType,
-			TypeName:                 childType.Name,
-			VariableToAccessTheValue: "v",
-			PrefixForVariableNaming:  varNamePascal,
+		r, err := self.goToProto(&convertingInput{
+			indentationLvl:          i.indentationLvl + 1,
+			prefixForVariableNaming: &nameWithPrefix,
+			input: &ConverterInput{
+				CurModuleImport: oi.CurModuleImport,
+				PbModuleImport:  oi.PbModuleImport,
+				VarToConvert:    "v",
+				Type:            childType,
+			},
 		})
 		if err != nil {
 			return nil, err
 		}
 
 		prepareList, err := self.templateManager.Parse("input-prop-list", &templates.InputPropListTemplInput{
-			MethodName:           i.MethodName,
 			VarName:              varName,
-			OriginalVariableName: i.VariableToAccessTheValue,
+			OriginalVariableName: oi.VarToConvert,
 			Type:                 r.ProtoType,
 			ValueToAppend:        r.Value,
-			Optional:             t.Optional,
 			ChildOptional:        childType.Optional,
-			HasOutput:            i.HasOutput,
 			Prepare:              r.Prepare,
 		})
 		if err != nil {
 			return nil, err
 		}
 
-		return &Type{
+		return &convertingValue{
 			GolangType:     golangType,
 			GolangTypeName: golangTypeName,
 			ProtoType:      "[]" + r.ProtoType,
 			ProtoTypeName:  "[]" + r.ProtoType,
 			Value:          varName,
 			Prepare:        []string{prepareList},
+
+			imports: r.imports,
 		}, nil
 	}
 	if t.Type == schemas.TypeType_Map {
@@ -209,11 +212,12 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 			}
 		}
 
-		varNamePascal := i.PrefixForVariableNaming + name
-		varName := formatter.PascalToCamel(varNamePascal)
+		varName := formatter.PascalToCamel(nameWithPrefix)
 
 		props := make([]*templates.InputPropMapTemplProp, 0, len(t.ChildTypes))
 		var prepare []string = nil
+
+		importsManager := imports.NewImportsManager()
 
 		for _, v := range t.ChildTypes {
 			propType, ok := self.schema.Types.Types[v.TypeHash]
@@ -221,15 +225,9 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 				return nil, fmt.Errorf("type \"%s\" not found", v.TypeHash)
 			}
 
-			propNameWithPrefix := *v.PropName
-			if i.VariableToAccessTheValue != "" {
-				propNameWithPrefix = fmt.Sprintf("%s.%s", i.VariableToAccessTheValue, *v.PropName)
-			}
+			propNameWithPrefix := fmt.Sprintf("%s.%s", oi.VarToConvert, *v.PropName)
 
-			if propType.Type == schemas.TypeType_String ||
-				propType.Type == schemas.TypeType_Int ||
-				propType.Type == schemas.TypeType_Float ||
-				propType.Type == schemas.TypeType_Bool {
+			if isBasicType(propType.Type) {
 				props = append(props, &templates.InputPropMapTemplProp{
 					Name:    *v.PropName,
 					Spacing: strings.Repeat(" ", biggestName-len(*v.PropName)),
@@ -238,20 +236,27 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 				continue
 			}
 
-			r, err := self.GoToProto(&GoToProtoInput{
-				indentationLvl: i.indentationLvl + 1,
-				MethodName:     i.MethodName,
-				HasOutput:      i.HasOutput,
-				CurPkg:         i.CurPkg,
+			overwriteTypeName := name + *v.PropName
+			r, err := self.goToProto(&convertingInput{
+				indentationLvl:          i.indentationLvl + 1,
+				overwriteTypeName:       &overwriteTypeName,
+				prefixForVariableNaming: &nameWithPrefix,
 
-				Type:                     propType,
-				TypeName:                 name + *v.PropName,
-				VariableToAccessTheValue: propNameWithPrefix,
-				PrefixForVariableNaming:  varNamePascal,
+				input: &ConverterInput{
+					CurModuleImport: oi.CurModuleImport,
+					PbModuleImport:  oi.PbModuleImport,
+					Type:            propType,
+					VarToConvert:    propNameWithPrefix,
+				},
 			})
 			if err != nil {
 				return nil, err
 			}
+
+			if r.imports != nil {
+				importsManager.MergeImports(r.imports.GetImportsUnorganized())
+			}
+
 			props = append(props, &templates.InputPropMapTemplProp{
 				Name:    *v.PropName,
 				Spacing: strings.Repeat(" ", biggestName-len(*v.PropName)),
@@ -263,39 +268,63 @@ func (self *goGrpcParser) GoToProto(i *GoToProtoInput) (*Type, error) {
 			prepare = append(prepare, r.Prepare...)
 		}
 
-		pbType, err := self.GetProtoTypeName(i.CurDomain, t)
+		pbType, err := GetProtoTypeName(t)
 		if err != nil {
 			return nil, err
 		}
 
-		pkgPb := "pb"
 		prepareMap, err := self.templateManager.Parse("input-prop-map", &templates.InputPropMapTemplInput{
-			MethodName:           i.MethodName,
 			VarName:              varName,
-			OriginalVariableName: i.VariableToAccessTheValue,
+			OriginalVariableName: oi.VarToConvert,
 			Type:                 pbType,
-			Optional:             t.Optional,
-			HasOutput:            i.HasOutput,
 			Prepare:              prepare,
 			IndentationLvl:       i.indentationLvl + 1,
 			Props:                props,
-			TypePkg:              &pkgPb,
+			TypePkg:              &oi.PbModuleImport.Alias,
 		})
 		if err != nil {
 			return nil, err
 		}
 
-		pbTypeWithPkg := pkgPb + "." + pbType
+		pbTypeWithPkg := oi.PbModuleImport.Alias + "." + pbType
 
-		return &Type{
+		var mapImports imports.ImportsManager = nil
+		if importsManager.GetImportsLen() != 0 {
+			mapImports = importsManager
+		}
+
+		return &convertingValue{
 			GolangType:     golangType,
 			GolangTypeName: golangTypeName,
 			ProtoType:      "*" + pbTypeWithPkg,
 			ProtoTypeName:  pbTypeWithPkg,
 			Value:          varName,
 			Prepare:        []string{prepareMap},
+
+			imports: mapImports,
 		}, nil
 	}
 
 	return nil, fmt.Errorf("invalid type \"%s\"", t.Type)
+}
+
+func (self *goGrpcParser) GoToProto(i *ConverterInput) (*ConvertedValue, error) {
+	result, err := self.goToProto(&convertingInput{
+		input:          i,
+		indentationLvl: 0,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var importsUnorganized []*imports.Import = nil
+	if result.imports != nil {
+		importsUnorganized = result.imports.GetImportsUnorganized()
+	}
+
+	return &ConvertedValue{
+		Value:              result.Value,
+		Prepare:            result.Prepare,
+		ImportsUnorganized: importsUnorganized,
+	}, nil
 }

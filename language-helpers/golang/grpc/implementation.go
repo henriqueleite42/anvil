@@ -10,30 +10,12 @@ import (
 type goGrpcParser struct {
 	schema *schemas.AnvpSchema
 
-	imports map[string]bool
-
-	enumsPkg      string
-	typesPkg      string
-	eventsPkg     string
-	entitiesPkg   string
-	repositoryPkg string
-	usecasePkg    string
-
 	goTypeParser    types_parser.TypesParser
 	templateManager template.TemplateManager
 }
 
 type NewGrpcParserInput struct {
 	Schema *schemas.AnvpSchema
-
-	ModuleName string
-
-	EnumsPkg      string
-	TypesPkg      string
-	EventsPkg     string
-	EntitiesPkg   string
-	RepositoryPkg string
-	UsecasePkg    string
 
 	GoTypeParser types_parser.TypesParser
 }
@@ -47,8 +29,6 @@ func NewGrpcParser(i *NewGrpcParserInput) GrpcParser {
 
 	return &goGrpcParser{
 		schema: i.Schema,
-
-		imports: map[string]bool{},
 
 		goTypeParser:    i.GoTypeParser,
 		templateManager: templateManager,
