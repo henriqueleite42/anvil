@@ -23,7 +23,7 @@ func (self *Type) GetTypeName(curModuleAlias string) string {
 
 	moduleAlias := self.ModuleImport.Alias
 
-	if self.AnvilType != schemas.TypeType_List {
+	if self.AnvilType.Type != schemas.TypeType_List {
 		return moduleAlias + "." + self.GolangType
 	}
 
@@ -40,13 +40,13 @@ func (self *Type) GetTypeName(curModuleAlias string) string {
 func (self *Type) GetFullTypeName(curModuleAlias string) string {
 	typeName := self.GetTypeName(curModuleAlias)
 
-	if self.AnvilType == schemas.TypeType_Map {
+	if self.AnvilType.Type == schemas.TypeType_Map {
 		typeName = "*" + typeName
 	}
 
 	if self.Optional &&
-		self.AnvilType != schemas.TypeType_Map &&
-		self.AnvilType != schemas.TypeType_List {
+		self.AnvilType.Type != schemas.TypeType_Map &&
+		self.AnvilType.Type != schemas.TypeType_List {
 		typeName = "*" + typeName
 	}
 

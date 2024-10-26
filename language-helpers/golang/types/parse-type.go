@@ -14,7 +14,7 @@ import (
 func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
 	result := &Type{
 		Optional:  t.Optional,
-		AnvilType: t.Type,
+		AnvilType: t,
 	}
 
 	// ----------------------
@@ -105,7 +105,7 @@ func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
 		}
 
 		var golangType string
-		if resolvedChildType.AnvilType == schemas.TypeType_Map ||
+		if resolvedChildType.AnvilType.Type == schemas.TypeType_Map ||
 			resolvedChildType.Optional {
 			golangType = "[]*" + resolvedChildType.GolangType
 		} else {

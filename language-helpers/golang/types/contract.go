@@ -12,9 +12,10 @@ type MapProp struct {
 }
 
 type Type struct {
+	AnvilType *schemas.Type
+
 	ModuleImport *imports.Import // Import of the module of the type, only Maps, Enums and Lists (of Maps nad Enums) will have one
 	GolangType   string
-	AnvilType    schemas.TypeType
 	Optional     bool
 	MapProps     []*MapProp
 
@@ -37,6 +38,8 @@ type EnumValue struct {
 }
 
 type Enum struct {
+	AnvilEnum *schemas.Enum
+
 	Import           *imports.Import
 	GolangName       string // Enum name
 	GolangType       string // string, int, etc

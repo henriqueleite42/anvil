@@ -93,7 +93,7 @@ func strOnly() {
 		log.Fatalf("TypeParser: fail to parse \"str\": %s", err.Error())
 	}
 
-	if strParsed.AnvilType != str.Type {
+	if strParsed.AnvilType.Type != str.Type {
 		log.Fatal("TypeParser: fail to parse \"str\": AnvilType != str.Type")
 	}
 	if strParsed.GolangType != "string" {
