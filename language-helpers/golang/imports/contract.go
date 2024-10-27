@@ -23,10 +23,9 @@ type ImportsManager interface {
 
 	// Return how many imports are in the list
 	GetImportsLen() int
-
-	// Return sorted imports, divided into standard and external, and filters the current pkg
-	GetImports(curPkg string) [][]string
-
 	// Return imports without any kind of sorting or filtering
 	GetImportsUnorganized() []*Import
+
+	// Return sorted imports, divided into standard and external, and filters the current pkg
+	ResolveImports(curPkg string) [][]string
 }

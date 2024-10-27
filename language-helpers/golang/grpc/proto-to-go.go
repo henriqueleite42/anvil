@@ -50,7 +50,7 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 	if t.Type == schemas.TypeType_Timestamp {
 		importsManager := imports.NewImportsManager()
 		importsManager.AddImport("time", nil)
-		importsManager.MergeImports(parsedType.GetImports())
+		importsManager.MergeImports(parsedType.GetImportsUnorganized())
 
 		pbType := "timestamppb.Timestamp"
 
@@ -220,7 +220,7 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 		var prepare []string = nil
 
 		importsManager := imports.NewImportsManager()
-		importsManager.MergeImports(parsedType.GetImports())
+		importsManager.MergeImports(parsedType.GetImportsUnorganized())
 
 		for _, v := range t.ChildTypes {
 			propType, ok := self.schema.Types.Types[v.TypeHash]
