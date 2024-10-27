@@ -323,6 +323,11 @@ func (self *goGrpcParser) GoToProto(i *ConverterInput) (*ConvertedValue, error) 
 	}
 
 	return &ConvertedValue{
+		GolangType:     result.GolangType,
+		GolangTypeName: result.GolangTypeName,
+		ProtoType:      result.ProtoType,
+		ProtoTypeName:  result.ProtoTypeName,
+
 		Value:              result.Value,
 		Prepare:            result.Prepare,
 		ImportsUnorganized: importsUnorganized,

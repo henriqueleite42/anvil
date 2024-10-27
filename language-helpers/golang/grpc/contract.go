@@ -36,6 +36,11 @@ type ConverterInput struct {
 
 // Value already converted
 type ConvertedValue struct {
+	GolangType     string // Already includes package, and * if necessary. Ex: *foo.Bar, *string, int32
+	GolangTypeName string // Only includes the type name and package. Ex: foo.Bar, string, int32
+	ProtoType      string // Already includes package, and * if necessary. Ex: *foo.Bar, *string, int32
+	ProtoTypeName  string // Only includes the type name and package. Ex: foo.Bar, string, int32
+
 	Value              string   // The value to be used. It can be the name of an variable or the value directly
 	Prepare            []string // Things necessary to prepare the value. In the template, it must come BEFORE the usage of the value
 	ImportsUnorganized []*imports.Import
