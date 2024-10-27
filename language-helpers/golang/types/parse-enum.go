@@ -50,6 +50,8 @@ func (self *typeParser) ParseEnum(e *schemas.Enum) (*Enum, error) {
 	}
 
 	enum := &Enum{
+		AnvilEnum: e,
+
 		Import:           self.getEnumsImport(e),
 		GolangName:       e.Name,
 		GolangType:       eType,
