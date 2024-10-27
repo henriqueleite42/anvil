@@ -181,31 +181,27 @@ func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
 
 		if t.RootNode == "Types" {
 			result.ModuleImport = self.getTypesImport(t)
+			result.imports.AddImport(result.ModuleImport.Path, &result.ModuleImport.Alias)
+			self.types = append(self.types, result)
 		} else if t.RootNode == "Events" {
 			result.ModuleImport = self.getEventsImport(t)
+			result.imports.AddImport(result.ModuleImport.Path, &result.ModuleImport.Alias)
+			self.events = append(self.events, result)
 		} else if t.RootNode == "Entities" {
 			result.ModuleImport = self.getEntitiesImport(t)
+			result.imports.AddImport(result.ModuleImport.Path, &result.ModuleImport.Alias)
+			self.entities = append(self.entities, result)
 		} else if t.RootNode == "Repository" {
 			result.ModuleImport = self.getRepositoryImport(t)
+			result.imports.AddImport(result.ModuleImport.Path, &result.ModuleImport.Alias)
+			self.repository = append(self.repository, result)
 		} else if t.RootNode == "Usecase" {
 			result.ModuleImport = self.getUsecaseImport(t)
+			result.imports.AddImport(result.ModuleImport.Path, &result.ModuleImport.Alias)
+			self.usecase = append(self.usecase, result)
+		} else {
+			return nil, fmt.Errorf("unable to get package for \"%s\"", t.Ref)
 		}
-
-		result.imports.AddImport(result.ModuleImport.Path, &result.ModuleImport.Alias)
-	}
-
-	if t.RootNode == "Types" {
-		self.types = append(self.types, result)
-	} else if t.RootNode == "Events" {
-		self.events = append(self.events, result)
-	} else if t.RootNode == "Entities" {
-		self.entities = append(self.entities, result)
-	} else if t.RootNode == "Repository" {
-		self.repository = append(self.repository, result)
-	} else if t.RootNode == "Usecase" {
-		self.usecase = append(self.usecase, result)
-	} else {
-		return nil, fmt.Errorf("unable to get package for \"%s\"", t.Ref)
 	}
 
 	self.typesToAvoidDuplication[t.Ref] = result
