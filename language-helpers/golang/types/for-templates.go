@@ -13,11 +13,15 @@ import (
 // ---------------------------------
 
 func (self *MapProp) GetTagsString() string {
+	if self.Tags == nil {
+		return ""
+	}
+
 	return strings.Join(self.Tags, " ")
 }
 
 func (self *Type) GetTypeName(curModuleAlias string) string {
-	if self.ModuleImport.Alias == curModuleAlias {
+	if self.ModuleImport == nil || self.ModuleImport.Alias == curModuleAlias {
 		return self.GolangType
 	}
 
