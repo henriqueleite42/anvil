@@ -50,6 +50,7 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 	if t.Type == schemas.TypeType_Timestamp {
 		importsManager := imports.NewImportsManager()
 		importsManager.AddImport("time", nil)
+		importsManager.MergeImports(parsedType.GetImports())
 
 		pbType := "timestamppb.Timestamp"
 
@@ -219,6 +220,7 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 		var prepare []string = nil
 
 		importsManager := imports.NewImportsManager()
+		importsManager.MergeImports(parsedType.GetImports())
 
 		for _, v := range t.ChildTypes {
 			propType, ok := self.schema.Types.Types[v.TypeHash]
@@ -275,7 +277,7 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 		}
 
 		var typePkg *string
-		if childTypeParsed.ModuleImport != nil && childTypeParsed.ModuleImport.IsAliasRequired {
+		if childTypeParsed.ModuleImport != nil && childTypeParsed.ModuleImport.Path != oi.CurModuleImport.Path {
 			typePkg = &childTypeParsed.ModuleImport.Alias
 		}
 
@@ -298,6 +300,11 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 		}
 		pbTypeWithPkg := oi.PbModuleImport.Alias + "." + pbType
 
+		var mapImports imports.ImportsManager = nil
+		if importsManager.GetImportsLen() != 0 {
+			mapImports = importsManager
+		}
+
 		return &convertingValue{
 			GolangType:     golangType,
 			GolangTypeName: golangTypeName,
@@ -305,6 +312,8 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 			ProtoTypeName:  pbTypeWithPkg,
 			Value:          varName,
 			Prepare:        []string{prepareMap},
+
+			imports: mapImports,
 		}, nil
 	}
 
