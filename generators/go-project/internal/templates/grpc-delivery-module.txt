@@ -121,7 +121,7 @@ package {{ .DomainSnake }}_delivery_grpc
 import (
 {{- range .ImportsGrpcDelivery }}
 	{{- range . }}
-	"{{ . }}"
+	{{ . }}
 	{{- end }}
 {{ end -}}
 )

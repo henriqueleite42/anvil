@@ -4,36 +4,42 @@ import (
 	_ "embed"
 
 	"github.com/henriqueleite42/anvil/language-helpers/golang/grpc"
-	types_parser "github.com/henriqueleite42/anvil/language-helpers/golang/types"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/imports"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
 type TemplEnumValue struct {
-	Idx     int
+	Idx     uint
 	Name    string
 	Spacing string
 	Value   string
 }
 
 type TemplEnum struct {
-	Name   string
-	Type   string
-	Values []*TemplEnumValue
+	GolangName       string // Enum name
+	GolangType       string // string, int, etc
+	Values           []*TemplEnumValue
+	DeprecatedValues []*TemplEnumValue
 }
 
 type UsecaseMethodTemplInput struct {
 	Domain         string
+	DomainCamel    string
 	DomainSnake    string
 	MethodName     string
 	InputTypeName  string
 	OutputTypeName string
+	Imports        [][]string
 }
 
 type RepositoryMethodTemplInput struct {
 	Domain         string
+	DomainCamel    string
 	DomainSnake    string
 	MethodName     string
 	InputTypeName  string
 	OutputTypeName string
+	Imports        [][]string
 }
 
 type TemplMethodDelivery struct {
@@ -42,8 +48,8 @@ type TemplMethodDelivery struct {
 	DomainSnake string
 	MethodName  string
 	Order       uint
-	Input       *grpc.Type
-	Output      *grpc.Type
+	Input       *grpc.ConvertedValue
+	Output      *grpc.ConvertedValue
 }
 
 type TemplMethod struct {
@@ -51,11 +57,31 @@ type TemplMethod struct {
 	InputTypeName  string
 	OutputTypeName string
 	Order          uint
+	Imports        [][]string
 }
 
 type GoConfig struct {
 	PkgName   string
 	GoVersion string
+}
+
+type TemplTypeMapProp struct {
+	Name     string
+	Spacing1 string
+	Type     string
+	Spacing2 string
+	Tags     string
+}
+
+type TemplType struct {
+	AnvilType *schemas.Type
+
+	ModuleImport *imports.Import // Import of the module of the type, only Maps, Enums and Lists (of Maps nad Enums) will have one
+	GolangType   string
+	Optional     bool
+	MapProps     []*TemplTypeMapProp
+
+	ImportsUnorganized []*imports.Import
 }
 
 type TemplInput struct {
@@ -69,12 +95,13 @@ type TemplInput struct {
 	ImportsUsecase      [][]string
 	ImportsGrpcDelivery [][]string
 
-	Enums    []*types_parser.Enum
-	Entities []*types_parser.Type
-	Events   []*types_parser.Type
+	Enums    []*TemplEnum
+	Types    []*TemplType
+	Events   []*TemplType
+	Entities []*TemplType
 
-	TypesRepository []*types_parser.Type
-	TypesUsecase    []*types_parser.Type
+	TypesRepository []*TemplType
+	TypesUsecase    []*TemplType
 
 	MethodsRepository   []*TemplMethod
 	MethodsUsecase      []*TemplMethod

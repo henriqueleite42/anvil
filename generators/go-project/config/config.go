@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/henriqueleite42/anvil/language-helpers/golang/imports"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 	"gopkg.in/yaml.v3"
 )
@@ -11,9 +12,10 @@ import (
 const GENERATOR_NAME = "go-project"
 
 type GeneratorConfig struct {
-	OutDir     *string `yaml:"OutDir"`
-	ModuleName string  `yaml:"ModuleName"`
-	GoVersion  string  `yaml:"GoVersion"`
+	OutDir         *string         `yaml:"OutDir"`
+	ModuleName     string          `yaml:"ModuleName"`
+	GoVersion      string          `yaml:"GoVersion"`
+	PbModuleImport *imports.Import // PbModulePath resolved
 }
 
 func GetConfig(filePath string) *GeneratorConfig {
@@ -69,9 +71,23 @@ func GetConfig(filePath string) *GeneratorConfig {
 		log.Fatalf("%s: fail to parse GoVersion to string", GENERATOR_NAME)
 	}
 
+	var pbModulePath string
+	pbModulePathAny, ok := params["PbModulePath"]
+	if ok {
+		pbModulePathString, ok := pbModulePathAny.(string)
+		if !ok {
+			log.Fatalf("%s: fail to parse PbModulePath to string", GENERATOR_NAME)
+		}
+		pbModulePath = pbModulePathString
+	} else {
+		pbModulePath = moduleName + "/internal/delivery/grpc/pb"
+	}
+	pbModuleImport := imports.NewImport(pbModulePath, nil)
+
 	return &GeneratorConfig{
-		OutDir:     outDir,
-		ModuleName: moduleName,
-		GoVersion:  goVersion,
+		OutDir:         outDir,
+		ModuleName:     moduleName,
+		GoVersion:      goVersion,
+		PbModuleImport: pbModuleImport,
 	}
 }

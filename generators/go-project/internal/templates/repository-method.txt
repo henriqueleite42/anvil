@@ -1,20 +1,23 @@
 package {{ .DomainSnake }}_repository
 
 import (
-	"context"
-	"errors"
+{{- range .Imports }}
+	{{- range . }}
+	{{ . }}
+	{{- end }}
+{{ end -}}
 )
 
 {{ if not .OutputTypeName -}}
 	{{- if not .InputTypeName -}}
 
-func (self *{{ .Domain }}RepositoryImplementation) {{ .MethodName }}(ctx context.Context) error {
+func (self *{{ .DomainCamel }}RepositoryImplementation) {{ .MethodName }}(ctx context.Context) error {
 	return errors.New("\"{{ .MethodName }}\": unimplemented")
 }
 
 	{{- else -}}
 
-func (self *{{ .Domain }}RepositoryImplementation) {{ .MethodName }}(ctx context.Context, i {{ .InputTypeName }}) error {
+func (self *{{ .DomainCamel }}RepositoryImplementation) {{ .MethodName }}(ctx context.Context, i {{ .InputTypeName }}) error {
 	return errors.New("\"{{ .MethodName }}\": unimplemented")
 }
 
@@ -22,13 +25,13 @@ func (self *{{ .Domain }}RepositoryImplementation) {{ .MethodName }}(ctx context
 {{- else -}}
 	{{- if not .InputTypeName -}}
 
-func (self *{{ .Domain }}RepositoryImplementation) {{ .MethodName }}(ctx context.Context) ({{ .OutputTypeName }}, error) {
+func (self *{{ .DomainCamel }}RepositoryImplementation) {{ .MethodName }}(ctx context.Context) ({{ .OutputTypeName }}, error) {
 	return nil, errors.New("\"{{ .MethodName }}\": unimplemented")
 }
 
 	{{- else -}}
 
-func (self *{{ .Domain }}RepositoryImplementation) {{ .MethodName }}(ctx context.Context, i {{ .InputTypeName }}) ({{ .OutputTypeName }}, error) {
+func (self *{{ .DomainCamel }}RepositoryImplementation) {{ .MethodName }}(ctx context.Context, i {{ .InputTypeName }}) ({{ .OutputTypeName }}, error) {
 	return nil, errors.New("\"{{ .MethodName }}\": unimplemented")
 }
 

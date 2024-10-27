@@ -82,6 +82,7 @@ func (self *anvToAnvpParser) resolveEvent(i *resolveInput) (string, error) {
 	event := &schemas.Event{
 		Ref:          ref,
 		OriginalPath: fmt.Sprintf("%s.%s", i.path, i.k),
+		Domain:       i.curDomain,
 		Name:         i.k,
 		RootNode:     rootNode,
 		Formats:      formats,

@@ -3,7 +3,7 @@ module github.com/henriqueleite42/anvil/cli
 go 1.22.4
 
 require (
-	github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241022180453-ff4469c51310
+	github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241026235822-a0a2badd320d
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 	gopkg.in/yaml.v3 v3.0.1

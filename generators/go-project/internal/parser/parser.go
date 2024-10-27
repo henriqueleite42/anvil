@@ -1,110 +1,84 @@
 package parser
 
 import (
+	generator_config "github.com/henriqueleite42/anvil/generators/go-project/config"
 	"github.com/henriqueleite42/anvil/generators/go-project/internal/templates"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/formatter"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/imports"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 	types_parser "github.com/henriqueleite42/anvil/language-helpers/golang/types"
 )
 
+type ParserRepository struct {
+	Methods []*templates.TemplMethod
+}
+
+type ParserUsecase struct {
+	Methods []*templates.TemplMethod
+}
+
+type ParserGrpcDelivery struct {
+	Methods []*templates.TemplMethodDelivery
+}
+
 type Parser struct {
-	Schema *schemas.AnvpSchema
+	schema *schemas.AnvpSchema
+	config *generator_config.GeneratorConfig
 
-	GoTypesParserModels     types_parser.TypeParser
-	GoTypesParserRepository types_parser.TypeParser
-	GoTypesParserUsecase    types_parser.TypeParser
+	goTypesParser types_parser.TypesParser
 
-	MethodsRepository                []*templates.TemplMethod
-	MethodsUsecaseToAvoidDuplication map[string]bool
-	MethodsUsecase                   []*templates.TemplMethod
-	MethodsGrpcDelivery              []*templates.TemplMethodDelivery
-}
-
-func hasModels(schema *schemas.AnvpSchema, curDomain string) bool {
-	if schema.Types != nil && schema.Types.Types != nil {
-		if _, ok := schema.Types.Types[curDomain]; ok {
-			return true
-		}
-	}
-	if schema.Entities != nil && schema.Entities.Entities != nil {
-		return true
-	}
-	if schema.Events != nil && schema.Events.Events != nil {
-		return true
-	}
-	if schema.Enums != nil && schema.Enums.Enums != nil {
-		return true
-	}
-
-	return false
-}
-
-func hasRepositories(schema *schemas.AnvpSchema, curDomain string) bool {
-	if schema.Repositories != nil && schema.Repositories.Repositories != nil {
-		if _, ok := schema.Repositories.Repositories[curDomain]; ok {
-			return true
-		}
-	}
-
-	return false
-}
-
-func hasUsecases(schema *schemas.AnvpSchema, curDomain string) bool {
-	if schema.Usecases != nil && schema.Usecases.Usecases != nil {
-		if _, ok := schema.Usecases.Usecases[curDomain]; ok {
-			return true
-		}
-	}
-
-	return false
+	repositories   map[string]*ParserRepository
+	usecases       map[string]*ParserUsecase
+	grpcDeliveries map[string]*ParserGrpcDelivery
 }
 
 func NewTypesParser(
 	schema *schemas.AnvpSchema,
-	curDomain string,
-	parserInput *types_parser.NewTypeParserInput,
+	config *generator_config.GeneratorConfig,
 ) (*Parser, error) {
-	typeParser := &Parser{
+	modelsImport := imports.NewImport(config.ModuleName+"/internal/models", nil)
+
+	goTypesParser, err := types_parser.NewTypeParser(&types_parser.NewTypeParserInput{
 		Schema: schema,
+		GetEnumsImport: func(e *schemas.Enum) *imports.Import {
+			return modelsImport
+		},
+		GetTypesImport: func(t *schemas.Type) *imports.Import {
+			return modelsImport
+		},
+		GetEventsImport: func(t *schemas.Type) *imports.Import {
+			return modelsImport
+		},
+		GetEntitiesImport: func(t *schemas.Type) *imports.Import {
+			return modelsImport
+		},
+		GetRepositoryImport: func(t *schemas.Type) *imports.Import {
+			domainSnake := formatter.PascalToSnake(t.Domain)
+			path := config.ModuleName + "/internal/repository/" + domainSnake
+			alias := domainSnake + "_repository"
+
+			return imports.NewImport(path, &alias)
+		},
+		GetUsecaseImport: func(t *schemas.Type) *imports.Import {
+			domainSnake := formatter.PascalToSnake(t.Domain)
+			path := config.ModuleName + "/internal/usecase/" + domainSnake
+			alias := domainSnake + "_usecase"
+
+			return imports.NewImport(path, &alias)
+		},
+	})
+	if err != nil {
+		return nil, err
 	}
 
-	if hasModels(schema, curDomain) {
-		goTypesParserModels, err := types_parser.NewTypeParser(parserInput)
-		if err != nil {
-			return nil, err
-		}
+	return &Parser{
+		schema: schema,
+		config: config,
 
-		typeParser.GoTypesParserModels = goTypesParserModels
-	}
+		goTypesParser: goTypesParser,
 
-	if hasRepositories(schema, curDomain) {
-		goTypesParserRepository, err := types_parser.NewTypeParser(parserInput)
-		if err != nil {
-			return nil, err
-		}
-
-		typeParser.GoTypesParserRepository = goTypesParserRepository
-		typeParser.MethodsRepository = make(
-			[]*templates.TemplMethod,
-			0,
-			len(schema.Repositories.Repositories[curDomain].Methods.Methods),
-		)
-
-		goTypesParserRepository.AddImport("context")
-	}
-
-	if hasUsecases(schema, curDomain) {
-		goTypesParserUsecase, err := types_parser.NewTypeParser(parserInput)
-		if err != nil {
-			return nil, err
-		}
-
-		typeParser.GoTypesParserUsecase = goTypesParserUsecase
-		typeParser.MethodsUsecase = make(
-			[]*templates.TemplMethod,
-			0,
-			len(schema.Usecases.Usecases[curDomain].Methods.Methods),
-		)
-	}
-
-	return typeParser, nil
+		repositories:   map[string]*ParserRepository{},
+		usecases:       map[string]*ParserUsecase{},
+		grpcDeliveries: map[string]*ParserGrpcDelivery{},
+	}, nil
 }
