@@ -5,8 +5,10 @@ import (
 	"sort"
 	"strings"
 
+	generator_config "github.com/henriqueleite42/anvil/generators/grpc/config"
 	"github.com/henriqueleite42/anvil/generators/grpc/internal/templates"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/grpc"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/imports"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/template"
 	types_parser "github.com/henriqueleite42/anvil/language-helpers/golang/types"
@@ -26,7 +28,7 @@ var templatesNamesValues = map[string]string{
 	"protofile": templates.ProtofileTempl,
 }
 
-func Parse(schema *schemas.AnvpSchema, silent bool, outputFolderPath *string) error {
+func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig, silent bool) error {
 	if schema.Deliveries == nil || schema.Deliveries.Deliveries == nil {
 		return fmt.Errorf("no delivery specified")
 	}
@@ -61,14 +63,29 @@ func Parse(schema *schemas.AnvpSchema, silent bool, outputFolderPath *string) er
 		//
 		// -----------------------------
 
+		// The package doesn't matter, it will not be used
+		pbImport := imports.NewImport("pb", nil)
+
 		goTypeParser, err := types_parser.NewTypeParser(&types_parser.NewTypeParserInput{
-			Schema:        schema,
-			EnumsPkg:      "pb",
-			TypesPkg:      "pb",
-			EventsPkg:     "pb",
-			EntitiesPkg:   "pb",
-			RepositoryPkg: "pb",
-			UsecasePkg:    "pb",
+			Schema: schema,
+			GetEnumsImport: func(e *schemas.Enum) *imports.Import {
+				return pbImport
+			},
+			GetTypesImport: func(t *schemas.Type) *imports.Import {
+				return pbImport
+			},
+			GetEventsImport: func(t *schemas.Type) *imports.Import {
+				return pbImport
+			},
+			GetEntitiesImport: func(t *schemas.Type) *imports.Import {
+				return pbImport
+			},
+			GetRepositoryImport: func(t *schemas.Type) *imports.Import {
+				return pbImport
+			},
+			GetUsecaseImport: func(t *schemas.Type) *imports.Import {
+				return pbImport
+			},
 		})
 		if err != nil {
 			return err
@@ -195,7 +212,7 @@ func Parse(schema *schemas.AnvpSchema, silent bool, outputFolderPath *string) er
 			return err
 		}
 
-		err = WriteFile(curDomain, outputFolderPath, protofile)
+		err = WriteFile(curDomain, config.OutDir, protofile)
 		if err != nil {
 			return err
 		}

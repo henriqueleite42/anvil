@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/henriqueleite42/anvil/generators/grpc/internal/templates"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/grpc"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
@@ -100,7 +101,7 @@ func (self *parser) resolveType(curDomain string, t *schemas.Type) (*templates.P
 		return nil, fmt.Errorf("\"%s\" type must be a Map", t.Name)
 	}
 
-	protoTypeName, err := self.grpcParser.GetProtoTypeName(curDomain, t)
+	protoTypeName, err := grpc.GetProtoTypeName(t)
 	if err != nil {
 		return nil, err
 	}
