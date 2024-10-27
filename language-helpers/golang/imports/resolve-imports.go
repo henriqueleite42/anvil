@@ -14,14 +14,14 @@ func IsExtImport(path string) bool {
 // - Splits the imports into standard and external
 // - Sort both groups alphabetically
 // - Resolve import to it's final value to be put into the code, Ex: `alias "foo/bar"`
-func ResolveImports(imports []*Import, curPkg string) [][]string {
+func ResolveImports(imports []*Import, curModuleAlias string) [][]string {
 	// Imports from golang std library
 	importsStd := make([]*Import, 0, len(imports))
 	// Imports from external libraries
 	importsExt := make([]*Import, 0, len(imports))
 
 	for _, v := range imports {
-		if v.Path == curPkg {
+		if v.Alias == curModuleAlias {
 			continue
 		}
 
@@ -45,16 +45,16 @@ func ResolveImports(imports []*Import, curPkg string) [][]string {
 
 	for _, v := range importsStd {
 		if v.IsAliasRequired {
-			importsStdString = append(importsStdString, fmt.Sprintf("%s %s", v.Alias, v.Path))
+			importsStdString = append(importsStdString, fmt.Sprintf("%s \"%s\"", v.Alias, v.Path))
 		} else {
-			importsStdString = append(importsStdString, v.Path)
+			importsStdString = append(importsStdString, fmt.Sprintf("\"%s\"", v.Path))
 		}
 	}
 	for _, v := range importsExt {
 		if v.IsAliasRequired {
-			importsExtString = append(importsExtString, fmt.Sprintf("%s %s", v.Alias, v.Path))
+			importsExtString = append(importsExtString, fmt.Sprintf("%s \"%s\"", v.Alias, v.Path))
 		} else {
-			importsExtString = append(importsExtString, v.Path)
+			importsExtString = append(importsExtString, fmt.Sprintf("\"%s\"", v.Path))
 		}
 	}
 
