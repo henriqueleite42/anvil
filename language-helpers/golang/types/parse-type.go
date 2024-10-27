@@ -69,7 +69,7 @@ func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
 		result.GolangType = "bool"
 	}
 	if t.Type == schemas.TypeType_Timestamp {
-		result.GolangType = "time.Time"
+		result.GolangType = "Time"
 		result.ModuleImport = imports.NewImport("time", nil)
 		result.imports = imports.NewImportsManager()
 		result.imports.AddImport("time", nil)
