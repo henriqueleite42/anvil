@@ -34,8 +34,8 @@ func (self *goGrpcParser) goToProto(i *convertingInput) (*convertingValue, error
 		return nil, err
 	}
 
-	golangType := parsedType.GetFullTypeName(oi.CurModuleImport.Path)
-	golangTypeName := parsedType.GetTypeName(oi.CurModuleImport.Path)
+	golangType := parsedType.GetFullTypeName(oi.CurModuleImport.Alias)
+	golangTypeName := parsedType.GetTypeName(oi.CurModuleImport.Alias)
 
 	if isBasicType(t.Type) {
 		// Doesn't need conversion
