@@ -53,10 +53,7 @@ type Enum struct {
 // It doesn't parse only special types (structs), but ALL types like
 // `string`, `int`, etc
 //
-// A single instance of types parser can and should be used per domain.
-//
-// Note that the types parser must be used **per domain**, and not per schema,
-// since a single schema can have multiple domains.
+// A single instance of types parser can and should be used per schema.
 type TypesParser interface {
 	// Parse an enum, then adds it to the list and returns the parsed enum
 	ParseEnum(e *schemas.Enum) (*Enum, error)

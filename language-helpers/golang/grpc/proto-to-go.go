@@ -286,10 +286,6 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 		}
 	}
 	if t.Type == schemas.TypeType_Timestamp {
-		importsManager := imports.NewImportsManager()
-		importsManager.AddImport("time", nil)
-		importsManager.MergeImports(parsedType.GetImportsUnorganized())
-
 		pbType := "timestamppb.Timestamp"
 
 		val := &convertingValue{
@@ -297,8 +293,6 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 			GolangTypeName: golangTypeName,
 			ProtoType:      "*" + pbType,
 			ProtoTypeName:  pbType,
-
-			imports: importsManager,
 		}
 
 		if t.Optional {
@@ -314,8 +308,12 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 				return nil, err
 			}
 
+			importsManager := imports.NewImportsManager()
+			importsManager.AddImport("time", nil)
+
 			val.Value = varName
 			val.Prepare = []string{prepareOptional}
+			val.imports = importsManager
 
 			return val, nil
 		} else {

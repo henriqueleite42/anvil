@@ -156,7 +156,6 @@ func (self *goGrpcParser) goToProto(i *convertingInput) (*convertingValue, error
 	if t.Type == schemas.TypeType_Timestamp {
 		importsManager := imports.NewImportsManager()
 		importsManager.AddImport("google.golang.org/protobuf/types/known/timestamppb", nil)
-		importsManager.MergeImports(parsedType.GetImportsUnorganized())
 
 		pbType := "timestamppb.Timestamp"
 
