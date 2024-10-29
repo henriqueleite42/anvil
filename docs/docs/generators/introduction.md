@@ -14,10 +14,6 @@ Generators are CLIs that generate things.
 
 These things can be code, schemas, migrations, anything you want.
 
-They should not be used to perform side-actions, like create tasks on Jira, or do things that aren't related to generate things: Your generator MUST have an output.
-
-To do side actions use [plugins](../plugins/introduction.md).
-
 ## Do I need to use a specific language to create?
 
 No, you can use any programming language that you want, you just need to make it executable by the final user.

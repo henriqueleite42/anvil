@@ -32,7 +32,7 @@ With Maps, the current structure of `Entities` is this:
 Entities:
   Entities:
     User:
-      Name: users
+      DbName: users
       Columns:
         Id:
           Type: Int
@@ -43,7 +43,7 @@ And with Lists, it would be like this:
 Entities:
   Entities:
     - Name: User
-      Name: users
+      DbName: users
       Columns:
         - Name: Id
           Type: Int

@@ -16,11 +16,19 @@ No. We are very clear that Anvil is focused on **Event-Oriented, Domain-Driven, 
 
 ## Can Anvil be used for monoliths?
 
-Sure, it probably will work great with monoliths too, since they kinda are "big micro-services", we don't guarantee that it will be perfect, but for sure it will help.
+Sure, it works great for both monoliths and micro-services, you only need to find the right generator.
 
 ## Can Anvil be used with NoSql databases?
 
 You kinda can if you have the right plugin, but the schema is not and will not be designed for the specific needs that a NoSql database have. If you want to use a NoSql database as a SQL database, Anvil will probably fit your needs.
+
+## Can Anvil be used in a large organization?
+
+Yes, large organizations are the ones that most benefit from Anvil.
+
+In large organizations, we usually have hundreds or even thousands of domains, micro-services, teams, events, packages and changes in the code in a daily basis. It's very hard and demanding to maintain everything, to share these knowledge of the best practices, to ensure that all developers not only know how to implement certain patterns but know the way that the company implements certain patterns.
+
+Anvil works perfectly for these kind of ecosystems. It allows you to have one centralized small team of extremely capable developers that say how the things will work, define rules, best practices, standard libraries, and everything else that you need or want to defined, and all the other teams and members of your organization will follow these rules and patterns.
 
 ## Why does Anvil hates creativity, free thinking and innovation?
 
