@@ -1,6 +1,8 @@
 package types_parser
 
-import "sort"
+import (
+	"sort"
+)
 
 func (self *typeParser) GetEnums() []*Enum {
 	sort.Slice(self.enums, func(i, j int) bool {

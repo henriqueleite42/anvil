@@ -62,7 +62,7 @@ func main() {
 
 	config := generator_config.GetConfig(configPath)
 
-	err = internal.Parse(schema, silent, config.OutDir)
+	err = internal.Parse(schema, config, silent)
 	if err != nil {
 		log.Fatal(err)
 	}

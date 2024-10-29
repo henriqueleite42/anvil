@@ -2,99 +2,90 @@ package parser
 
 import (
 	"fmt"
-	"sort"
-	"strings"
 
 	"github.com/henriqueleite42/anvil/generators/go-project/internal/templates"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/formatter"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/imports"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
-	types_parser "github.com/henriqueleite42/anvil/language-helpers/golang/types"
 )
 
-type RepositoryParsed struct {
-	Imports [][]string
-	Types   []*types_parser.Type
-	Methods []*templates.TemplMethod
-}
+func (self *Parser) resolveRepositoryMethod(rpt *schemas.RepositoryMethod) error {
+	pkgName := formatter.PascalToSnake(rpt.Domain) + "_repository"
 
-func (self *Parser) resolveRepositoryMethod(usc *schemas.RepositoryMethod, pkgName string) error {
+	importsManager := imports.NewImportsManager()
+
 	var inputTypeName string
-	if usc.Input != nil && usc.Input.TypeHash != "" {
-		t, ok := self.Schema.Types.Types[usc.Input.TypeHash]
+	if rpt.Input != nil && rpt.Input.TypeHash != "" {
+		t, ok := self.schema.Types.Types[rpt.Input.TypeHash]
 		if !ok {
-			return fmt.Errorf("fail to find type for \"%s.Input\"", usc.Name)
+			return fmt.Errorf("fail to find type for \"%s.Input\"", rpt.Name)
 		}
 
-		tParsed, err := self.GoTypesParserRepository.ParseType(t)
+		tParsed, err := self.goTypesParser.ParseType(t)
 		if err != nil {
 			return err
 		}
+
+		importsManager.MergeImport(tParsed.ModuleImport)
 
 		inputTypeName = tParsed.GetFullTypeName(pkgName)
 	}
 
 	var outputTypeName string
-	if usc.Output != nil && usc.Output.TypeHash != "" {
-		t, ok := self.Schema.Types.Types[usc.Output.TypeHash]
+	if rpt.Output != nil && rpt.Output.TypeHash != "" {
+		t, ok := self.schema.Types.Types[rpt.Output.TypeHash]
 		if !ok {
-			return fmt.Errorf("fail to find type for \"%s.Output\"", usc.Name)
+			return fmt.Errorf("fail to find type for \"%s.Output\"", rpt.Name)
 		}
 
-		tParsed, err := self.GoTypesParserRepository.ParseType(t)
+		tParsed, err := self.goTypesParser.ParseType(t)
 		if err != nil {
 			return err
 		}
 
+		importsManager.MergeImport(tParsed.ModuleImport)
+
 		outputTypeName = tParsed.GetFullTypeName(pkgName)
 	}
 
-	self.MethodsRepository = append(self.MethodsRepository, &templates.TemplMethod{
-		MethodName:     usc.Name,
+	importsManager.AddImport("context", nil)
+	importsManager.AddImport("errors", nil)
+	imports := imports.ResolveImports(importsManager.GetImportsUnorganized(), pkgName)
+
+	self.repositories[rpt.Domain].Methods = append(self.repositories[rpt.Domain].Methods, &templates.TemplMethod{
+		MethodName:     rpt.Name,
 		InputTypeName:  inputTypeName,
 		OutputTypeName: outputTypeName,
-		Order:          usc.Order,
+		Order:          rpt.Order,
+		Imports:        imports,
 	})
 
 	return nil
 }
 
-func (self *Parser) ParseRepositories(curDomain string) (*RepositoryParsed, error) {
-	if self.Schema.Repositories == nil || self.Schema.Repositories.Repositories == nil {
-		return &RepositoryParsed{}, nil
+func (self *Parser) parseRepositories() error {
+	if self.schema.Repositories == nil || self.schema.Repositories.Repositories == nil {
+		return nil
 	}
 
-	repositories, ok := self.Schema.Repositories.Repositories[curDomain]
-	if !ok {
-		return &RepositoryParsed{}, nil
-	}
-
-	self.MethodsRepository = []*templates.TemplMethod{}
-
-	for _, v := range repositories.Methods.Methods {
-		if !strings.HasPrefix(v.Ref, curDomain) {
+	for _, repository := range self.schema.Repositories.Repositories {
+		if repository.Methods == nil || repository.Methods.Methods == nil {
 			continue
 		}
 
-		domainSnake := formatter.PascalToSnake(curDomain)
+		for _, v := range repository.Methods.Methods {
+			if _, ok := self.repositories[v.Domain]; !ok {
+				self.repositories[v.Domain] = &ParserRepository{
+					Methods: make([]*templates.TemplMethod, 0, len(repository.Methods.Methods)),
+				}
+			}
 
-		err := self.resolveRepositoryMethod(v, domainSnake+"_repository")
-		if err != nil {
-			return nil, err
+			err := self.resolveRepositoryMethod(v)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
-	imports := self.GoTypesParserRepository.GetImports()
-	types := self.GoTypesParserRepository.GetTypes()
-	sort.Slice(types, func(i, j int) bool {
-		return types[i].GolangType < types[j].GolangType
-	})
-	sort.Slice(self.MethodsRepository, func(i, j int) bool {
-		return self.MethodsRepository[i].Order < self.MethodsRepository[j].Order
-	})
-
-	return &RepositoryParsed{
-		Imports: imports,
-		Types:   types,
-		Methods: self.MethodsRepository,
-	}, nil
+	return nil
 }

@@ -147,6 +147,7 @@ func (self *anvToAnvpParser) enums(curDomain string, file map[string]any) error 
 		enum := &schemas.Enum{
 			Ref:          ref,
 			OriginalPath: fmt.Sprintf("%s.%s", path, k),
+			Domain:       curDomain,
 			Name:         k,
 			DbName:       dbType,
 			DbType:       dbType,

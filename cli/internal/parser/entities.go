@@ -80,6 +80,7 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 	entityType := &schemas.Type{
 		Ref:          ref,
 		OriginalPath: path,
+		Domain:       i.curDomain,
 		Name:         i.k,
 		RootNode:     rootNode,
 		ChildTypes:   []*schemas.TypeChild{},
@@ -453,6 +454,7 @@ func (self *anvToAnvpParser) resolveEntity(i *resolveInput) (string, error) {
 	entity := &schemas.Entity{
 		Ref:          ref,
 		OriginalPath: path,
+		Domain:       i.curDomain,
 		Name:         i.k,
 		RootNode:     rootNode,
 		TypeHash:     refHash,

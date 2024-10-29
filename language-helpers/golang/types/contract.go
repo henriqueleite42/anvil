@@ -1,110 +1,66 @@
 package types_parser
 
 import (
-	"strings"
-
+	"github.com/henriqueleite42/anvil/language-helpers/golang/imports"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
 type MapProp struct {
-	Name     string
-	Spacing1 string // Spacing between name and type
-	Type     *Type
-	Spacing2 string // Spacing between type and tags
-	Tags     []string
-}
-
-func (self *MapProp) GetTagsString() string {
-	return strings.Join(self.Tags, " ")
+	Name string
+	Type *Type
+	Tags []string
 }
 
 type Type struct {
-	GolangPkg  *string // Only Maps, Enums and Lists (because their children can be Maps or Enums) have a pkg
-	GolangType string
-	AnvilType  schemas.TypeType
-	Optional   bool
-	MapProps   []*MapProp
-}
+	AnvilType *schemas.Type
 
-func (self *Type) GetTypeName(curPkg string) string {
-	typeName := self.GolangType
+	ModuleImport *imports.Import // Import of the module of the type, only Maps, Enums and Lists (of Maps nad Enums) will have one
+	GolangType   string
+	Optional     bool
+	MapProps     []*MapProp
 
-	if self.GolangPkg != nil && *self.GolangPkg != curPkg {
-		if self.AnvilType == schemas.TypeType_List {
-			trueType := strings.TrimPrefix(self.GolangType, "[]")
-			if strings.HasPrefix(trueType, "*") {
-				trueType = strings.TrimPrefix(trueType, "*")
-				typeName = "[]*" + *self.GolangPkg + "." + trueType
-			} else {
-				typeName = "[]" + *self.GolangPkg + "." + trueType
-			}
-		} else {
-			typeName = *self.GolangPkg + "." + typeName
-		}
-	}
-
-	return typeName
-}
-
-func (self *Type) GetFullTypeName(curPkg string) string {
-	typeName := self.GetTypeName(curPkg)
-
-	if self.AnvilType == schemas.TypeType_Map {
-		typeName = "*" + typeName
-	}
-
-	if self.Optional &&
-		self.AnvilType != schemas.TypeType_Map &&
-		self.AnvilType != schemas.TypeType_List {
-		typeName = "*" + typeName
-	}
-
-	return typeName
+	// Internal use, handles all the imports necessary to
+	// create the struct declaration of the type
+	//
+	// Ex: Id it's a Map that has a prop with type `time.Time`, it will add
+	// "time" to the imports list.
+	//
+	// It doesn't work atr a deep level: If it's a Map with a child Map,
+	// The imports will not have the necessary imports for the child Map or
+	// the import for the child's module. They will be at the child's type.
+	imports imports.ImportsManager
 }
 
 type EnumValue struct {
-	Idx     uint
-	Name    string
-	Spacing string
-	Value   string
+	Idx   uint
+	Name  string
+	Value string
 }
 
 type Enum struct {
-	GolangPkg        string
-	GolangName       string
-	GolangType       string
+	AnvilEnum *schemas.Enum
+
+	Import           *imports.Import
+	GolangName       string // Enum name
+	GolangType       string // string, int, etc
 	Values           []*EnumValue
 	DeprecatedValues []*EnumValue
 }
 
-func (self *Enum) GetFullEnumName(curPkg string) string {
-	enumName := self.GolangName
-
-	if self.GolangPkg != curPkg {
-		enumName = self.GolangPkg + "." + enumName
-	}
-
-	return enumName
-}
-
-// The types parser must be used per domain, and not per schema!
+// The objective of the types parser is to help you to convert
+// Anvil types to Golang types.
 //
-// Each domain that you want to parse must have it's own instance of types parser,
-// to ensure that the imports, types, etc will not mix
+// It doesn't parse only special types (structs), but ALL types like
+// `string`, `int`, etc
 //
-// Of course, if you want to mix they, so you can use a single instance
-type TypeParser interface {
-	// Parse a type and all it's children (if any), then adds them all to the list and returns the root parsed type
-	ParseType(t *schemas.Type) (*Type, error)
+// A single instance of types parser can and should be used per schema.
+type TypesParser interface {
 	// Parse an enum, then adds it to the list and returns the parsed enum
 	ParseEnum(e *schemas.Enum) (*Enum, error)
-
-	// Add an import to the list (already handles duplicated imports)
-	AddImport(impt string)
-	// Returns imports divided by groups (like the formatter does), each group is sorted alphabetically
-	GetImports() [][]string
-	// Remove all imports from list
-	ResetImports()
+	// Parse a type and all it's children (if any), then adds them all to the list and returns the root parsed type
+	//
+	// If you parse the same type twice, it will simple return the same result, but without parse it again
+	ParseType(t *schemas.Type) (*Type, error)
 
 	// Returns all parsed enums, sorted alphabetically
 	GetEnums() []*Enum

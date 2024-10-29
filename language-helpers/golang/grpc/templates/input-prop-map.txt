@@ -10,6 +10,4 @@
 		 	{{ .Name }}:{{ .Spacing }} {{ .Value }},
 			{{- end }}
 		}
-	}{{ if not .Optional }} else {
-		return {{ if .HasOutput }}nil, {{ end }}errors.New("\"{{ .MethodName }}\": \"{{ .OriginalVariableName }}\" must not be nil")
-	}{{ end }}
+	}

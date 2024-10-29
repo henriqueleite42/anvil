@@ -133,6 +133,7 @@ func (self *anvToAnvpParser) delivery(curDomain string, file map[string]any) err
 			rpc := &schemas.DeliveryGrpcRpc{
 				Ref:               ref,
 				OriginalPath:      originalPath,
+				Domain:            curDomain,
 				Name:              name,
 				UsecaseMethodHash: usecaseMethodHash,
 				Order:             uint(k),

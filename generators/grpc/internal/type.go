@@ -5,25 +5,49 @@ import (
 	"strings"
 
 	"github.com/henriqueleite42/anvil/generators/grpc/internal/templates"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/formatter"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/grpc"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
-func (self *parser) resolveTypeProp(curDomain string, t *schemas.Type) (string, error) {
+func (self *parserManager) resolveTypeProp(t *schemas.Type, rootDomain string) (string, error) {
 	var typeString string
 	if t.Type == schemas.TypeType_String {
 		typeString = "string"
 	}
-	if t.Type == schemas.TypeType_Int {
+	if t.Type == schemas.TypeType_Bytes {
+		typeString = "bytes"
+	}
+	if t.Type == schemas.TypeType_Int ||
+		t.Type == schemas.TypeType_Int8 ||
+		t.Type == schemas.TypeType_Int16 ||
+		t.Type == schemas.TypeType_Int32 {
 		typeString = "int32"
 	}
-	if t.Type == schemas.TypeType_Float {
+	if t.Type == schemas.TypeType_Int64 {
+		typeString = "int64"
+	}
+	if t.Type == schemas.TypeType_Uint ||
+		t.Type == schemas.TypeType_Uint8 ||
+		t.Type == schemas.TypeType_Uint16 ||
+		t.Type == schemas.TypeType_Uint32 {
+		typeString = "uint32"
+	}
+	if t.Type == schemas.TypeType_Uint64 {
+		typeString = "uint64"
+	}
+	if t.Type == schemas.TypeType_Float ||
+		t.Type == schemas.TypeType_Float32 {
 		typeString = "float"
+	}
+	if t.Type == schemas.TypeType_Float64 {
+		typeString = "double"
 	}
 	if t.Type == schemas.TypeType_Bool {
 		typeString = "bool"
 	}
 	if t.Type == schemas.TypeType_Timestamp {
-		self.imports["google/protobuf/timestamp.proto"] = true
+		self.grpcTypesParser[t.Domain].imports.AddImport("google/protobuf/timestamp.proto", nil)
 		typeString = "google.protobuf.Timestamp"
 	}
 	if t.Type == schemas.TypeType_Enum {
@@ -48,7 +72,7 @@ func (self *parser) resolveTypeProp(curDomain string, t *schemas.Type) (string, 
 			return "", fmt.Errorf("type \"%s\" is missing prop \"ChildTypes\"", t.Ref)
 		}
 
-		resolvedType, err := self.resolveType(curDomain, t)
+		resolvedType, err := self.resolveType(t, rootDomain)
 		if err != nil {
 			return "", err
 		}
@@ -73,7 +97,7 @@ func (self *parser) resolveTypeProp(curDomain string, t *schemas.Type) (string, 
 			return "", fmt.Errorf("fail to resolve child type \"%s\" for type \"%s\"", childTypeRef, t.Name)
 		}
 
-		typeName, err := self.resolveTypeProp(curDomain, childType)
+		typeName, err := self.resolveTypeProp(childType, rootDomain)
 		if err != nil {
 			return "", err
 		}
@@ -91,16 +115,16 @@ func (self *parser) resolveTypeProp(curDomain string, t *schemas.Type) (string, 
 	return typeString, nil
 }
 
-func (self *parser) resolveType(curDomain string, t *schemas.Type) (*templates.ProtofileTemplInputType, error) {
+func (self *parserManager) resolveType(t *schemas.Type, rootDomain string) (*templates.ProtofileTemplInputType, error) {
 	if existentType, ok := self.typesToAvoidDuplication[t.Ref]; ok {
 		return existentType, nil
 	}
 
 	if t.Type != schemas.TypeType_Map {
-		return nil, fmt.Errorf("\"%s\" type must be a Map", t.Name)
+		return nil, fmt.Errorf("\"%s\" type must be a Map", t.Ref)
 	}
 
-	protoTypeName, err := self.grpcParser.GetProtoTypeName(curDomain, t)
+	protoTypeName, err := grpc.GetProtoTypeName(t)
 	if err != nil {
 		return nil, err
 	}
@@ -116,9 +140,14 @@ func (self *parser) resolveType(curDomain string, t *schemas.Type) (*templates.P
 			return nil, fmt.Errorf("child type \"%s\" not found for type \"%s\"", v.TypeHash, t.Name)
 		}
 
-		propType, err := self.resolveTypeProp(curDomain, childType)
+		propType, err := self.resolveTypeProp(childType, rootDomain)
 		if err != nil {
 			return nil, err
+		}
+
+		if childType.Domain != rootDomain {
+			domainKebab := formatter.PascalToKebab(childType.Domain)
+			self.grpcTypesParser[rootDomain].imports.AddImport(domainKebab+".proto", nil)
 		}
 
 		result.Props = append(result.Props, &templates.ProtofileTemplInputTypeProp{
@@ -148,7 +177,16 @@ func (self *parser) resolveType(curDomain string, t *schemas.Type) (*templates.P
 	}
 
 	self.typesToAvoidDuplication[t.Ref] = result
-	self.types = append(self.types, result)
+
+	if t.RootNode == "Types" || t.RootNode == "Usecase" {
+		self.grpcTypesParser[t.Domain].types = append(self.grpcTypesParser[t.Domain].types, result)
+	}
+	if t.RootNode == "Events" {
+		self.grpcTypesParser[t.Domain].events = append(self.grpcTypesParser[t.Domain].events, result)
+	}
+	if t.RootNode == "Entities" {
+		self.grpcTypesParser[t.Domain].entities = append(self.grpcTypesParser[t.Domain].entities, result)
+	}
 
 	return result, nil
 }

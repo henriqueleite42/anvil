@@ -3,6 +3,7 @@ syntax = "proto3";
 {{ range .Imports -}}
 import "{{ . }}";
 {{ end }}
+{{ if .Methods -}}
 service {{ .Domain }}Api {
 	{{- range .Methods -}}
 		{{- if .Input }}
@@ -20,6 +21,7 @@ service {{ .Domain }}Api {
 		{{- end }}
 	{{- end }}
 }
+{{- end }}
 
 {{ range .Enums -}}
 enum {{ .Name }} {
@@ -39,3 +41,18 @@ message {{ .Name }} {
 	{{- end}}
 }
 {{ end }}
+{{ range .Events -}}
+message {{ .Name }} {
+	{{- range .Props }}
+	{{ .Type }}{{ .Spacing1 }} {{ .Name }}{{ .Spacing2 }} = {{ .Idx }};
+	{{- end}}
+}
+{{ end }}
+{{ range .Entities -}}
+message {{ .Name }} {
+	{{- range .Props }}
+	{{ .Type }}{{ .Spacing1 }} {{ .Name }}{{ .Spacing2 }} = {{ .Idx }};
+	{{- end}}
+}
+{{ end }}
+

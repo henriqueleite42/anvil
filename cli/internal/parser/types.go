@@ -285,6 +285,7 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 		OriginalPath:    fmt.Sprintf("%s.%s", i.path, i.k),
 		Name:            name,
 		RootNode:        rootNode,
+		Domain:          i.curDomain,
 		Confidentiality: confidentiality,
 		Optional:        optional,
 		Format:          format,

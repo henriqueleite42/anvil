@@ -2,24 +2,32 @@ package parser
 
 import (
 	"fmt"
-	"sort"
-	"strings"
 
+	generator_config "github.com/henriqueleite42/anvil/generators/go-project/config"
 	"github.com/henriqueleite42/anvil/generators/go-project/internal/templates"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/formatter"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/grpc"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/imports"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
-type GrpcDeliveryParsed struct {
-	Imports [][]string
-	Methods []*templates.TemplMethodDelivery
-}
-
-func (self *Parser) resolveGrpcDelivery(dlv *schemas.DeliveryGrpcRpc, curDomain string) error {
-	methodName := dlv.Name
-
-	method, ok := self.Schema.Usecases.Usecases[curDomain].Methods.Methods[dlv.UsecaseMethodHash]
+func (self *Parser) resolveGrpcDelivery(
+	dlv *schemas.DeliveryGrpcRpc,
+	curModuleImport *imports.Import,
+	pbModuleImport *imports.Import,
+) error {
+	if self.schema.Usecases == nil ||
+		self.schema.Usecases.Usecases == nil {
+		return nil
+	}
+	if _, ok := self.schema.Usecases.Usecases[dlv.Domain]; !ok {
+		return nil
+	}
+	if self.schema.Usecases.Usecases[dlv.Domain].Methods == nil ||
+		self.schema.Usecases.Usecases[dlv.Domain].Methods.Methods == nil {
+		return nil
+	}
+	method, ok := self.schema.Usecases.Usecases[dlv.Domain].Methods.Methods[dlv.UsecaseMethodHash]
 	if !ok {
 		return fmt.Errorf("usecase method \"%s\" not found", dlv.UsecaseMethodHash)
 	}
@@ -34,60 +42,55 @@ func (self *Parser) resolveGrpcDelivery(dlv *schemas.DeliveryGrpcRpc, curDomain 
 	}
 
 	grpcParser := grpc.NewGrpcParser(&grpc.NewGrpcParserInput{
-		Schema:       self.Schema,
-		GoTypeParser: self.GoTypesParserUsecase,
+		Schema:       self.schema,
+		GoTypeParser: self.goTypesParser,
 	})
 
-	var input *grpc.Type = nil
+	var input *grpc.ConvertedValue = nil
 	if inputTypeHash != "" {
-		t, ok := self.Schema.Types.Types[inputTypeHash]
+		t, ok := self.schema.Types.Types[inputTypeHash]
 		if !ok {
-			return fmt.Errorf("type \"%s\" not found for input of method \"%s\"", inputTypeHash, methodName)
+			return fmt.Errorf("type \"%s\" not found for input of method \"%s\"", inputTypeHash, dlv.Name)
 		}
 
-		templT, err := grpcParser.ProtoToGo(&grpc.ProtoToGoInput{
-			Type:                     t,
-			MethodName:               methodName,
-			VariableToAccessTheValue: "i",
-			HasOutput:                true,
+		templT, err := grpcParser.ProtoToGo(&grpc.ConverterInput{
+			Type:            t,
+			CurModuleImport: curModuleImport,
+			PbModuleImport:  pbModuleImport,
+			VarToConvert:    "i",
 		})
 		if err != nil {
 			return err
 		}
 
 		input = templT
-		self.GoTypesParserUsecase.AddImport("errors")
-	} else {
-		self.GoTypesParserUsecase.AddImport("google.golang.org/protobuf/types/known/emptypb")
 	}
 
-	var output *grpc.Type = nil
+	var output *grpc.ConvertedValue = nil
 	if outputTypeHash != "" {
-		t, ok := self.Schema.Types.Types[outputTypeHash]
+		t, ok := self.schema.Types.Types[outputTypeHash]
 		if !ok {
-			return fmt.Errorf("type \"%s\" not found for output of method \"%s\"", outputTypeHash, methodName)
+			return fmt.Errorf("type \"%s\" not found for output of method \"%s\"", outputTypeHash, dlv.Name)
 		}
 
-		templT, err := grpcParser.GoToProto(&grpc.GoToProtoInput{
-			Type:                     t,
-			MethodName:               methodName,
-			VariableToAccessTheValue: "result",
-			HasOutput:                true,
+		templT, err := grpcParser.GoToProto(&grpc.ConverterInput{
+			Type:            t,
+			CurModuleImport: curModuleImport,
+			PbModuleImport:  pbModuleImport,
+			VarToConvert:    "result",
 		})
 		if err != nil {
 			return err
 		}
 
 		output = templT
-	} else {
-		self.GoTypesParserUsecase.AddImport("google.golang.org/protobuf/types/known/emptypb")
 	}
 
-	self.MethodsGrpcDelivery = append(self.MethodsGrpcDelivery, &templates.TemplMethodDelivery{
-		Domain:      curDomain,
-		DomainCamel: formatter.PascalToCamel(curDomain),
-		DomainSnake: formatter.PascalToSnake(curDomain),
-		MethodName:  methodName,
+	self.grpcDeliveries[dlv.Domain].Methods = append(self.grpcDeliveries[dlv.Domain].Methods, &templates.TemplMethodDelivery{
+		Domain:      dlv.Domain,
+		DomainCamel: formatter.PascalToCamel(dlv.Domain),
+		DomainSnake: formatter.PascalToSnake(dlv.Domain),
+		MethodName:  dlv.Name,
 		Input:       input,
 		Output:      output,
 		Order:       dlv.Order,
@@ -96,46 +99,38 @@ func (self *Parser) resolveGrpcDelivery(dlv *schemas.DeliveryGrpcRpc, curDomain 
 	return nil
 }
 
-func (self *Parser) ParseDeliveriesGrpc(curDomain string) (*GrpcDeliveryParsed, error) {
-	if self.Schema.Deliveries == nil || self.Schema.Deliveries.Deliveries == nil {
-		return &GrpcDeliveryParsed{}, nil
+func (self *Parser) parseDeliveriesGrpc(config *generator_config.GeneratorConfig) error {
+	if self.schema.Deliveries == nil || self.schema.Deliveries.Deliveries == nil {
+		return nil
 	}
 
-	deliveries, ok := self.Schema.Deliveries.Deliveries[curDomain]
-	if !ok {
-		return &GrpcDeliveryParsed{}, nil
-	}
-
-	if deliveries.Grpc == nil {
-		return &GrpcDeliveryParsed{}, nil
-	}
-
-	self.MethodsGrpcDelivery = []*templates.TemplMethodDelivery{}
-
-	for _, v := range deliveries.Grpc.Rpcs {
-		if !strings.HasPrefix(v.Ref, curDomain) {
+	for _, deliveries := range self.schema.Deliveries.Deliveries {
+		if deliveries.Grpc == nil || deliveries.Grpc.Rpcs == nil {
 			continue
 		}
 
-		err := self.resolveGrpcDelivery(v, curDomain)
-		if err != nil {
-			return nil, err
+		for _, v := range deliveries.Grpc.Rpcs {
+			if _, ok := self.grpcDeliveries[v.Domain]; !ok {
+				self.grpcDeliveries[v.Domain] = &ParserGrpcDelivery{
+					Methods: []*templates.TemplMethodDelivery{},
+				}
+			}
+
+			domainSnake := formatter.PascalToSnake(v.Domain)
+			moduleName := domainSnake + "_delivery_grpc"
+
+			curModuleImport := imports.NewImport(config.ModuleName+"/internal/delivery/grpc/"+domainSnake, &moduleName)
+
+			err := self.resolveGrpcDelivery(
+				v,
+				curModuleImport,
+				config.PbModuleImport,
+			)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
-	self.GoTypesParserUsecase.AddImport("context")
-	self.GoTypesParserUsecase.AddImport("github.com/rs/xid")
-	self.GoTypesParserUsecase.AddImport("github.com/rs/zerolog")
-	self.GoTypesParserUsecase.AddImport("google.golang.org/grpc")
-	imports := self.GoTypesParserUsecase.GetImports()
-	self.GoTypesParserUsecase.ResetImports()
-
-	sort.Slice(self.MethodsGrpcDelivery, func(i, j int) bool {
-		return self.MethodsGrpcDelivery[i].Order < self.MethodsGrpcDelivery[j].Order
-	})
-
-	return &GrpcDeliveryParsed{
-		Imports: imports,
-		Methods: self.MethodsGrpcDelivery,
-	}, nil
+	return nil
 }

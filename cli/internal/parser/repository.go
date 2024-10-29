@@ -128,6 +128,7 @@ func (self *anvToAnvpParser) repository(curDomain string, file map[string]any) e
 		method := &schemas.RepositoryMethod{
 			Ref:          self.getRef(curDomain, "Repository."+k),
 			OriginalPath: fullPath,
+			Domain:       curDomain,
 			Order:        uint(order),
 			Name:         k,
 			Description:  description,

@@ -131,6 +131,7 @@ func (self *anvToAnvpParser) usecase(curDomain string, file map[string]any) erro
 		method := &schemas.UsecaseMethod{
 			Ref:          ref,
 			OriginalPath: fullPath,
+			Domain:       curDomain,
 			Order:        uint(order),
 			Name:         k,
 			Description:  description,

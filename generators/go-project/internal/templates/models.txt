@@ -4,7 +4,7 @@ package {{ $pkg }}
 import (
 {{- range .ImportsModels }}
 	{{- range . }}
-	"{{ . }}"
+	{{ . }}
 	{{- end }}
 {{ end -}}
 )
@@ -18,10 +18,18 @@ const (
 )
 {{ end -}}
 
+{{ range $type := .Types }}
+type {{ $type.GolangType }} struct {
+{{- range $prop := $type.MapProps }}
+	{{ $prop.Name }}{{ $prop.Spacing1 }} {{ $prop.Type }}{{ if $prop.Tags }}{{ $prop.Spacing2 }} `{{ $prop.Tags }}`{{ end }}
+{{- end }}
+}
+{{ end -}}
+
 {{ range $entity := .Entities }}
 type {{ $entity.GolangType }} struct {
 {{- range $prop := $entity.MapProps }}
-	{{ $prop.Name }}{{ $prop.Spacing1 }} {{ $prop.Type.GetFullTypeName $pkg }}{{ if $prop.Tags }}{{ $prop.Spacing2 }} `{{ $prop.GetTagsString }}`{{ end }}
+	{{ $prop.Name }}{{ $prop.Spacing1 }} {{ $prop.Type }}{{ if $prop.Tags }}{{ $prop.Spacing2 }} `{{ $prop.Tags }}`{{ end }}
 {{- end }}
 }
 {{ end -}}
@@ -29,7 +37,7 @@ type {{ $entity.GolangType }} struct {
 {{- range $event := .Events }}
 type {{ $event.GolangType }} struct {
 {{- range $prop := $event.MapProps }}
-	{{ $prop.Name }}{{ $prop.Spacing1 }} {{ $prop.Type.GetFullTypeName $pkg }}{{ if $prop.Tags }}{{ $prop.Spacing2 }} `{{ $prop.GetTagsString }}`{{ end }}
+	{{ $prop.Name }}{{ $prop.Spacing1 }} {{ $prop.Type }}{{ if $prop.Tags }}{{ $prop.Spacing2 }} `{{ $prop.Tags }}`{{ end }}
 {{- end }}
 }
 {{ end -}}

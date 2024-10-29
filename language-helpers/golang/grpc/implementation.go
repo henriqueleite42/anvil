@@ -10,14 +10,14 @@ import (
 type goGrpcParser struct {
 	schema *schemas.AnvpSchema
 
-	goTypeParser    types_parser.TypeParser
+	goTypeParser    types_parser.TypesParser
 	templateManager template.TemplateManager
 }
 
 type NewGrpcParserInput struct {
 	Schema *schemas.AnvpSchema
 
-	GoTypeParser types_parser.TypeParser
+	GoTypeParser types_parser.TypesParser
 }
 
 func NewGrpcParser(i *NewGrpcParserInput) GrpcParser {
@@ -28,7 +28,8 @@ func NewGrpcParser(i *NewGrpcParserInput) GrpcParser {
 	templateManager.AddTemplate("input-prop-optional", templates.InputPropOptionalTempl)
 
 	return &goGrpcParser{
-		schema:          i.Schema,
+		schema: i.Schema,
+
 		goTypeParser:    i.GoTypeParser,
 		templateManager: templateManager,
 	}
