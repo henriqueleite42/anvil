@@ -37,7 +37,7 @@ func (self *goGrpcParser) goToProto(i *convertingInput) (*convertingValue, error
 	golangType := parsedType.GetFullTypeName(oi.CurModuleImport.Alias)
 	golangTypeName := parsedType.GetTypeName(oi.CurModuleImport.Alias)
 
-	if isBasicType(t.Type) {
+	if doestNeedConversion(t.Type) {
 		// Doesn't need conversion
 		return &convertingValue{
 			GolangType:     golangType,
@@ -46,6 +46,112 @@ func (self *goGrpcParser) goToProto(i *convertingInput) (*convertingValue, error
 			ProtoTypeName:  golangTypeName,
 			Value:          oi.VarToConvert,
 		}, nil
+	}
+	if t.Type == schemas.TypeType_Int ||
+		t.Type == schemas.TypeType_Int8 ||
+		t.Type == schemas.TypeType_Int16 {
+		pbType := "int32"
+
+		val := &convertingValue{
+			GolangType:     golangType,
+			GolangTypeName: golangTypeName,
+			ProtoTypeName:  pbType,
+		}
+
+		if t.Optional {
+			varName := formatter.PascalToCamel(nameWithPrefix)
+			prepareOptional, err := self.templateManager.Parse("input-prop-optional", &templates.InputPropOptionalTemplInput{
+				VarName:              varName,
+				OriginalVariableName: oi.VarToConvert,
+				Type:                 "*" + pbType,
+				ValueToAssign:        fmt.Sprintf("%s(*%s)", pbType, oi.VarToConvert),
+				NeedsPointer:         true,
+			})
+			if err != nil {
+				return nil, err
+			}
+
+			val.ProtoType = "*" + pbType
+			val.Value = varName
+			val.Prepare = []string{prepareOptional}
+
+			return val, nil
+		} else {
+			val.ProtoType = pbType
+			val.Value = fmt.Sprintf("%s(%s)", pbType, oi.VarToConvert)
+
+			return val, nil
+		}
+	}
+	if t.Type == schemas.TypeType_Uint ||
+		t.Type == schemas.TypeType_Uint8 ||
+		t.Type == schemas.TypeType_Uint16 {
+		pbType := "uint32"
+
+		val := &convertingValue{
+			GolangType:     golangType,
+			GolangTypeName: golangTypeName,
+			ProtoTypeName:  pbType,
+		}
+
+		if t.Optional {
+			varName := formatter.PascalToCamel(nameWithPrefix)
+			prepareOptional, err := self.templateManager.Parse("input-prop-optional", &templates.InputPropOptionalTemplInput{
+				VarName:              varName,
+				OriginalVariableName: oi.VarToConvert,
+				Type:                 "*" + pbType,
+				ValueToAssign:        fmt.Sprintf("%s(*%s)", pbType, oi.VarToConvert),
+				NeedsPointer:         true,
+			})
+			if err != nil {
+				return nil, err
+			}
+
+			val.ProtoType = "*" + pbType
+			val.Value = varName
+			val.Prepare = []string{prepareOptional}
+
+			return val, nil
+		} else {
+			val.ProtoType = pbType
+			val.Value = fmt.Sprintf("%s(%s)", pbType, oi.VarToConvert)
+
+			return val, nil
+		}
+	}
+	if t.Type == schemas.TypeType_Float {
+		pbType := "float32"
+
+		val := &convertingValue{
+			GolangType:     golangType,
+			GolangTypeName: golangTypeName,
+			ProtoTypeName:  pbType,
+		}
+
+		if t.Optional {
+			varName := formatter.PascalToCamel(nameWithPrefix)
+			prepareOptional, err := self.templateManager.Parse("input-prop-optional", &templates.InputPropOptionalTemplInput{
+				VarName:              varName,
+				OriginalVariableName: oi.VarToConvert,
+				Type:                 "*" + pbType,
+				ValueToAssign:        fmt.Sprintf("%s(*%s)", pbType, oi.VarToConvert),
+				NeedsPointer:         true,
+			})
+			if err != nil {
+				return nil, err
+			}
+
+			val.ProtoType = "*" + pbType
+			val.Value = varName
+			val.Prepare = []string{prepareOptional}
+
+			return val, nil
+		} else {
+			val.ProtoType = pbType
+			val.Value = fmt.Sprintf("%s(%s)", pbType, oi.VarToConvert)
+
+			return val, nil
+		}
 	}
 	if t.Type == schemas.TypeType_Timestamp {
 		importsManager := imports.NewImportsManager()
@@ -147,7 +253,7 @@ func (self *goGrpcParser) goToProto(i *convertingInput) (*convertingValue, error
 			return nil, fmt.Errorf("type \"%s\" not found", t.ChildTypes[0].TypeHash)
 		}
 
-		if isBasicType(childType.Type) {
+		if doestNeedConversion(childType.Type) {
 			return self.goToProto(&convertingInput{
 				input: &ConverterInput{
 					CurModuleImport: oi.CurModuleImport,
@@ -229,7 +335,7 @@ func (self *goGrpcParser) goToProto(i *convertingInput) (*convertingValue, error
 
 			propNameWithPrefix := fmt.Sprintf("%s.%s", oi.VarToConvert, *v.PropName)
 
-			if isBasicType(propType.Type) {
+			if doestNeedConversion(propType.Type) {
 				props = append(props, &templates.InputPropMapTemplProp{
 					Name:    *v.PropName,
 					Spacing: strings.Repeat(" ", biggestName-len(*v.PropName)),
