@@ -3,7 +3,6 @@ package internal
 import (
 	"fmt"
 	"sort"
-	"strings"
 
 	generator_config "github.com/henriqueleite42/anvil/generators/grpc/config"
 	"github.com/henriqueleite42/anvil/generators/grpc/internal/templates"
@@ -14,14 +13,13 @@ import (
 	types_parser "github.com/henriqueleite42/anvil/language-helpers/golang/types"
 )
 
-type parser struct {
-	schema                  *schemas.AnvpSchema
-	grpcParser              grpc.GrpcParser
-	imports                 map[string]bool
-	methods                 []*templates.ProtofileTemplInputMethod
-	enums                   map[string]*templates.ProtofileTemplInputEnum
+type parserManager struct {
+	schema     *schemas.AnvpSchema
+	grpcParser grpc.GrpcParser
+
 	typesToAvoidDuplication map[string]*templates.ProtofileTemplInputType
-	types                   []*templates.ProtofileTemplInputType
+
+	grpcTypesParser map[string]*grpcTypesParser
 }
 
 var templatesNamesValues = map[string]string{
@@ -44,10 +42,76 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig,
 		}
 	}
 
-	for curDomain, v := range schema.Deliveries.Deliveries {
-		if _, ok := schema.Usecases.Usecases[curDomain]; !ok {
-			return fmt.Errorf("no usecases specified in domain \"%s\"", curDomain)
+	// The package doesn't matter, it will not be used
+	pbImport := imports.NewImport("pb", nil)
+
+	goTypeParser, err := types_parser.NewTypeParser(&types_parser.NewTypeParserInput{
+		Schema: schema,
+		GetEnumsImport: func(e *schemas.Enum) *imports.Import {
+			return pbImport
+		},
+		GetTypesImport: func(t *schemas.Type) *imports.Import {
+			return pbImport
+		},
+		GetEventsImport: func(t *schemas.Type) *imports.Import {
+			return pbImport
+		},
+		GetEntitiesImport: func(t *schemas.Type) *imports.Import {
+			return pbImport
+		},
+		GetRepositoryImport: func(t *schemas.Type) *imports.Import {
+			return pbImport
+		},
+		GetUsecaseImport: func(t *schemas.Type) *imports.Import {
+			return pbImport
+		},
+	})
+	if err != nil {
+		return err
+	}
+
+	grpcParser := grpc.NewGrpcParser(&grpc.NewGrpcParserInput{
+		Schema:       schema,
+		GoTypeParser: goTypeParser,
+	})
+
+	parser := &parserManager{
+		schema:                  schema,
+		grpcParser:              grpcParser,
+		typesToAvoidDuplication: map[string]*templates.ProtofileTemplInputType{},
+		grpcTypesParser:         make(map[string]*grpcTypesParser, len(schema.Schemas)),
+	}
+
+	for _, shm := range schema.Schemas {
+		parser.grpcTypesParser[shm.Domain] = &grpcTypesParser{
+			imports:  imports.NewImportsManager(),
+			enums:    map[string]*templates.ProtofileTemplInputEnum{},
+			types:    []*templates.ProtofileTemplInputType{},
+			events:   []*templates.ProtofileTemplInputType{},
+			entities: []*templates.ProtofileTemplInputType{},
 		}
+	}
+
+	// -----------------------------
+	//
+	// Prepare types
+	//
+	// -----------------------------
+
+	if schema.Enums != nil && schema.Enums.Enums != nil {
+		for _, v := range schema.Enums.Enums {
+			parser.resolveEnum(v)
+		}
+	}
+
+	// -----------------------------
+	//
+	// Prepare rpcs
+	//
+	// -----------------------------
+
+	for curDomain, v := range schema.Deliveries.Deliveries {
+		emptyMsg := "google.protobuf.Empty"
 
 		rpcs := make([]*schemas.DeliveryGrpcRpc, 0, len(v.Grpc.Rpcs))
 		for _, v := range v.Grpc.Rpcs {
@@ -57,72 +121,7 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig,
 			return rpcs[i].Order < rpcs[j].Order
 		})
 
-		// -----------------------------
-		//
-		// Parse methods
-		//
-		// -----------------------------
-
-		// The package doesn't matter, it will not be used
-		pbImport := imports.NewImport("pb", nil)
-
-		goTypeParser, err := types_parser.NewTypeParser(&types_parser.NewTypeParserInput{
-			Schema: schema,
-			GetEnumsImport: func(e *schemas.Enum) *imports.Import {
-				return pbImport
-			},
-			GetTypesImport: func(t *schemas.Type) *imports.Import {
-				return pbImport
-			},
-			GetEventsImport: func(t *schemas.Type) *imports.Import {
-				return pbImport
-			},
-			GetEntitiesImport: func(t *schemas.Type) *imports.Import {
-				return pbImport
-			},
-			GetRepositoryImport: func(t *schemas.Type) *imports.Import {
-				return pbImport
-			},
-			GetUsecaseImport: func(t *schemas.Type) *imports.Import {
-				return pbImport
-			},
-		})
-		if err != nil {
-			return err
-		}
-
-		grpcParser := grpc.NewGrpcParser(&grpc.NewGrpcParserInput{
-			Schema:       schema,
-			GoTypeParser: goTypeParser,
-		})
-
-		parserInstance := &parser{
-			schema:                  schema,
-			grpcParser:              grpcParser,
-			imports:                 map[string]bool{},
-			methods:                 make([]*templates.ProtofileTemplInputMethod, 0, len(rpcs)),
-			enums:                   map[string]*templates.ProtofileTemplInputEnum{},
-			typesToAvoidDuplication: map[string]*templates.ProtofileTemplInputType{},
-			types:                   []*templates.ProtofileTemplInputType{},
-		}
-
-		emptyMsg := "google.protobuf.Empty"
-
-		if schema.Enums != nil && schema.Enums.Enums != nil {
-			for _, v := range schema.Enums.Enums {
-				if strings.HasPrefix(v.Ref, curDomain) {
-					parserInstance.resolveEnum(v)
-				}
-			}
-		}
-
-		if schema.Types != nil && schema.Types.Types != nil {
-			for _, v := range schema.Types.Types {
-				if strings.HasPrefix(v.Ref, curDomain) && v.RootNode == "Types" {
-					parserInstance.resolveType(curDomain, v)
-				}
-			}
-		}
+		parser.grpcTypesParser[curDomain].methods = make([]*templates.ProtofileTemplInputMethod, 0, len(rpcs))
 
 		for _, v := range rpcs {
 			method, ok := schema.Usecases.Usecases[curDomain].Methods.Methods[v.UsecaseMethodHash]
@@ -141,14 +140,14 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig,
 					return fmt.Errorf("type \"%s\" not found for usecase method \"%s\"", method.Input.TypeHash, method.Name)
 				}
 
-				inputTypeResolved, err := parserInstance.resolveType(curDomain, inputType)
+				inputTypeResolved, err := parser.resolveType(inputType, inputType.Domain)
 				if err != nil {
 					return err
 				}
 
 				input = &inputTypeResolved.Name
 			} else {
-				parserInstance.imports["google/protobuf/empty.proto"] = true
+				parser.grpcTypesParser[curDomain].imports.AddImport("google/protobuf/empty.proto", nil)
 				input = &emptyMsg
 			}
 
@@ -163,44 +162,48 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig,
 					return fmt.Errorf("type \"%s\" not found for usecase method \"%s\"", method.Output.TypeHash, method.Name)
 				}
 
-				outputTypeResolved, err := parserInstance.resolveType(curDomain, outputType)
+				outputTypeResolved, err := parser.resolveType(outputType, outputType.Domain)
 				if err != nil {
 					return err
 				}
 
 				output = &outputTypeResolved.Name
 			} else {
-				parserInstance.imports["google/protobuf/empty.proto"] = true
+				parser.grpcTypesParser[curDomain].imports.AddImport("google/protobuf/empty.proto", nil)
 				output = &emptyMsg
 			}
 
-			parserInstance.methods = append(parserInstance.methods, &templates.ProtofileTemplInputMethod{
+			parser.grpcTypesParser[curDomain].methods = append(parser.grpcTypesParser[curDomain].methods, &templates.ProtofileTemplInputMethod{
 				Name:   method.Name,
 				Input:  input,
 				Output: output,
 			})
 		}
+	}
 
-		// -----------------------------
-		//
-		// Prepare template
-		//
-		// -----------------------------
+	// -----------------------------
+	//
+	// Prepare templates
+	//
+	// -----------------------------
 
+	for _, shm := range schema.Schemas {
 		templInput := &templates.ProtofileTemplInput{
-			Domain:  curDomain,
-			Imports: make([]string, 0, len(parserInstance.imports)),
-			Enums:   make([]*templates.ProtofileTemplInputEnum, 0, len(parserInstance.enums)),
-			Methods: parserInstance.methods,
-			Types:   parserInstance.types,
+			Domain:   shm.Domain,
+			Imports:  make([]string, 0, parser.grpcTypesParser[shm.Domain].imports.GetImportsLen()),
+			Enums:    make([]*templates.ProtofileTemplInputEnum, 0, len(parser.grpcTypesParser[shm.Domain].enums)),
+			Methods:  parser.grpcTypesParser[shm.Domain].methods,
+			Types:    parser.grpcTypesParser[shm.Domain].types,
+			Events:   parser.grpcTypesParser[shm.Domain].events,
+			Entities: parser.grpcTypesParser[shm.Domain].entities,
 		}
-		for k := range parserInstance.imports {
-			templInput.Imports = append(templInput.Imports, k)
+		for _, v := range parser.grpcTypesParser[shm.Domain].imports.GetImportsUnorganized() {
+			templInput.Imports = append(templInput.Imports, v.Path)
 		}
 		sort.Slice(templInput.Imports, func(i, j int) bool {
 			return templInput.Imports[i] < templInput.Imports[j]
 		})
-		for _, v := range parserInstance.enums {
+		for _, v := range parser.grpcTypesParser[shm.Domain].enums {
 			templInput.Enums = append(templInput.Enums, v)
 		}
 		sort.Slice(templInput.Enums, func(i, j int) bool {
@@ -212,7 +215,7 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig,
 			return err
 		}
 
-		err = WriteFile(curDomain, config.OutDir, protofile)
+		err = WriteFile(shm.Domain, config.OutDir, protofile)
 		if err != nil {
 			return err
 		}

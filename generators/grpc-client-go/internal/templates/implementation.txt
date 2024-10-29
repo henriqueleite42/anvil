@@ -4,7 +4,7 @@ package {{ .DomainSnake }}_grpc_client
 import (
 {{- range .ImportsImplementation }}
 	{{- range . }}
-	"{{ . }}"
+	{{ . }}
 	{{- end }}
 {{ end -}}
 )

@@ -5,15 +5,17 @@ package {{ $pkg }}
 import (
 {{- range .ImportsContract }}
 	{{- range . }}
-	"{{ . }}"
+	{{ . }}
 	{{- end }}
 {{ end -}}
 )
 
+{{ if .Methods -}}
 type {{ .Domain }}ApiInput struct {
 	Addr    string
 	Timeout time.Duration
 }
+{{- end }}
 
 {{- /*
 ------------------
@@ -41,11 +43,12 @@ const (
 {{ range $type := .Types }}
 type {{ $type.GolangType }} struct {
 {{- range $prop := $type.MapProps }}
-	{{ $prop.Name }}{{ $prop.Spacing1 }} {{ $prop.Type.GetFullTypeName $pkg }}
+	{{ $prop.Name }}{{ $prop.Spacing1 }} {{ $prop.Type }}
 {{- end }}
 }
 {{- end }}
 
+{{ if .Methods -}}
 type {{ .Domain }}Api interface {
 	Close() error
 {{ range $method := .Methods }}
@@ -64,4 +67,5 @@ type {{ .Domain }}Api interface {
 {{- end }}
 {{- end }}
 }
+{{- end }}
 

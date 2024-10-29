@@ -8,8 +8,8 @@ import (
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
-func (self *parser) resolveEnum(e *schemas.Enum) *templates.ProtofileTemplInputEnum {
-	if existentEnum, ok := self.enums[e.Name]; ok {
+func (self *parserManager) resolveEnum(e *schemas.Enum) *templates.ProtofileTemplInputEnum {
+	if existentEnum, ok := self.grpcTypesParser[e.Domain].enums[e.Name]; ok {
 		return existentEnum
 	}
 
@@ -42,7 +42,7 @@ func (self *parser) resolveEnum(e *schemas.Enum) *templates.ProtofileTemplInputE
 		})
 	}
 
-	self.enums[e.Name] = result
+	self.grpcTypesParser[e.Domain].enums[e.Name] = result
 
 	return result
 }
