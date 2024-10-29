@@ -1,4 +1,4 @@
 package {{ .DomainSnake }}_usecase
 
-type {{ .DomainCamel }}UsecaseImplementation struct {
+type {{ .Domain }}UsecaseImplementation struct {
 }
