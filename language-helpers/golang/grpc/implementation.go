@@ -14,7 +14,7 @@ type goGrpcParser struct {
 	goTypeParser    types_parser.TypesParser
 	templateManager template.TemplateManager
 
-	enumConversionImport *imports.Import
+	getEnumConversionImpt func(e *schemas.Enum) *imports.Import
 }
 
 type NewGrpcParserInput struct {
@@ -22,7 +22,7 @@ type NewGrpcParserInput struct {
 
 	GoTypeParser types_parser.TypesParser
 
-	EnumConversionImport *imports.Import
+	GetEnumConversionImpt func(e *schemas.Enum) *imports.Import
 }
 
 func NewGrpcParser(i *NewGrpcParserInput) GrpcParser {
@@ -38,6 +38,6 @@ func NewGrpcParser(i *NewGrpcParserInput) GrpcParser {
 		goTypeParser:    i.GoTypeParser,
 		templateManager: templateManager,
 
-		enumConversionImport: i.EnumConversionImport,
+		getEnumConversionImpt: i.GetEnumConversionImpt,
 	}
 }
