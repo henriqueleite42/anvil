@@ -348,13 +348,23 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 			ProtoTypeName:  pbType,
 		}
 
+		var firstLetter string
+		var pkg string
+		if self.enumConversionImport.Alias == oi.CurModuleImport.Alias {
+			firstLetter = "c"
+		} else {
+			firstLetter = "C"
+			pkg = self.enumConversionImport.Alias + "."
+		}
+		enumConvertFuncName := fmt.Sprintf("%s%sonvertPbTo%s(*%s)", pkg, firstLetter, enum.GolangName, oi.VarToConvert)
+
 		if t.Optional {
 			varName := formatter.PascalToCamel(nameWithPrefix)
 			prepareOptional, err := self.templateManager.Parse("input-prop-optional", &templates.InputPropOptionalTemplInput{
 				VarName:              varName,
 				OriginalVariableName: oi.VarToConvert,
 				Type:                 parsedType.GetFullTypeName(oi.CurModuleImport.Alias),
-				ValueToAssign:        fmt.Sprintf("convertPbTo%s(*%s)", enum.GolangName, oi.VarToConvert),
+				ValueToAssign:        fmt.Sprintf("%s(*%s)", enumConvertFuncName, oi.VarToConvert),
 				NeedsPointer:         true,
 			})
 			if err != nil {
@@ -366,7 +376,7 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 
 			return val, nil
 		} else {
-			val.Value = fmt.Sprintf("convertPbTo%s(%s)", enum.GolangName, oi.VarToConvert)
+			val.Value = fmt.Sprintf("%s(%s)", enumConvertFuncName, oi.VarToConvert)
 
 			return val, nil
 		}

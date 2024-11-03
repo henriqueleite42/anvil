@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"github.com/henriqueleite42/anvil/language-helpers/golang/grpc/templates"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/imports"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/template"
 	types_parser "github.com/henriqueleite42/anvil/language-helpers/golang/types"
@@ -12,12 +13,16 @@ type goGrpcParser struct {
 
 	goTypeParser    types_parser.TypesParser
 	templateManager template.TemplateManager
+
+	enumConversionImport *imports.Import
 }
 
 type NewGrpcParserInput struct {
 	Schema *schemas.AnvpSchema
 
 	GoTypeParser types_parser.TypesParser
+
+	EnumConversionImport *imports.Import
 }
 
 func NewGrpcParser(i *NewGrpcParserInput) GrpcParser {
@@ -32,5 +37,7 @@ func NewGrpcParser(i *NewGrpcParserInput) GrpcParser {
 
 		goTypeParser:    i.GoTypeParser,
 		templateManager: templateManager,
+
+		enumConversionImport: i.EnumConversionImport,
 	}
 }
