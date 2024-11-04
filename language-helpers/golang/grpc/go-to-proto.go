@@ -214,12 +214,13 @@ func (self *goGrpcParser) goToProto(i *convertingInput) (*convertingValue, error
 		var pkg string
 		if enumConversionImport.Alias == oi.CurModuleImport.Alias {
 			firstLetter = "c"
+			importsManager.MergeImport(enum.Import)
 		} else {
 			firstLetter = "C"
 			pkg = enumConversionImport.Alias + "."
 			importsManager.MergeImport(enumConversionImport)
 		}
-		enumConvertFuncName := fmt.Sprintf("%s%sonvert%sToPb(*%s)", pkg, firstLetter, enum.GolangName, oi.VarToConvert)
+		enumConvertFuncName := fmt.Sprintf("%s%sonvert%sToPb", pkg, firstLetter, enum.GolangName)
 
 		val := &convertingValue{
 			GolangType:     golangType,
@@ -338,7 +339,7 @@ func (self *goGrpcParser) goToProto(i *convertingInput) (*convertingValue, error
 		var prepare []string = nil
 
 		importsManager := imports.NewImportsManager()
-		importsManager.MergeImports(parsedType.GetImportsUnorganized())
+		// importsManager.MergeImport(parsedType.ModuleImport)
 
 		for _, v := range t.ChildTypes {
 			propType, ok := self.schema.Types.Types[v.TypeHash]
