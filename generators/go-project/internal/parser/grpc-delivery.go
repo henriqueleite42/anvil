@@ -13,8 +13,7 @@ import (
 
 func (self *Parser) resolveGrpcDelivery(
 	dlv *schemas.DeliveryGrpcRpc,
-	curModuleImport *imports.Import,
-	pbModuleImport *imports.Import,
+	config *generator_config.GeneratorConfig,
 ) error {
 	if self.schema.Usecases == nil ||
 		self.schema.Usecases.Usecases == nil {
@@ -32,6 +31,10 @@ func (self *Parser) resolveGrpcDelivery(
 		return fmt.Errorf("usecase method \"%s\" not found", dlv.UsecaseMethodHash)
 	}
 
+	domainSnake := formatter.PascalToSnake(dlv.Domain)
+	moduleName := domainSnake + "_delivery_grpc"
+	curModuleImport := imports.NewImport(config.ModuleName+"/internal/delivery/grpc/"+domainSnake, &moduleName)
+
 	var inputTypeHash string
 	if method.Input != nil {
 		inputTypeHash = method.Input.TypeHash
@@ -43,7 +46,13 @@ func (self *Parser) resolveGrpcDelivery(
 
 	grpcParser := grpc.NewGrpcParser(&grpc.NewGrpcParserInput{
 		Schema:       self.schema,
-		GoTypeParser: self.goTypesParser,
+		GoTypeParser: self.GoTypesParser,
+		GetEnumConversionImpt: func(e *schemas.Enum) *imports.Import {
+			domainSnake := formatter.PascalToSnake(e.Domain)
+			alias := domainSnake + "_delivery_grpc_helper"
+			path := config.ModuleName + "/internal/delivery/grpc/" + domainSnake + "/helpers"
+			return imports.NewImport(path, &alias)
+		},
 	})
 
 	var input *grpc.ConvertedValue = nil
@@ -56,7 +65,7 @@ func (self *Parser) resolveGrpcDelivery(
 		templT, err := grpcParser.ProtoToGo(&grpc.ConverterInput{
 			Type:            t,
 			CurModuleImport: curModuleImport,
-			PbModuleImport:  pbModuleImport,
+			PbModuleImport:  config.PbModuleImport,
 			VarToConvert:    "i",
 		})
 		if err != nil {
@@ -76,7 +85,7 @@ func (self *Parser) resolveGrpcDelivery(
 		templT, err := grpcParser.GoToProto(&grpc.ConverterInput{
 			Type:            t,
 			CurModuleImport: curModuleImport,
-			PbModuleImport:  pbModuleImport,
+			PbModuleImport:  config.PbModuleImport,
 			VarToConvert:    "result",
 		})
 		if err != nil {
@@ -116,15 +125,9 @@ func (self *Parser) parseDeliveriesGrpc(config *generator_config.GeneratorConfig
 				}
 			}
 
-			domainSnake := formatter.PascalToSnake(v.Domain)
-			moduleName := domainSnake + "_delivery_grpc"
-
-			curModuleImport := imports.NewImport(config.ModuleName+"/internal/delivery/grpc/"+domainSnake, &moduleName)
-
 			err := self.resolveGrpcDelivery(
 				v,
-				curModuleImport,
-				config.PbModuleImport,
+				config,
 			)
 			if err != nil {
 				return err

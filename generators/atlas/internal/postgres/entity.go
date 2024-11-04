@@ -70,7 +70,7 @@ func resolveEntities(schema *schemas.AnvpSchema) ([]*templates.HclTemplInputEnti
 		for _, vv := range v.PrimaryKey.ColumnsHashes {
 			column, ok := v.Columns[vv]
 			if !ok {
-				return nil, fmt.Errorf("fail to get column with hash \"%s\" for table \"%s\"", vv, v.Name)
+				return nil, fmt.Errorf("fail to get column with hash \"%s\" to parse primary key for table \"%s\"", vv, v.Name)
 			}
 			cType, ok := schema.Types.Types[column.TypeHash]
 			if !ok {

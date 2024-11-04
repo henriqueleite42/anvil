@@ -16,6 +16,8 @@ type TemplEnumValue struct {
 }
 
 type TemplEnum struct {
+	AnvilEnum *schemas.Enum
+
 	GolangName       string // Enum name
 	GolangType       string // string, int, etc
 	Values           []*TemplEnumValue
@@ -90,10 +92,11 @@ type TemplInput struct {
 	DomainSnake                 string
 	SpacingRelativeToDomainName string
 
-	ImportsModels       [][]string
-	ImportsRepository   [][]string
-	ImportsUsecase      [][]string
-	ImportsGrpcDelivery [][]string
+	ImportsModels             [][]string
+	ImportsRepository         [][]string
+	ImportsUsecase            [][]string
+	ImportsGrpcDelivery       [][]string
+	ImportsGrpcDeliveryHelper [][]string
 
 	Enums    []*TemplEnum
 	Types    []*TemplType
@@ -122,6 +125,9 @@ var GitIgnoreTempl string
 
 //go:embed go-mod.txt
 var GoModTempl string
+
+//go:embed grpc-delivery-module-helper.txt
+var GrpcDeliveryModuleHelperTempl string
 
 //go:embed grpc-delivery-module.txt
 var GrpcDeliveryModuleTempl string

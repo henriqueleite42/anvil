@@ -12,7 +12,7 @@ import (
 func (self *Parser) resolveUsecaseMethod(usc *schemas.UsecaseMethod) error {
 	pkgName := formatter.PascalToSnake(usc.Domain) + "_usecase"
 
-	importsManager := imports.NewImportsManager()
+	methodImportsManager := imports.NewImportsManager()
 
 	var inputTypeName string
 	if usc.Input != nil && usc.Input.TypeHash != "" {
@@ -21,12 +21,12 @@ func (self *Parser) resolveUsecaseMethod(usc *schemas.UsecaseMethod) error {
 			return fmt.Errorf("fail to find type for \"%s.Input\"", usc.Name)
 		}
 
-		tParsed, err := self.goTypesParser.ParseType(t)
+		tParsed, err := self.GoTypesParser.ParseType(t)
 		if err != nil {
 			return err
 		}
 
-		importsManager.MergeImport(tParsed.ModuleImport)
+		methodImportsManager.MergeImport(tParsed.ModuleImport)
 
 		inputTypeName = tParsed.GetFullTypeName(pkgName)
 	}
@@ -38,19 +38,21 @@ func (self *Parser) resolveUsecaseMethod(usc *schemas.UsecaseMethod) error {
 			return fmt.Errorf("fail to find type for \"%s.Output\"", usc.Name)
 		}
 
-		tParsed, err := self.goTypesParser.ParseType(t)
+		tParsed, err := self.GoTypesParser.ParseType(t)
 		if err != nil {
 			return err
 		}
 
-		importsManager.MergeImport(tParsed.ModuleImport)
+		methodImportsManager.MergeImport(tParsed.ModuleImport)
 
 		outputTypeName = tParsed.GetFullTypeName(pkgName)
 	}
 
-	importsManager.AddImport("context", nil)
-	importsManager.AddImport("errors", nil)
-	imports := imports.ResolveImports(importsManager.GetImportsUnorganized(), pkgName)
+	methodImportsManager.AddImport("context", nil)
+	methodImportsUnorganized := methodImportsManager.GetImportsUnorganized()
+	imports := imports.ResolveImports(methodImportsUnorganized, pkgName)
+
+	self.ImportsUsecase[usc.Domain].MergeImports(methodImportsUnorganized)
 
 	self.usecases[usc.Domain].Methods = append(self.usecases[usc.Domain].Methods, &templates.TemplMethod{
 		MethodName:     usc.Name,
@@ -78,6 +80,8 @@ func (self *Parser) parseUsecases() error {
 				self.usecases[v.Domain] = &ParserUsecase{
 					Methods: make([]*templates.TemplMethod, 0, len(usecase.Methods.Methods)),
 				}
+
+				self.ImportsUsecase[v.Domain].AddImport("context", nil)
 			}
 
 			err := self.resolveUsecaseMethod(v)

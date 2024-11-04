@@ -1,0 +1,30 @@
+package {{ .DomainSnake }}_delivery_grpc_helper
+
+import (
+{{- range .ImportsGrpcDeliveryHelper }}
+	{{- range . }}
+	{{ . }}
+	{{- end }}
+{{ end -}}
+)
+
+{{ range $enum := .Enums }}
+func Convert{{ $enum.GolangName }}ToPb(val models.{{ $enum.GolangName }}) pb.{{ $enum.GolangName }} {
+	{{-  range $value := $enum.Values }}
+	if val == models.{{ $enum.GolangName }}_{{ $value.Name }} {
+		return {{ $value.Idx }}
+	}
+	{{- end }}
+
+	return 0
+}
+func ConvertPbTo{{ $enum.GolangName }}(val pb.{{ $enum.GolangName }}) models.{{ $enum.GolangName }} {
+	{{- range $value := $enum.Values }}
+	if val == {{ $value.Idx }} {
+		return models.{{ $enum.GolangName }}_{{ $value.Name }}
+	}
+	{{- end }}
+
+	return models.{{ $enum.GolangName }}_{{ with $firstEnum := index $enum.Values 0 }}{{ $firstEnum.Name }}{{ end }}
+}
+{{- end }}

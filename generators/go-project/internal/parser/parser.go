@@ -25,11 +25,17 @@ type Parser struct {
 	schema *schemas.AnvpSchema
 	config *generator_config.GeneratorConfig
 
-	goTypesParser types_parser.TypesParser
+	GoTypesParser types_parser.TypesParser
 
 	repositories   map[string]*ParserRepository
 	usecases       map[string]*ParserUsecase
 	grpcDeliveries map[string]*ParserGrpcDelivery
+
+	ImportsModels             map[string]imports.ImportsManager
+	ImportsRepository         map[string]imports.ImportsManager
+	ImportsUsecase            map[string]imports.ImportsManager
+	ImportsGrpcDelivery       map[string]imports.ImportsManager
+	ImportsGrpcDeliveryHelper map[string]imports.ImportsManager
 }
 
 func NewTypesParser(
@@ -71,14 +77,30 @@ func NewTypesParser(
 		return nil, err
 	}
 
-	return &Parser{
+	parser := &Parser{
 		schema: schema,
 		config: config,
 
-		goTypesParser: goTypesParser,
+		GoTypesParser: goTypesParser,
 
 		repositories:   map[string]*ParserRepository{},
 		usecases:       map[string]*ParserUsecase{},
 		grpcDeliveries: map[string]*ParserGrpcDelivery{},
-	}, nil
+
+		ImportsModels:             map[string]imports.ImportsManager{},
+		ImportsRepository:         map[string]imports.ImportsManager{},
+		ImportsUsecase:            map[string]imports.ImportsManager{},
+		ImportsGrpcDelivery:       map[string]imports.ImportsManager{},
+		ImportsGrpcDeliveryHelper: map[string]imports.ImportsManager{},
+	}
+
+	for _, v := range schema.Schemas {
+		parser.ImportsModels[v.Domain] = imports.NewImportsManager()
+		parser.ImportsRepository[v.Domain] = imports.NewImportsManager()
+		parser.ImportsUsecase[v.Domain] = imports.NewImportsManager()
+		parser.ImportsGrpcDelivery[v.Domain] = imports.NewImportsManager()
+		parser.ImportsGrpcDeliveryHelper[v.Domain] = imports.NewImportsManager()
+	}
+
+	return parser, nil
 }
