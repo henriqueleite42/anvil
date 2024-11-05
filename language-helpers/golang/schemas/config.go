@@ -11,6 +11,7 @@ type Generator struct {
 // Config
 
 type Config struct {
+	ProjectName  string       `yaml:"ProjectName"`
 	AnvilVersion string       `yaml:"AnvilVersion"`
 	Schemas      []string     `yaml:"Schemas"`
 	Generators   []*Generator `yaml:"Generators"`
