@@ -6,7 +6,7 @@ func (self *Parser) parseEnums() error {
 	}
 
 	for _, v := range self.schema.Enums.Enums {
-		_, err := self.goTypesParser.ParseEnum(v)
+		_, err := self.GoTypesParser.ParseEnum(v)
 		if err != nil {
 			return err
 		}
@@ -21,7 +21,7 @@ func (self *Parser) parseTypes() error {
 	}
 
 	for _, v := range self.schema.Types.Types {
-		_, err := self.goTypesParser.ParseType(v)
+		_, err := self.GoTypesParser.ParseType(v)
 		if err != nil {
 			return err
 		}
@@ -38,7 +38,7 @@ func (self *Parser) parseEntities() error {
 	for _, v := range self.schema.Entities.Entities {
 		entity := self.schema.Types.Types[v.TypeHash]
 
-		_, err := self.goTypesParser.ParseType(entity)
+		_, err := self.GoTypesParser.ParseType(entity)
 		if err != nil {
 			return err
 		}

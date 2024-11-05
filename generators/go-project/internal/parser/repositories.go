@@ -12,7 +12,7 @@ import (
 func (self *Parser) resolveRepositoryMethod(rpt *schemas.RepositoryMethod) error {
 	pkgName := formatter.PascalToSnake(rpt.Domain) + "_repository"
 
-	importsManager := imports.NewImportsManager()
+	methodImportsManager := imports.NewImportsManager()
 
 	var inputTypeName string
 	if rpt.Input != nil && rpt.Input.TypeHash != "" {
@@ -21,12 +21,12 @@ func (self *Parser) resolveRepositoryMethod(rpt *schemas.RepositoryMethod) error
 			return fmt.Errorf("fail to find type for \"%s.Input\"", rpt.Name)
 		}
 
-		tParsed, err := self.goTypesParser.ParseType(t)
+		tParsed, err := self.GoTypesParser.ParseType(t)
 		if err != nil {
 			return err
 		}
 
-		importsManager.MergeImport(tParsed.ModuleImport)
+		methodImportsManager.MergeImport(tParsed.ModuleImport)
 
 		inputTypeName = tParsed.GetFullTypeName(pkgName)
 	}
@@ -38,19 +38,21 @@ func (self *Parser) resolveRepositoryMethod(rpt *schemas.RepositoryMethod) error
 			return fmt.Errorf("fail to find type for \"%s.Output\"", rpt.Name)
 		}
 
-		tParsed, err := self.goTypesParser.ParseType(t)
+		tParsed, err := self.GoTypesParser.ParseType(t)
 		if err != nil {
 			return err
 		}
 
-		importsManager.MergeImport(tParsed.ModuleImport)
+		methodImportsManager.MergeImport(tParsed.ModuleImport)
 
 		outputTypeName = tParsed.GetFullTypeName(pkgName)
 	}
 
-	importsManager.AddImport("context", nil)
-	importsManager.AddImport("errors", nil)
-	imports := imports.ResolveImports(importsManager.GetImportsUnorganized(), pkgName)
+	self.ImportsRepository[rpt.Domain].MergeImports(methodImportsManager.GetImportsUnorganized())
+
+	methodImportsManager.AddImport("context", nil)
+	methodImportsManager.AddImport("errors", nil)
+	imports := imports.ResolveImports(methodImportsManager.GetImportsUnorganized(), pkgName)
 
 	self.repositories[rpt.Domain].Methods = append(self.repositories[rpt.Domain].Methods, &templates.TemplMethod{
 		MethodName:     rpt.Name,
@@ -78,6 +80,8 @@ func (self *Parser) parseRepositories() error {
 				self.repositories[v.Domain] = &ParserRepository{
 					Methods: make([]*templates.TemplMethod, 0, len(repository.Methods.Methods)),
 				}
+
+				self.ImportsRepository[v.Domain].AddImport("context", nil)
 			}
 
 			err := self.resolveRepositoryMethod(v)

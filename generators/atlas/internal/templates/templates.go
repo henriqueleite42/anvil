@@ -27,12 +27,14 @@ type HclTemplInputEntityForeignKey struct {
 	RefColumns []string
 	OnUpdate   *string
 	OnDelete   *string
+	Order      uint
 }
 
 type HclTemplInputEntityIndex struct {
 	Name    string
 	Columns []string
 	Unique  bool
+	Order   uint
 }
 
 type HclTemplInputEntity struct {

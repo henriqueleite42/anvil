@@ -67,9 +67,10 @@ func enumToTemplEnum(e *types_parser.Enum) *templates.TemplEnum {
 		values = make([]*templates.TemplEnumValue, 0, len(e.Values))
 
 		for _, v := range e.Values {
+			fullName := fmt.Sprintf("%s_%s", e.GolangName, v.Name)
 			values = append(values, &templates.TemplEnumValue{
 				Name:    v.Name,
-				Spacing: strings.Repeat(" ", biggestName-len(v.Name)),
+				Spacing: strings.Repeat(" ", biggestName-len(fullName)),
 				Idx:     v.Idx,
 				Value:   v.Value,
 			})
@@ -100,6 +101,8 @@ func enumToTemplEnum(e *types_parser.Enum) *templates.TemplEnum {
 	}
 
 	return &templates.TemplEnum{
+		AnvilEnum: e.AnvilEnum,
+
 		GolangName:       e.GolangName,
 		GolangType:       e.GolangType,
 		Values:           values,
@@ -109,7 +112,7 @@ func enumToTemplEnum(e *types_parser.Enum) *templates.TemplEnum {
 
 func (self *Parser) GetEnums() (map[string][]*templates.TemplEnum, error) {
 	enumsByDomain := map[string][]*templates.TemplEnum{}
-	enums := self.goTypesParser.GetEnums()
+	enums := self.GoTypesParser.GetEnums()
 	for _, e := range enums {
 		if _, ok := enumsByDomain[e.AnvilEnum.Domain]; !ok {
 			enumsByDomain[e.AnvilEnum.Domain] = []*templates.TemplEnum{}
@@ -130,7 +133,7 @@ func (self *Parser) GetEnums() (map[string][]*templates.TemplEnum, error) {
 
 func (self *Parser) GetTypes() (map[string][]*templates.TemplType, error) {
 	typesByDomain := map[string][]*templates.TemplType{}
-	types := self.goTypesParser.GetTypes()
+	types := self.GoTypesParser.GetTypes()
 	for _, t := range types {
 		if _, ok := typesByDomain[t.AnvilType.Domain]; !ok {
 			typesByDomain[t.AnvilType.Domain] = []*templates.TemplType{}
@@ -151,7 +154,7 @@ func (self *Parser) GetTypes() (map[string][]*templates.TemplType, error) {
 
 func (self *Parser) GetEntities() (map[string][]*templates.TemplType, error) {
 	entitiesByDomain := map[string][]*templates.TemplType{}
-	entities := self.goTypesParser.GetEntities()
+	entities := self.GoTypesParser.GetEntities()
 	for _, t := range entities {
 		if _, ok := entitiesByDomain[t.AnvilType.Domain]; !ok {
 			entitiesByDomain[t.AnvilType.Domain] = []*templates.TemplType{}
@@ -172,7 +175,7 @@ func (self *Parser) GetEntities() (map[string][]*templates.TemplType, error) {
 
 func (self *Parser) GetEvents() (map[string][]*templates.TemplType, error) {
 	eventsByDomain := map[string][]*templates.TemplType{}
-	events := self.goTypesParser.GetEvents()
+	events := self.GoTypesParser.GetEvents()
 	for _, t := range events {
 		if _, ok := eventsByDomain[t.AnvilType.Domain]; !ok {
 			eventsByDomain[t.AnvilType.Domain] = []*templates.TemplType{}
@@ -193,7 +196,7 @@ func (self *Parser) GetEvents() (map[string][]*templates.TemplType, error) {
 
 func (self *Parser) GetRepositoryTypes() (map[string][]*templates.TemplType, error) {
 	repositoryTypesByDomain := map[string][]*templates.TemplType{}
-	repositoryTypes := self.goTypesParser.GetRepository()
+	repositoryTypes := self.GoTypesParser.GetRepository()
 	for _, t := range repositoryTypes {
 		if _, ok := repositoryTypesByDomain[t.AnvilType.Domain]; !ok {
 			repositoryTypesByDomain[t.AnvilType.Domain] = []*templates.TemplType{}
@@ -214,7 +217,7 @@ func (self *Parser) GetRepositoryTypes() (map[string][]*templates.TemplType, err
 
 func (self *Parser) GetUsecaseTypes() (map[string][]*templates.TemplType, error) {
 	usecaseTypesByDomain := map[string][]*templates.TemplType{}
-	usecaseTypes := self.goTypesParser.GetUsecase()
+	usecaseTypes := self.GoTypesParser.GetUsecase()
 	for _, t := range usecaseTypes {
 		if _, ok := usecaseTypesByDomain[t.AnvilType.Domain]; !ok {
 			usecaseTypesByDomain[t.AnvilType.Domain] = []*templates.TemplType{}

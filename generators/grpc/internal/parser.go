@@ -6,16 +6,13 @@ import (
 
 	generator_config "github.com/henriqueleite42/anvil/generators/grpc/config"
 	"github.com/henriqueleite42/anvil/generators/grpc/internal/templates"
-	"github.com/henriqueleite42/anvil/language-helpers/golang/grpc"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/imports"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/template"
-	types_parser "github.com/henriqueleite42/anvil/language-helpers/golang/types"
 )
 
 type parserManager struct {
-	schema     *schemas.AnvpSchema
-	grpcParser grpc.GrpcParser
+	schema *schemas.AnvpSchema
 
 	typesToAvoidDuplication map[string]*templates.ProtofileTemplInputType
 
@@ -42,42 +39,8 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig,
 		}
 	}
 
-	// The package doesn't matter, it will not be used
-	pbImport := imports.NewImport("pb", nil)
-
-	goTypeParser, err := types_parser.NewTypeParser(&types_parser.NewTypeParserInput{
-		Schema: schema,
-		GetEnumsImport: func(e *schemas.Enum) *imports.Import {
-			return pbImport
-		},
-		GetTypesImport: func(t *schemas.Type) *imports.Import {
-			return pbImport
-		},
-		GetEventsImport: func(t *schemas.Type) *imports.Import {
-			return pbImport
-		},
-		GetEntitiesImport: func(t *schemas.Type) *imports.Import {
-			return pbImport
-		},
-		GetRepositoryImport: func(t *schemas.Type) *imports.Import {
-			return pbImport
-		},
-		GetUsecaseImport: func(t *schemas.Type) *imports.Import {
-			return pbImport
-		},
-	})
-	if err != nil {
-		return err
-	}
-
-	grpcParser := grpc.NewGrpcParser(&grpc.NewGrpcParserInput{
-		Schema:       schema,
-		GoTypeParser: goTypeParser,
-	})
-
 	parser := &parserManager{
 		schema:                  schema,
-		grpcParser:              grpcParser,
 		typesToAvoidDuplication: map[string]*templates.ProtofileTemplInputType{},
 		grpcTypesParser:         make(map[string]*grpcTypesParser, len(schema.Schemas)),
 	}

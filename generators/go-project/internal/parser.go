@@ -14,16 +14,17 @@ import (
 )
 
 var templatesNamesValues = map[string]string{
-	"models":                   templates.ModelsTempl,
-	"repository":               templates.RepositoryTempl,
-	"repository-struct":        templates.RepositoryStructTempl,
-	"repository-method":        templates.RepositoryMethodTempl,
-	"usecase":                  templates.UsecaseTempl,
-	"usecase-struct":           templates.UsecaseStructTempl,
-	"usecase-method":           templates.UsecaseMethodTempl,
-	"grpc-delivery-module":     templates.GrpcDeliveryModuleTempl,
-	"go-mod":                   templates.GoModTempl,
-	"validator-implementation": templates.ValidatorImplementationTempl,
+	"models":                      templates.ModelsTempl,
+	"repository":                  templates.RepositoryTempl,
+	"repository-struct":           templates.RepositoryStructTempl,
+	"repository-method":           templates.RepositoryMethodTempl,
+	"usecase":                     templates.UsecaseTempl,
+	"usecase-struct":              templates.UsecaseStructTempl,
+	"usecase-method":              templates.UsecaseMethodTempl,
+	"grpc-delivery-module-helper": templates.GrpcDeliveryModuleHelperTempl,
+	"grpc-delivery-module":        templates.GrpcDeliveryModuleTempl,
+	"go-mod":                      templates.GoModTempl,
+	"validator-implementation":    templates.ValidatorImplementationTempl,
 }
 
 type File struct {
@@ -97,6 +98,7 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 		var hasModels bool
 		var hasRepository bool
 		var hasUsecase bool
+		var domainHasEnums bool
 		var domainHasGrpcDelivery bool
 
 		curDomain := scm.Domain
@@ -109,18 +111,18 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 		}
 
 		// Models
-		modelsImportsManager := imports.NewImportsManager()
 
 		if enumsPerDomain != nil {
 			if enums, ok := enumsPerDomain[curDomain]; ok {
 				hasModels = true
+				domainHasEnums = true
 				templInput.Enums = enums
 			}
 		}
 		if typesPerDomain != nil {
 			if types, ok := typesPerDomain[curDomain]; ok {
 				for _, t := range types {
-					modelsImportsManager.MergeImports(t.ImportsUnorganized)
+					typeParser.ImportsModels[curDomain].MergeImports(t.ImportsUnorganized)
 				}
 
 				hasModels = true
@@ -129,8 +131,8 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 		}
 		if eventsPerDomain != nil {
 			if events, ok := eventsPerDomain[curDomain]; ok {
-				for _, e := range events {
-					modelsImportsManager.MergeImports(e.ImportsUnorganized)
+				for _, t := range events {
+					typeParser.ImportsModels[curDomain].MergeImports(t.ImportsUnorganized)
 				}
 
 				hasModels = true
@@ -139,8 +141,8 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 		}
 		if entitiesPerDomain != nil {
 			if entities, ok := entitiesPerDomain[curDomain]; ok {
-				for _, e := range entities {
-					modelsImportsManager.MergeImports(e.ImportsUnorganized)
+				for _, t := range entities {
+					typeParser.ImportsModels[curDomain].MergeImports(t.ImportsUnorganized)
 				}
 
 				hasModels = true
@@ -149,19 +151,18 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 		}
 
 		importsModels := imports.ResolveImports(
-			modelsImportsManager.GetImportsUnorganized(),
+			typeParser.ImportsModels[curDomain].GetImportsUnorganized(),
 			"models",
 		)
 		templInput.ImportsModels = importsModels
 
 		// Repository
-		repositoryImportsManager := imports.NewImportsManager()
 
 		if repositoryTypesPerDomain != nil {
 			if repositoryTypes, ok := repositoryTypesPerDomain[curDomain]; ok {
 				hasRepository = true
 				for _, r := range repositoryTypes {
-					repositoryImportsManager.MergeImports(r.ImportsUnorganized)
+					typeParser.ImportsRepository[curDomain].MergeImports(r.ImportsUnorganized)
 				}
 
 				templInput.TypesRepository = repositoryTypes
@@ -170,46 +171,43 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 		if repositoriesPerDomain != nil {
 			if repository, ok := repositoriesPerDomain[curDomain]; ok {
 				hasRepository = true
-				repositoryImportsManager.AddImport("context", nil)
 				templInput.MethodsRepository = repository.Methods
 			}
 		}
 
 		importsRepository := imports.ResolveImports(
-			repositoryImportsManager.GetImportsUnorganized(),
+			typeParser.ImportsRepository[curDomain].GetImportsUnorganized(),
 			templInput.DomainSnake+"_repository",
 		)
 		templInput.ImportsRepository = importsRepository
 
 		// Usecase
-		usecaseImportsManager := imports.NewImportsManager()
 
 		if usecaseTypesPerDomain != nil {
 			if usecaseTypes, ok := usecaseTypesPerDomain[curDomain]; ok {
-				hasUsecase = true
-				for _, u := range usecaseTypes {
-					usecaseImportsManager.MergeImports(u.ImportsUnorganized)
+				for _, r := range usecaseTypes {
+					typeParser.ImportsUsecase[curDomain].MergeImports(r.ImportsUnorganized)
 				}
 
+				hasUsecase = true
 				templInput.TypesUsecase = usecaseTypes
 			}
 		}
 		if usecasesPerDomain != nil {
 			if usecase, ok := usecasesPerDomain[curDomain]; ok {
 				hasUsecase = true
-				usecaseImportsManager.AddImport("context", nil)
 				templInput.MethodsUsecase = usecase.Methods
 			}
 		}
 
 		importsUsecase := imports.ResolveImports(
-			usecaseImportsManager.GetImportsUnorganized(),
+			typeParser.ImportsUsecase[curDomain].GetImportsUnorganized(),
 			templInput.DomainSnake+"_usecase",
 		)
 		templInput.ImportsUsecase = importsUsecase
 
 		// Grpc Delivery
-		grpcDeliveryImportsManager := imports.NewImportsManager()
+		typeParser.ImportsGrpcDeliveryHelper[curDomain].MergeImport(config.PbModuleImport)
 
 		if grpcDeliveriesPerDomain != nil {
 			if grpcDelivery, ok := grpcDeliveriesPerDomain[curDomain]; ok {
@@ -219,26 +217,26 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 
 				for _, method := range grpcDelivery.Methods {
 					if method.Input != nil {
-						grpcDeliveryImportsManager.MergeImports(method.Input.ImportsUnorganized)
+						typeParser.ImportsGrpcDelivery[curDomain].MergeImports(method.Input.ImportsUnorganized)
 					} else {
-						grpcDeliveryImportsManager.AddImport("google.golang.org/protobuf/types/known/emptypb", nil)
+						typeParser.ImportsGrpcDelivery[curDomain].AddImport("google.golang.org/protobuf/types/known/emptypb", nil)
 					}
 					if method.Output != nil {
-						grpcDeliveryImportsManager.MergeImports(method.Output.ImportsUnorganized)
+						typeParser.ImportsGrpcDelivery[curDomain].MergeImports(method.Output.ImportsUnorganized)
 					} else {
-						grpcDeliveryImportsManager.AddImport("google.golang.org/protobuf/types/known/emptypb", nil)
+						typeParser.ImportsGrpcDelivery[curDomain].AddImport("google.golang.org/protobuf/types/known/emptypb", nil)
 					}
 				}
 
-				grpcDeliveryImportsManager.AddImport("context", nil)
-				grpcDeliveryImportsManager.AddImport("github.com/rs/xid", nil)
-				grpcDeliveryImportsManager.AddImport("google.golang.org/grpc", nil)
-				grpcDeliveryImportsManager.AddImport("github.com/rs/zerolog", nil)
-				grpcDeliveryImportsManager.MergeImport(config.PbModuleImport)
-				grpcDeliveryImportsManager.AddImport(config.ModuleName+"/internal/adapters", nil)
+				typeParser.ImportsGrpcDelivery[curDomain].AddImport("context", nil)
+				typeParser.ImportsGrpcDelivery[curDomain].AddImport("github.com/rs/xid", nil)
+				typeParser.ImportsGrpcDelivery[curDomain].AddImport("google.golang.org/grpc", nil)
+				typeParser.ImportsGrpcDelivery[curDomain].AddImport("github.com/rs/zerolog", nil)
+				typeParser.ImportsGrpcDelivery[curDomain].MergeImport(config.PbModuleImport)
+				typeParser.ImportsGrpcDelivery[curDomain].AddImport(config.ModuleName+"/internal/adapters", nil)
 
 				if _, ok := enumsPerDomain[curDomain]; ok {
-					grpcDeliveryImportsManager.AddImport(config.ModuleName+"/internal/models", nil)
+					typeParser.ImportsGrpcDeliveryHelper[curDomain].AddImport(config.ModuleName+"/internal/models", nil)
 				}
 
 				templInput.MethodsGrpcDelivery = grpcDelivery.Methods
@@ -246,10 +244,15 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 		}
 
 		importsGrpcDelivery := imports.ResolveImports(
-			grpcDeliveryImportsManager.GetImportsUnorganized(),
+			typeParser.ImportsGrpcDelivery[curDomain].GetImportsUnorganized(),
 			templInput.DomainSnake+"_grpc_delivery",
 		)
 		templInput.ImportsGrpcDelivery = importsGrpcDelivery
+		importsGrpcDeliveryHelper := imports.ResolveImports(
+			typeParser.ImportsGrpcDeliveryHelper[curDomain].GetImportsUnorganized(),
+			templInput.DomainSnake+"_grpc_delivery_helper",
+		)
+		templInput.ImportsGrpcDeliveryHelper = importsGrpcDeliveryHelper
 
 		// -----------
 		//
@@ -364,6 +367,21 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 					Overwrite: true,
 				},
 			)
+
+			if domainHasEnums {
+				grpcModuleHelper, err := templateManager.Parse("grpc-delivery-module-helper", templInput)
+				if err != nil {
+					return nil, err
+				}
+				files = append(
+					files,
+					&File{
+						Name:      fmt.Sprintf("internal/delivery/grpc/%s/helpers/enums.go", templInput.DomainSnake),
+						Content:   grpcModuleHelper,
+						Overwrite: true,
+					},
+				)
+			}
 		}
 	}
 

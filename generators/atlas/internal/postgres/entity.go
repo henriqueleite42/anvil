@@ -70,7 +70,7 @@ func resolveEntities(schema *schemas.AnvpSchema) ([]*templates.HclTemplInputEnti
 		for _, vv := range v.PrimaryKey.ColumnsHashes {
 			column, ok := v.Columns[vv]
 			if !ok {
-				return nil, fmt.Errorf("fail to get column with hash \"%s\" for table \"%s\"", vv, v.Name)
+				return nil, fmt.Errorf("fail to get column with hash \"%s\" to parse primary key for table \"%s\"", vv, v.Name)
 			}
 			cType, ok := schema.Types.Types[column.TypeHash]
 			if !ok {
@@ -90,10 +90,10 @@ func resolveEntities(schema *schemas.AnvpSchema) ([]*templates.HclTemplInputEnti
 
 		for _, vv := range v.Indexes {
 			columnsNames := make([]string, 0, len(vv.ColumnsHashes))
-			for _, vv := range vv.ColumnsHashes {
-				column, ok := v.Columns[vv]
+			for _, vvv := range vv.ColumnsHashes {
+				column, ok := v.Columns[vvv]
 				if !ok {
-					return nil, fmt.Errorf("fail to get column with hash \"%s\" for table \"%s\"", vv, v.Name)
+					return nil, fmt.Errorf("fail to get column with hash \"%s\" for table \"%s\"", vvv, v.Name)
 				}
 				cType, ok := schema.Types.Types[column.TypeHash]
 				if !ok {
@@ -109,9 +109,12 @@ func resolveEntities(schema *schemas.AnvpSchema) ([]*templates.HclTemplInputEnti
 				Name:    vv.ConstraintName,
 				Columns: columnsNames,
 				Unique:  vv.Unique,
+				Order:   vv.Order,
 			})
 		}
-		// TODO: Add sort when order added to Indexes
+		sort.Slice(indexes, func(i, j int) bool {
+			return indexes[i].Order < indexes[j].Order
+		})
 
 		for _, vv := range v.ForeignKeys {
 			refTableEntity, ok := schema.Entities.Entities[vv.RefTableHash]
@@ -120,10 +123,10 @@ func resolveEntities(schema *schemas.AnvpSchema) ([]*templates.HclTemplInputEnti
 			}
 
 			columns := make([]string, 0, len(vv.ColumnsHashes))
-			for _, vv := range vv.ColumnsHashes {
-				column, ok := v.Columns[vv]
+			for _, vvv := range vv.ColumnsHashes {
+				column, ok := v.Columns[vvv]
 				if !ok {
-					return nil, fmt.Errorf("fail to get column with hash \"%s\" for table \"%s\"", vv, v.Name)
+					return nil, fmt.Errorf("fail to get column with hash \"%s\" for table \"%s\"", vvv, v.Name)
 				}
 				cType, ok := schema.Types.Types[column.TypeHash]
 				if !ok {
@@ -135,10 +138,10 @@ func resolveEntities(schema *schemas.AnvpSchema) ([]*templates.HclTemplInputEnti
 				columns = append(columns, "column."+*cType.DbName)
 			}
 			refColumns := make([]string, 0, len(vv.RefColumnsHashes))
-			for _, vv := range vv.RefColumnsHashes {
-				column, ok := refTableEntity.Columns[vv]
+			for _, vvv := range vv.RefColumnsHashes {
+				column, ok := refTableEntity.Columns[vvv]
 				if !ok {
-					return nil, fmt.Errorf("fail to get table with hash \"%s\"", vv)
+					return nil, fmt.Errorf("fail to get table with hash \"%s\"", vvv)
 				}
 				cType, ok := schema.Types.Types[column.TypeHash]
 				if !ok {
@@ -157,9 +160,12 @@ func resolveEntities(schema *schemas.AnvpSchema) ([]*templates.HclTemplInputEnti
 				RefColumns: refColumns,
 				OnUpdate:   vv.OnUpdate,
 				OnDelete:   vv.OnDelete,
+				Order:      vv.Order,
 			})
 		}
-		// TODO: Add sort when order added to ForeignKeys
+		sort.Slice(foreignKeys, func(i, j int) bool {
+			return foreignKeys[i].Order < foreignKeys[j].Order
+		})
 
 		result = append(result, &templates.HclTemplInputEntity{
 			DbName:      v.DbName,

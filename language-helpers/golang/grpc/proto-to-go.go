@@ -341,11 +341,23 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 
 		pbType := oi.PbModuleImport.Alias + "." + enum.GolangName
 
+		enumConversionImport := self.getEnumConversionImpt(schemaEnum)
+		var pkg string
+		if enumConversionImport.Alias == oi.CurModuleImport.Alias {
+			importsManager.MergeImport(enum.Import)
+		} else {
+			pkg = enumConversionImport.Alias + "."
+			importsManager.MergeImport(enumConversionImport)
+		}
+		enumConvertFuncName := fmt.Sprintf("%sConvertPbTo%s", pkg, enum.GolangName)
+
 		val := &convertingValue{
 			GolangType:     golangType,
 			GolangTypeName: golangTypeName,
 			ProtoType:      "*" + pbType,
 			ProtoTypeName:  pbType,
+
+			imports: importsManager,
 		}
 
 		if t.Optional {
@@ -354,7 +366,7 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 				VarName:              varName,
 				OriginalVariableName: oi.VarToConvert,
 				Type:                 parsedType.GetFullTypeName(oi.CurModuleImport.Alias),
-				ValueToAssign:        fmt.Sprintf("convertPbTo%s(*%s)", enum.GolangName, oi.VarToConvert),
+				ValueToAssign:        fmt.Sprintf("%s(*%s)", enumConvertFuncName, oi.VarToConvert),
 				NeedsPointer:         true,
 			})
 			if err != nil {
@@ -366,7 +378,7 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 
 			return val, nil
 		} else {
-			val.Value = fmt.Sprintf("convertPbTo%s(%s)", enum.GolangName, oi.VarToConvert)
+			val.Value = fmt.Sprintf("%s(%s)", enumConvertFuncName, oi.VarToConvert)
 
 			return val, nil
 		}
@@ -456,7 +468,7 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 		var prepare []string = nil
 
 		importsManager := imports.NewImportsManager()
-		importsManager.MergeImports(parsedType.GetImportsUnorganized())
+		importsManager.MergeImport(parsedType.ModuleImport)
 
 		for _, v := range t.ChildTypes {
 			propType, ok := self.schema.Types.Types[v.TypeHash]

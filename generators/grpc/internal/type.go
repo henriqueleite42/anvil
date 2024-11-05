@@ -63,6 +63,11 @@ func (self *parserManager) resolveTypeProp(t *schemas.Type, rootDomain string) (
 			return "", fmt.Errorf("enum \"%s\" notfound", *t.EnumHash)
 		}
 
+		if enum.Domain != rootDomain {
+			domainKebab := formatter.PascalToKebab(enum.Domain)
+			self.grpcTypesParser[rootDomain].imports.AddImport(domainKebab+".proto", nil)
+		}
+
 		enumResolved := self.resolveEnum(enum)
 
 		typeString = enumResolved.Name

@@ -36,7 +36,12 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig,
 		}
 	}
 
-	resolvePkgName := func(t *schemas.Type) *imports.Import {
+	resolveEnumImpt := func(e *schemas.Enum) *imports.Import {
+		domainSnake := formatter.PascalToSnake(e.Domain)
+		pkg := domainSnake + "_grpc_client"
+		return imports.NewImport(config.ClientsModuleName+"/"+domainSnake, &pkg)
+	}
+	resolveTypeImpt := func(t *schemas.Type) *imports.Import {
 		domainSnake := formatter.PascalToSnake(t.Domain)
 		pkg := domainSnake + "_grpc_client"
 		return imports.NewImport(config.ClientsModuleName+"/"+domainSnake, &pkg)
@@ -47,24 +52,21 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig,
 	goTypesParser, err := types_parser.NewTypeParser(&types_parser.NewTypeParserInput{
 		Schema: schema,
 
-		GetEnumsImport: func(e *schemas.Enum) *imports.Import {
-			domainSnake := formatter.PascalToSnake(e.Domain)
-			pkg := domainSnake + "_grpc_client"
-			return imports.NewImport(config.ClientsModuleName+"/"+domainSnake, &pkg)
-		},
-		GetTypesImport:      resolvePkgName,
-		GetEventsImport:     resolvePkgName,
-		GetEntitiesImport:   resolvePkgName,
-		GetRepositoryImport: resolvePkgName,
-		GetUsecaseImport:    resolvePkgName,
+		GetEnumsImport:      resolveEnumImpt,
+		GetTypesImport:      resolveTypeImpt,
+		GetEventsImport:     resolveTypeImpt,
+		GetEntitiesImport:   resolveTypeImpt,
+		GetRepositoryImport: resolveTypeImpt,
+		GetUsecaseImport:    resolveTypeImpt,
 	})
 	if err != nil {
 		return err
 	}
 
 	grpcParser := grpc.NewGrpcParser(&grpc.NewGrpcParserInput{
-		Schema:       schema,
-		GoTypeParser: goTypesParser,
+		Schema:                schema,
+		GoTypeParser:          goTypesParser,
+		GetEnumConversionImpt: resolveEnumImpt,
 	})
 
 	contractsImportsPerDomain := make(map[string]imports.ImportsManager, len(schema.Schemas))
@@ -142,7 +144,7 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig,
 
 					t, err := grpcParser.GoToProto(&grpc.ConverterInput{
 						Type:            inputType,
-						CurModuleImport: resolvePkgName(inputType),
+						CurModuleImport: resolveTypeImpt(inputType),
 						PbModuleImport:  pbImport,
 						VarToConvert:    "i",
 					})
@@ -175,7 +177,7 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig,
 
 					t, err := grpcParser.ProtoToGo(&grpc.ConverterInput{
 						Type:            outputType,
-						CurModuleImport: resolvePkgName(outputType),
+						CurModuleImport: resolveTypeImpt(outputType),
 						PbModuleImport:  pbImport,
 						VarToConvert:    "result",
 					})
@@ -219,7 +221,7 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig,
 			typesPerDomain[t.AnvilType.Domain] = []*templates.TemplType{}
 		}
 		contractsImportsPerDomain[t.AnvilType.Domain].MergeImports(t.GetImportsUnorganized())
-		pkg := resolvePkgName(t.AnvilType)
+		pkg := resolveTypeImpt(t.AnvilType)
 		typesPerDomain[t.AnvilType.Domain] = append(typesPerDomain[t.AnvilType.Domain], typeToTemplType(pkg.Alias, t))
 	}
 	for _, t := range entities {
@@ -227,7 +229,7 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig,
 			typesPerDomain[t.AnvilType.Domain] = []*templates.TemplType{}
 		}
 		contractsImportsPerDomain[t.AnvilType.Domain].MergeImports(t.GetImportsUnorganized())
-		pkg := resolvePkgName(t.AnvilType)
+		pkg := resolveTypeImpt(t.AnvilType)
 		typesPerDomain[t.AnvilType.Domain] = append(typesPerDomain[t.AnvilType.Domain], typeToTemplType(pkg.Alias, t))
 	}
 	for _, t := range events {
@@ -235,7 +237,7 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig,
 			typesPerDomain[t.AnvilType.Domain] = []*templates.TemplType{}
 		}
 		contractsImportsPerDomain[t.AnvilType.Domain].MergeImports(t.GetImportsUnorganized())
-		pkg := resolvePkgName(t.AnvilType)
+		pkg := resolveTypeImpt(t.AnvilType)
 		typesPerDomain[t.AnvilType.Domain] = append(typesPerDomain[t.AnvilType.Domain], typeToTemplType(pkg.Alias, t))
 	}
 	for _, t := range repository {
@@ -243,7 +245,7 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig,
 			typesPerDomain[t.AnvilType.Domain] = []*templates.TemplType{}
 		}
 		contractsImportsPerDomain[t.AnvilType.Domain].MergeImports(t.GetImportsUnorganized())
-		pkg := resolvePkgName(t.AnvilType)
+		pkg := resolveTypeImpt(t.AnvilType)
 		typesPerDomain[t.AnvilType.Domain] = append(typesPerDomain[t.AnvilType.Domain], typeToTemplType(pkg.Alias, t))
 	}
 	for _, t := range usecase {
@@ -251,7 +253,7 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig,
 			typesPerDomain[t.AnvilType.Domain] = []*templates.TemplType{}
 		}
 		contractsImportsPerDomain[t.AnvilType.Domain].MergeImports(t.GetImportsUnorganized())
-		pkg := resolvePkgName(t.AnvilType)
+		pkg := resolveTypeImpt(t.AnvilType)
 		typesPerDomain[t.AnvilType.Domain] = append(typesPerDomain[t.AnvilType.Domain], typeToTemplType(pkg.Alias, t))
 	}
 

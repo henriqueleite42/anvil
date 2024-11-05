@@ -42,7 +42,7 @@ table "{{ .DbName }}" {
 	index "{{ .Name }}" {
 		columns = [
 			{{- range .Columns }}
-			{{ . }}
+			{{ . }},
 			{{- end }}
 		]
 		{{- if .Unique }}

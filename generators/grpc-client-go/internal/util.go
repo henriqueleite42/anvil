@@ -64,9 +64,10 @@ func enumToTemplEnum(e *types_parser.Enum) *templates.TemplEnum {
 		values = make([]*templates.TemplEnumValue, 0, len(e.Values))
 
 		for _, v := range e.Values {
+			name := fmt.Sprintf("%s_%s", e.GolangName, v.Name)
 			values = append(values, &templates.TemplEnumValue{
 				Name:    v.Name,
-				Spacing: strings.Repeat(" ", biggestName-len(v.Name)),
+				Spacing: strings.Repeat(" ", biggestName-len(name)),
 				Idx:     v.Idx,
 				Value:   v.Value,
 			})
@@ -87,9 +88,10 @@ func enumToTemplEnum(e *types_parser.Enum) *templates.TemplEnum {
 		deprecatedValues = make([]*templates.TemplEnumValue, 0, len(e.DeprecatedValues))
 
 		for _, v := range e.DeprecatedValues {
+			name := fmt.Sprintf("%s_%s", e.GolangName, v.Name)
 			deprecatedValues = append(deprecatedValues, &templates.TemplEnumValue{
 				Name:    v.Name,
-				Spacing: strings.Repeat(" ", biggestName-len(v.Name)),
+				Spacing: strings.Repeat(" ", biggestName-len(name)),
 				Idx:     v.Idx,
 				Value:   v.Value,
 			})

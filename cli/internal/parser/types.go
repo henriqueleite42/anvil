@@ -148,7 +148,6 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 		}
 
 		childTypes = make([]*schemas.TypeChild, 0, len(propertiesMap))
-
 		for kk, vv := range propertiesMap {
 			typeHash, err := self.resolveType(&resolveInput{
 				curDomain:  i.curDomain,
@@ -161,20 +160,13 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 			if err != nil {
 				return "", err
 			}
-			typeRef := self.schema.Types.Types[typeHash]
-			if typeRef == nil {
-				return "", fmt.Errorf("fail to find type \"%s.%s.Properties.%s\"`", i.path, i.k, kk)
-			}
 			childTypes = append(childTypes, &schemas.TypeChild{
 				PropName: &kk,
 				TypeHash: typeHash,
 			})
 		}
 		sort.Slice(childTypes, func(i, j int) bool {
-			typeRefI := self.schema.Types.Types[childTypes[i].TypeHash]
-			typeRefJ := self.schema.Types.Types[childTypes[j].TypeHash]
-
-			return typeRefI.Name < typeRefJ.Name
+			return *childTypes[i].PropName < *childTypes[j].PropName
 		})
 	} else if typeType == schemas.TypeType_Map {
 		return "", fmt.Errorf("type \"%s.%s\" must have property \"Properties\". All types with map \"Type\" must", i.path, i.k)
@@ -202,10 +194,6 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 		})
 		if err != nil {
 			return "", err
-		}
-		typeRef := self.schema.Types.Types[typeHash]
-		if typeRef == nil {
-			return "", fmt.Errorf("fail to find type \"%s.%s.Items.%s\"`", i.path, i.k, kk)
 		}
 
 		if childTypes == nil {

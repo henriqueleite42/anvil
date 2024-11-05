@@ -1,6 +1,8 @@
 package grpc
 
-import "github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
+import (
+	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
+)
 
 func doestNeedConversion(t schemas.TypeType) bool {
 	return t == schemas.TypeType_Bytes ||
