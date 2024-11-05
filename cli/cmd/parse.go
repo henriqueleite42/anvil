@@ -17,18 +17,16 @@ var (
 func addParseCommand(rootCmd *cobra.Command) {
 	parseCmd := &cobra.Command{
 		Use:   "parse",
-		Short: "Parse the file to create the formatted version",
+		Short: "Parse the schemas to check for errors",
 		Run: func(cmd *cobra.Command, args []string) {
-			schema, err := parser.ParseAnvToAnvp(parse_SchemaFiles)
+			configFilePath := args[0]
+
+			_, err := files.ReadConfigFile(configFilePath)
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			if global_Silent {
-				return
-			}
-
-			_, err = files.WriteAnvpFile(schema, parse_SchemaFiles)
+			_, err = parser.ParseAnvToAnvp(parse_SchemaFiles)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -38,9 +36,6 @@ func addParseCommand(rootCmd *cobra.Command) {
 	parseCmd.PersistentFlags().StringSliceVar(&parse_SchemaFiles, "schema", []string{}, "config files")
 	parseCmd.MarkPersistentFlagRequired("schema")
 	viper.BindPFlag("schema", parseCmd.PersistentFlags().Lookup("schema"))
-
-	parseCmd.PersistentFlags().BoolVar(&global_Silent, "silent", false, "if it should have an effect or only run it silently")
-	viper.BindPFlag("silent", rootCmd.PersistentFlags().Lookup("silent"))
 
 	rootCmd.AddCommand(parseCmd)
 }

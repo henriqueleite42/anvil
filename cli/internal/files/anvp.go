@@ -3,15 +3,13 @@ package files
 import (
 	"fmt"
 	"os"
-	"sort"
-	"strings"
+	"time"
 
-	"github.com/henriqueleite42/anvil/language-helpers/golang/hashing"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 	"gopkg.in/yaml.v3"
 )
 
-func GetAnvpFilePath(anvpFileName string, createFolders bool) (string, error) {
+func GetAnvpFilePath(config *schemas.Config, createFolders bool) (string, error) {
 	myDir, err := os.Getwd()
 	if err != nil {
 		return "", err
@@ -26,24 +24,47 @@ func GetAnvpFilePath(anvpFileName string, createFolders bool) (string, error) {
 		}
 	}
 
-	return fmt.Sprintf("%s/%s.anvp", path, anvpFileName), nil
+	return fmt.Sprintf("%s/%s.anvp", path, config.ProjectName), nil
 }
 
-func WriteAnvpFile(schema *schemas.AnvpSchema, schemaFiles []string) (string, error) {
+func GetTimestampedAnvpFilePath(config *schemas.Config, createFolders bool) (string, error) {
+	myDir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+
+	path := myDir + fmt.Sprintf("/anvil/processed/%s", config.ProjectName)
+
+	if createFolders {
+		err = os.MkdirAll(path, os.ModePerm)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	now := time.Now().UTC()
+	year := fmt.Sprintf("%02d", now.Year())
+	month := fmt.Sprintf("%02d", int(now.Month()))
+	day := fmt.Sprintf("%02d", now.Day())
+	hour := fmt.Sprintf("%02d", now.Hour())
+	minute := fmt.Sprintf("%02d", now.Minute())
+	seconds := fmt.Sprintf("%02d", now.Second())
+	timestamp := year + month + day + hour + minute + seconds
+
+	return fmt.Sprintf("%s/%s_%s.anvp", path, timestamp, config.ProjectName), nil
+}
+
+func WriteAnvpFile(config *schemas.Config, schema *schemas.AnvpSchema) (string, error) {
 	yamlData, err := yaml.Marshal(schema)
 	if err != nil {
 		return "", err
 	}
 
-	sort.Slice(schemaFiles, func(i, j int) bool {
-		return schemaFiles[i] < schemaFiles[j]
-	})
-
-	anvpFileName := hashing.String(
-		strings.Join(schemaFiles, ""),
-	)
-
-	filePath, err := GetAnvpFilePath(anvpFileName, true)
+	filePath, err := GetAnvpFilePath(config, true)
+	if err != nil {
+		return "", err
+	}
+	timestampedFilePath, err := GetTimestampedAnvpFilePath(config, true)
 	if err != nil {
 		return "", err
 	}
@@ -52,12 +73,16 @@ func WriteAnvpFile(schema *schemas.AnvpSchema, schemaFiles []string) (string, er
 	if err != nil {
 		return "", err
 	}
+	err = os.WriteFile(timestampedFilePath, yamlData, 0644)
+	if err != nil {
+		return "", err
+	}
 
 	return filePath, nil
 }
 
-func ReadAnvpFile(anvFilePath string) (*schemas.AnvpSchema, error) {
-	path, err := GetAnvpFilePath(anvFilePath, false)
+func ReadAnvpFile(config *schemas.Config) (*schemas.AnvpSchema, error) {
+	path, err := GetAnvpFilePath(config, false)
 	if err != nil {
 		return nil, err
 	}
