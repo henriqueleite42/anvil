@@ -17,7 +17,7 @@ type {{ .DomainCamel }}ApiImplementation struct {
 
 }
 {{ range $enum := .Enums }}
-func convert{{ $enum.GolangName }}ToPb(val {{ $enum.GolangName }}) pb.{{ $enum.GolangName }} {
+func Convert{{ $enum.GolangName }}ToPb(val {{ $enum.GolangName }}) pb.{{ $enum.GolangName }} {
 	{{-  range $value := $enum.Values }}
 	if val == {{ $enum.GolangName }}_{{ $value.Name }} {
 		return {{ $value.Idx }}
@@ -26,7 +26,7 @@ func convert{{ $enum.GolangName }}ToPb(val {{ $enum.GolangName }}) pb.{{ $enum.G
 
 	return 0
 }
-func convertPbTo{{ $enum.GolangName }}(val pb.{{ $enum.GolangName }}) {{ $enum.GolangName }} {
+func ConvertPbTo{{ $enum.GolangName }}(val pb.{{ $enum.GolangName }}) {{ $enum.GolangName }} {
 	{{- range $value := $enum.Values }}
 	if val == {{ $value.Idx }} {
 		return {{ $enum.GolangName }}_{{ $value.Name }}

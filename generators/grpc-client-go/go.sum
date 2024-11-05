@@ -22,6 +22,10 @@ github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241029034942-0
 github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241029034942-037f02c794ff/go.mod h1:1aCAFI8VjcMPFPPx55qS1gV768EL24uu7veUx1SsPpE=
 github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241029040126-c70c1c842b47 h1:Gd+hRkznu+pLn5dlY+sPT7ftu041lO3Y65BVnOEtBrg=
 github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241029040126-c70c1c842b47/go.mod h1:1aCAFI8VjcMPFPPx55qS1gV768EL24uu7veUx1SsPpE=
+github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241105102900-e39e63303354 h1:r5xfZqzsrwrK6ZlVlzu9l2pgAaEjTQ3NkaeujlVqQ5U=
+github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241105102900-e39e63303354/go.mod h1:1aCAFI8VjcMPFPPx55qS1gV768EL24uu7veUx1SsPpE=
+github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241105103525-31a0a9e4d97c h1:rFMaVhrzplbQOZ6vTvCshyozqtHvhQ4RiP5i+QxG2gk=
+github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241105103525-31a0a9e4d97c/go.mod h1:1aCAFI8VjcMPFPPx55qS1gV768EL24uu7veUx1SsPpE=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
