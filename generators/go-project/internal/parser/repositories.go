@@ -48,11 +48,11 @@ func (self *Parser) resolveRepositoryMethod(rpt *schemas.RepositoryMethod) error
 		outputTypeName = tParsed.GetFullTypeName(pkgName)
 	}
 
-	methodImportsManager.AddImport("context", nil)
-	methodImportsUnorganized := methodImportsManager.GetImportsUnorganized()
-	imports := imports.ResolveImports(methodImportsUnorganized, pkgName)
+	self.ImportsRepository[rpt.Domain].MergeImports(methodImportsManager.GetImportsUnorganized())
 
-	self.ImportsRepository[rpt.Domain].MergeImports(methodImportsUnorganized)
+	methodImportsManager.AddImport("context", nil)
+	methodImportsManager.AddImport("errors", nil)
+	imports := imports.ResolveImports(methodImportsManager.GetImportsUnorganized(), pkgName)
 
 	self.repositories[rpt.Domain].Methods = append(self.repositories[rpt.Domain].Methods, &templates.TemplMethod{
 		MethodName:     rpt.Name,

@@ -218,21 +218,11 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 				for _, method := range grpcDelivery.Methods {
 					if method.Input != nil {
 						typeParser.ImportsGrpcDelivery[curDomain].MergeImports(method.Input.ImportsUnorganized)
-						fmt.Println("--input--" + curDomain + "." + method.MethodName)
-						for _, v := range method.Input.ImportsUnorganized {
-							fmt.Println(v.Path)
-						}
-						fmt.Println("----")
 					} else {
 						typeParser.ImportsGrpcDelivery[curDomain].AddImport("google.golang.org/protobuf/types/known/emptypb", nil)
 					}
 					if method.Output != nil {
 						typeParser.ImportsGrpcDelivery[curDomain].MergeImports(method.Output.ImportsUnorganized)
-						fmt.Println("--output--" + curDomain + "." + method.MethodName)
-						for _, v := range method.Output.ImportsUnorganized {
-							fmt.Println(v.Path)
-						}
-						fmt.Println("----")
 					} else {
 						typeParser.ImportsGrpcDelivery[curDomain].AddImport("google.golang.org/protobuf/types/known/emptypb", nil)
 					}

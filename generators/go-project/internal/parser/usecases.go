@@ -48,11 +48,11 @@ func (self *Parser) resolveUsecaseMethod(usc *schemas.UsecaseMethod) error {
 		outputTypeName = tParsed.GetFullTypeName(pkgName)
 	}
 
-	methodImportsManager.AddImport("context", nil)
-	methodImportsUnorganized := methodImportsManager.GetImportsUnorganized()
-	imports := imports.ResolveImports(methodImportsUnorganized, pkgName)
+	self.ImportsUsecase[usc.Domain].MergeImports(methodImportsManager.GetImportsUnorganized())
 
-	self.ImportsUsecase[usc.Domain].MergeImports(methodImportsUnorganized)
+	methodImportsManager.AddImport("context", nil)
+	methodImportsManager.AddImport("errors", nil)
+	imports := imports.ResolveImports(methodImportsManager.GetImportsUnorganized(), pkgName)
 
 	self.usecases[usc.Domain].Methods = append(self.usecases[usc.Domain].Methods, &templates.TemplMethod{
 		MethodName:     usc.Name,
