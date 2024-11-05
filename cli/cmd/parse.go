@@ -3,7 +3,6 @@ package cmd
 import (
 	"log"
 
-	"github.com/henriqueleite42/anvil/cli/internal/files"
 	"github.com/henriqueleite42/anvil/cli/internal/parser"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -19,14 +18,7 @@ func addParseCommand(rootCmd *cobra.Command) {
 		Use:   "parse",
 		Short: "Parse the schemas to check for errors",
 		Run: func(cmd *cobra.Command, args []string) {
-			configFilePath := args[0]
-
-			_, err := files.ReadConfigFile(configFilePath)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			_, err = parser.ParseAnvToAnvp(parse_SchemaFiles)
+			_, err := parser.ParseAnvToAnvp(parse_SchemaFiles)
 			if err != nil {
 				log.Fatal(err)
 			}

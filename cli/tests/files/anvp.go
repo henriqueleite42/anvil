@@ -11,7 +11,7 @@ import (
 
 func ReadAnvpFile(logJson bool) {
 	schema, err := files.ReadAnvpFile(&schemas.Config{
-		ProjectName: "foo",
+		ProjectName: "Foo",
 		Schemas: []string{
 			"../examples/advanced/authentication.anv",
 		},
