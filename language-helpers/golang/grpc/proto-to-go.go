@@ -342,17 +342,14 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 		pbType := oi.PbModuleImport.Alias + "." + enum.GolangName
 
 		enumConversionImport := self.getEnumConversionImpt(schemaEnum)
-		var firstLetter string
 		var pkg string
 		if enumConversionImport.Alias == oi.CurModuleImport.Alias {
-			firstLetter = "c"
 			importsManager.MergeImport(enum.Import)
 		} else {
-			firstLetter = "C"
 			pkg = enumConversionImport.Alias + "."
 			importsManager.MergeImport(enumConversionImport)
 		}
-		enumConvertFuncName := fmt.Sprintf("%s%sonvertPbTo%s", pkg, firstLetter, enum.GolangName)
+		enumConvertFuncName := fmt.Sprintf("%sConvertPbTo%s", pkg, enum.GolangName)
 
 		val := &convertingValue{
 			GolangType:     golangType,
