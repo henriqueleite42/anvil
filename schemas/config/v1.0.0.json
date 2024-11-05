@@ -5,6 +5,11 @@
 	"description": "Anvil config file",
 	"type": "object",
 	"properties": {
+		"ProjectName": {
+			"type": "string",
+			"description": "Name of the project",
+			"pattern": "^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$"
+		},
 		"AnvilVersion": {
 			"type": "string",
 			"description": "Version of Anvil CLI/Schema"
@@ -43,6 +48,7 @@
 		}
 	},
 	"required": [
+		"ProjectName",
 		"AnvilVersion",
 		"Schemas",
 		"Generators"

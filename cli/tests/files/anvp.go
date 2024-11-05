@@ -6,10 +6,16 @@ import (
 	"log"
 
 	"github.com/henriqueleite42/anvil/cli/internal/files"
+	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
 func ReadAnvpFile(logJson bool) {
-	schema, err := files.ReadAnvpFile("../examples/advanced/authentication.anv")
+	schema, err := files.ReadAnvpFile(&schemas.Config{
+		ProjectName: "Foo",
+		Schemas: []string{
+			"../examples/advanced/authentication.anv",
+		},
+	})
 	if err != nil {
 		log.Fatal(err)
 	}

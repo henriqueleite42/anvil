@@ -21,10 +21,16 @@ func addGenerateCommand(rootCmd *cobra.Command) {
 			"generate",
 			"gen",
 		},
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MaximumNArgs(1),
 		Short: "Run generators based on a config file",
 		Run: func(cmd *cobra.Command, args []string) {
-			configFilePath := args[0]
+			var configFilePath string
+			if len(args) > 0 {
+				configFilePath = args[0]
+			}
+			if configFilePath == "" {
+				configFilePath = "./anvil.yaml"
+			}
 
 			configFile, err := files.ReadConfigFile(configFilePath)
 			if err != nil {
@@ -40,7 +46,7 @@ func addGenerateCommand(rootCmd *cobra.Command) {
 				log.Fatal(err)
 			}
 
-			anvpPath, err := files.WriteAnvpFile(schema, configFile.Schemas)
+			anvpPath, err := files.WriteAnvpFile(configFile, schema)
 			if err != nil {
 				log.Fatal(err)
 			}
