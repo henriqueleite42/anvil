@@ -4,13 +4,6 @@ import (
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
-type EnumConversionType int
-
-const (
-	EnumConversionType_FromPb EnumConversionType = iota
-	EnumConversionType_ToPb
-)
-
 func doestNeedConversion(t schemas.TypeType) bool {
 	return t == schemas.TypeType_Bytes ||
 		t == schemas.TypeType_String ||

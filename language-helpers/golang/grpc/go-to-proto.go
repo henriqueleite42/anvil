@@ -339,7 +339,6 @@ func (self *goGrpcParser) goToProto(i *convertingInput) (*convertingValue, error
 		var prepare []string = nil
 
 		importsManager := imports.NewImportsManager()
-		// importsManager.MergeImport(parsedType.ModuleImport)
 
 		for _, v := range t.ChildTypes {
 			propType, ok := self.schema.Types.Types[v.TypeHash]
