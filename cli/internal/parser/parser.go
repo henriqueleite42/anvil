@@ -19,43 +19,61 @@ type resolveInput struct {
 	v         any    // Value, type specification
 }
 
-func (self *anvToAnvpParser) parseCommon(fileUri string, file map[string]any) (string, error) {
-	curDomain, err := self.domain(fileUri, file)
-	if err != nil {
-		return "", err
+func (self *anvToAnvpParser) parseCommon(filesAny map[string]map[string]any) error {
+	// ---------------------
+	//
+	// Needs to parse one by one!
+	// First, all metadata from all domains,
+	// them, all the auth from all domains,
+	// and so on
+	// It's done this way, because domains can be dependents
+	// of other domains. Ex:
+	// A Type from domain A is dependent of an Enum of domain B
+	//
+	// ---------------------
+	for curDomain, file := range filesAny {
+		err := self.resolveEntitiesMetadata(curDomain, file)
+		if err != nil {
+			return err
+		}
 	}
 
-	err = self.resolveEntitiesMetadata(curDomain, file)
-	if err != nil {
-		return "", err
+	for curDomain, file := range filesAny {
+		err := self.auth(curDomain, file)
+		if err != nil {
+			return err
+		}
 	}
 
-	err = self.auth(curDomain, file)
-	if err != nil {
-		return "", err
+	for curDomain, file := range filesAny {
+		err := self.enums(curDomain, file)
+		if err != nil {
+			return err
+		}
 	}
 
-	err = self.enums(curDomain, file)
-	if err != nil {
-		return "", err
+	for curDomain, file := range filesAny {
+		err := self.types(curDomain, file)
+		if err != nil {
+			return err
+		}
 	}
 
-	err = self.types(curDomain, file)
-	if err != nil {
-		return "", err
+	for curDomain, file := range filesAny {
+		err := self.entities(curDomain, file)
+		if err != nil {
+			return err
+		}
 	}
 
-	err = self.entities(curDomain, file)
-	if err != nil {
-		return "", err
+	for curDomain, file := range filesAny {
+		err := self.events(curDomain, file)
+		if err != nil {
+			return err
+		}
 	}
 
-	err = self.events(curDomain, file)
-	if err != nil {
-		return "", err
-	}
-
-	return curDomain, nil
+	return nil
 }
 
 func (self *anvToAnvpParser) parse(curDomain string, file map[string]any) error {
@@ -90,12 +108,17 @@ func ParseAnvToAnvp(uris []string) (*schemas.AnvpSchema, error) {
 			return nil, err
 		}
 
-		curDomain, err := parser.parseCommon(uri, file)
+		curDomain, err := parser.domain(uri, file)
 		if err != nil {
 			return nil, err
 		}
 
 		filesAny[curDomain] = file
+	}
+
+	err := parser.parseCommon(filesAny)
+	if err != nil {
+		return nil, err
 	}
 
 	for curDomain, file := range filesAny {

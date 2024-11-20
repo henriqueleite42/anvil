@@ -8,6 +8,38 @@ import (
 
 // ---------------------------------
 //
+// Utils
+//
+// ---------------------------------
+
+// Recursively removes [] and * from the prefix of the type,
+// so it can handle arrays of arrays
+func splitTypePrefix(input string) (string, string) {
+	var prefixBuilder strings.Builder
+	i := 0
+
+	// Iterate over the string and extract the prefix
+	for i < len(input) {
+		if strings.HasPrefix(input[i:], "[]") {
+			prefixBuilder.WriteString("[]")
+			i += 2
+		} else if input[i] == '*' {
+			prefixBuilder.WriteByte('*')
+			i++
+		} else {
+			break
+		}
+	}
+
+	// Prefix contains only "[]" and "*", remainder contains the rest
+	prefix := prefixBuilder.String()
+	remainder := input[i:]
+
+	return prefix, remainder
+}
+
+// ---------------------------------
+//
 // Functions to be used in TEMPLATES
 //
 // ---------------------------------
@@ -31,14 +63,9 @@ func (self *Type) GetTypeName(curModuleAlias string) string {
 		return moduleAlias + "." + self.GolangType
 	}
 
-	prefix := "[]"
-	trueType := strings.TrimPrefix(self.GolangType, "[]")
-	if strings.HasPrefix(trueType, "*") {
-		trueType = strings.TrimPrefix(trueType, "*")
-		prefix = prefix + "*"
-	}
+	prefix, remainder := splitTypePrefix(self.GolangType)
 
-	return prefix + moduleAlias + "." + trueType
+	return prefix + moduleAlias + "." + remainder
 }
 
 func (self *Type) GetFullTypeName(curModuleAlias string) string {
