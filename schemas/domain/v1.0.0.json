@@ -8,6 +8,10 @@
 		"Field": {
 			"type": "object",
 			"properties": {
+				"Description": {
+					"type": "string",
+					"description": "Description for the field."
+				},
 				"Type": {
 					"type": "string",
 					"description": "The field type, mostly used by the programming language, but can be used by the database and in proto files too.",
@@ -242,6 +246,10 @@
 			"type": "object",
 			"description": "Specification for the HTTP request/response",
 			"properties": {
+				"Description": {
+					"type": "string",
+					"description": "Description for the http route example."
+				},
 				"Body": {
 					"type": "object",
 					"description": "Body of the request/response"
@@ -312,6 +320,10 @@
 				"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
 					"type": "object",
 					"properties": {
+						"Description": {
+							"type": "string",
+							"description": "Description for the enum."
+						},
 						"Type": {
 							"type": "string",
 							"description": "The type of the enum values",
@@ -330,6 +342,10 @@
 										"Name": {
 											"type": "string",
 											"description": "The name of the enum value. Usually used by the generators to create values in the database and code."
+										},
+										"Description": {
+											"type": "string",
+											"description": "Description for the enum value."
 										},
 										"Value": {
 											"type": "string",
@@ -377,6 +393,10 @@
 				"^([A-Z][a-z0-9]+)((d)|([A-Z0-9][a-z0-9]+))*([A-Z])?$": {
 					"type": "object",
 					"properties": {
+						"Description": {
+							"type": "string",
+							"description": "Description for the event."
+						},
 						"Formats": {
 							"type": "array",
 							"description": "Formats that the event is emitted",
@@ -481,6 +501,10 @@
 												"type": "string",
 												"description": "Constraint name"
 											},
+											"Description": {
+												"type": "string",
+												"description": "Description for the constraint."
+											},
 											"Columns": {
 												"type": "array",
 												"description": "The columns that compose the index",
@@ -506,6 +530,10 @@
 									"items": {
 										"type": "object",
 										"properties": {
+											"Description": {
+												"type": "string",
+												"description": "Description for the foreign key."
+											},
 											"Columns": {
 												"type": "array",
 												"description": "Columns on the current entity to be referenced. The name MUST be written as in the SCHEMA, and not as it appears on the database",
@@ -765,6 +793,10 @@
 										"type": "string",
 										"description": "Name for the RPC. If not specified, the Usecase method name will be used"
 									},
+									"Description": {
+										"type": "string",
+										"description": "Description for the rpc."
+									},
 									"UsecaseMethod": {
 										"type": "string",
 										"description": "Usecase method that will be delivered by this RPC"
@@ -777,6 +809,10 @@
 												"type": "object",
 												"description": "A name for the example. Example: `Success`, `DuplicatedUser`, `PostNotFound`",
 												"properties": {
+													"Description": {
+														"type": "string",
+														"description": "Description for the example."
+													},
 													"StatusCode": {
 														"type": "integer",
 														"description": "Expected status code returned. Default is `0`."
@@ -812,6 +848,10 @@
 								"type": "object",
 								"description": "http delivery configuration",
 								"properties": {
+									"Description": {
+										"type": "string",
+										"description": "Description for the http route."
+									},
 									"UsecaseMethod": {
 										"type": "string",
 										"description": "Usecase method that will be delivered by this route"
@@ -937,6 +977,10 @@
 								"type": "object",
 								"description": "Queue delivery configuration",
 								"properties": {
+									"Description": {
+										"type": "string",
+										"description": "Description for the queue."
+									},
 									"UsecaseMethod": {
 										"type": "string",
 										"description": "Usecase method that will be delivered by this Queue"
