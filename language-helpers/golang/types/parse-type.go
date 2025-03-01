@@ -157,7 +157,14 @@ func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
 				Type: propType,
 			}
 
-			if !childType.Optional && !slices.Contains(childType.Validate, "required") {
+			if !childType.Optional &&
+				!slices.Contains(childType.Validate, "required") &&
+				// Only applies it to pointer types, because when you use the "required"
+				// tag on "go-validator", it only checks if the value is != than it's zero
+				// value, what makes booleans fail if false and numbers fail if 0,
+				// what is not the expected intuitive behavior of "required" (it should
+				// be checking if the value was received, and not it's contents)
+				IsTypePointer(childType) {
 				childType.Validate = append(childType.Validate, "required")
 			}
 
