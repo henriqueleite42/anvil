@@ -121,7 +121,12 @@ func (self *parserManager) resolveTypeProp(t *schemas.Type, rootDomain string) (
 }
 
 func (self *parserManager) resolveType(t *schemas.Type, rootDomain string) (*templates.ProtofileTemplInputType, error) {
-	if existentType, ok := self.typesToAvoidDuplication[rootDomain+t.Ref]; ok {
+	if t.Domain != rootDomain {
+		domainKebab := formatter.PascalToKebab(t.Domain)
+		self.grpcTypesParser[rootDomain].imports.AddImport(domainKebab+".proto", nil)
+	}
+
+	if existentType, ok := self.typesToAvoidDuplication[t.Ref]; ok {
 		return existentType, nil
 	}
 
@@ -162,11 +167,6 @@ func (self *parserManager) resolveType(t *schemas.Type, rootDomain string) (*tem
 		})
 	}
 
-	if t.Domain != rootDomain {
-		domainKebab := formatter.PascalToKebab(t.Domain)
-		self.grpcTypesParser[rootDomain].imports.AddImport(domainKebab+".proto", nil)
-	}
-
 	biggestName := 0
 	biggestType := 0
 	for _, v := range result.Props {
@@ -186,7 +186,7 @@ func (self *parserManager) resolveType(t *schemas.Type, rootDomain string) (*tem
 		v.Spacing2 = strings.Repeat(" ", biggestName-len(v.Name))
 	}
 
-	self.typesToAvoidDuplication[rootDomain+t.Ref] = result
+	self.typesToAvoidDuplication[t.Ref] = result
 
 	if t.RootNode == "Types" || t.RootNode == "Usecase" {
 		self.grpcTypesParser[t.Domain].types = append(self.grpcTypesParser[t.Domain].types, result)

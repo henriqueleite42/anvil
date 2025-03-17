@@ -151,6 +151,9 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig,
 	// -----------------------------
 
 	for _, shm := range schema.Schemas {
+		sort.Slice(parser.grpcTypesParser[shm.Domain].types, func(i, j int) bool {
+			return parser.grpcTypesParser[shm.Domain].types[i].Name < parser.grpcTypesParser[shm.Domain].types[j].Name
+		})
 		templInput := &templates.ProtofileTemplInput{
 			Domain:   shm.Domain,
 			Imports:  make([]string, 0, parser.grpcTypesParser[shm.Domain].imports.GetImportsLen()),
