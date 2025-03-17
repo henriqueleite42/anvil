@@ -121,7 +121,7 @@ func (self *parserManager) resolveTypeProp(t *schemas.Type, rootDomain string) (
 }
 
 func (self *parserManager) resolveType(t *schemas.Type, rootDomain string) (*templates.ProtofileTemplInputType, error) {
-	if existentType, ok := self.typesToAvoidDuplication[t.Ref]; ok {
+	if existentType, ok := self.typesToAvoidDuplication[rootDomain+t.Ref]; ok {
 		return existentType, nil
 	}
 
@@ -186,7 +186,7 @@ func (self *parserManager) resolveType(t *schemas.Type, rootDomain string) (*tem
 		v.Spacing2 = strings.Repeat(" ", biggestName-len(v.Name))
 	}
 
-	self.typesToAvoidDuplication[t.Ref] = result
+	self.typesToAvoidDuplication[rootDomain+t.Ref] = result
 
 	if t.RootNode == "Types" || t.RootNode == "Usecase" {
 		self.grpcTypesParser[t.Domain].types = append(self.grpcTypesParser[t.Domain].types, result)
