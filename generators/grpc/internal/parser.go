@@ -103,7 +103,7 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig,
 					return fmt.Errorf("type \"%s\" not found for usecase method \"%s\"", method.Input.TypeHash, method.Name)
 				}
 
-				inputTypeResolved, err := parser.resolveType(inputType, inputType.Domain)
+				inputTypeResolved, err := parser.resolveType(inputType, method.Domain)
 				if err != nil {
 					return err
 				}
@@ -125,7 +125,7 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig,
 					return fmt.Errorf("type \"%s\" not found for usecase method \"%s\"", method.Output.TypeHash, method.Name)
 				}
 
-				outputTypeResolved, err := parser.resolveType(outputType, outputType.Domain)
+				outputTypeResolved, err := parser.resolveType(outputType, method.Domain)
 				if err != nil {
 					return err
 				}
