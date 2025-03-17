@@ -162,6 +162,11 @@ func (self *parserManager) resolveType(t *schemas.Type, rootDomain string) (*tem
 		})
 	}
 
+	if t.Domain != rootDomain {
+		domainKebab := formatter.PascalToKebab(t.Domain)
+		self.grpcTypesParser[rootDomain].imports.AddImport(domainKebab+".proto", nil)
+	}
+
 	biggestName := 0
 	biggestType := 0
 	for _, v := range result.Props {
