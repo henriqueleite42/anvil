@@ -39,15 +39,15 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig,
 	resolveEnumImpt := func(e *schemas.Enum) *imports.Import {
 		domainSnake := formatter.PascalToSnake(e.Domain)
 		pkg := domainSnake + "_grpc_client"
-		return imports.NewImport(config.ClientsModuleName+"/"+domainSnake, &pkg)
+		return imports.NewImport(config.ProjectName+"/"+config.ClientsPath+"/"+domainSnake, &pkg)
 	}
 	resolveTypeImpt := func(t *schemas.Type) *imports.Import {
 		domainSnake := formatter.PascalToSnake(t.Domain)
 		pkg := domainSnake + "_grpc_client"
-		return imports.NewImport(config.ClientsModuleName+"/"+domainSnake, &pkg)
+		return imports.NewImport(config.ProjectName+"/"+config.ClientsPath+"/"+domainSnake, &pkg)
 	}
 
-	pbImport := imports.NewImport(config.ClientsModuleName+"/pb", nil)
+	pbImport := imports.NewImport(config.ProjectName+"/"+config.ProtoPath, nil)
 
 	goTypesParser, err := types_parser.NewTypeParser(&types_parser.NewTypeParserInput{
 		Schema: schema,
@@ -88,6 +88,15 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig,
 	if schema.Enums != nil && schema.Enums.Enums != nil {
 		for _, e := range schema.Enums.Enums {
 			_, err := goTypesParser.ParseEnum(e)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	if schema.Types != nil && schema.Types.Types != nil {
+		for _, e := range schema.Types.Types {
+			_, err := goTypesParser.ParseType(e)
 			if err != nil {
 				return err
 			}
@@ -137,11 +146,6 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig,
 						return fmt.Errorf("type \"%s\" not found for usecase method \"%s\"", method.Input.TypeHash, method.Name)
 					}
 
-					_, err := goTypesParser.ParseType(inputType)
-					if err != nil {
-						return err
-					}
-
 					t, err := grpcParser.GoToProto(&grpc.ConverterInput{
 						Type:            inputType,
 						CurModuleImport: resolveTypeImpt(inputType),
@@ -168,11 +172,6 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig,
 					outputType, ok := schema.Types.Types[method.Output.TypeHash]
 					if !ok {
 						return fmt.Errorf("type \"%s\" not found for usecase method \"%s\"", method.Output.TypeHash, method.Name)
-					}
-
-					_, err := goTypesParser.ParseType(outputType)
-					if err != nil {
-						return err
 					}
 
 					t, err := grpcParser.ProtoToGo(&grpc.ConverterInput{

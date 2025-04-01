@@ -11,18 +11,17 @@ import (
 type goGrpcParser struct {
 	schema *schemas.AnvpSchema
 
-	goTypeParser    types_parser.TypesParser
 	templateManager template.TemplateManager
 
-	getEnumConversionImpt func(e *schemas.Enum) *imports.Import
+	goTypeParser   types_parser.TypesParser
+	pbModuleImport *imports.Import // Protobuff module import representation
 }
 
 type NewGrpcParserInput struct {
 	Schema *schemas.AnvpSchema
 
-	GoTypeParser types_parser.TypesParser
-
-	GetEnumConversionImpt func(e *schemas.Enum) *imports.Import
+	GoTypeParser   types_parser.TypesParser
+	PbModuleImport *imports.Import // Protobuff module import representation
 }
 
 func NewGrpcParser(i *NewGrpcParserInput) GrpcParser {
@@ -35,9 +34,9 @@ func NewGrpcParser(i *NewGrpcParserInput) GrpcParser {
 	return &goGrpcParser{
 		schema: i.Schema,
 
-		goTypeParser:    i.GoTypeParser,
 		templateManager: templateManager,
 
-		getEnumConversionImpt: i.GetEnumConversionImpt,
+		goTypeParser:   i.GoTypeParser,
+		pbModuleImport: i.PbModuleImport,
 	}
 }

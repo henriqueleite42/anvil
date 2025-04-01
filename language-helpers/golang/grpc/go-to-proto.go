@@ -205,17 +205,16 @@ func (self *goGrpcParser) goToProto(i *convertingInput) (*convertingValue, error
 		}
 
 		importsManager := imports.NewImportsManager()
-		importsManager.MergeImport(oi.PbModuleImport)
+		importsManager.MergeImport(self.pbModuleImport)
 
-		pbType := oi.PbModuleImport.Alias + "." + enum.GolangName
+		pbType := self.pbModuleImport.Alias + "." + enum.GolangName
 
-		enumConversionImport := self.getEnumConversionImpt(schemaEnum)
 		var pkg string
-		if enumConversionImport.Alias == oi.CurModuleImport.Alias {
+		if enum.Import.Alias == oi.CurModuleImport.Alias {
 			importsManager.MergeImport(enum.Import)
 		} else {
-			pkg = enumConversionImport.Alias + "."
-			importsManager.MergeImport(enumConversionImport)
+			pkg = enum.Import.Alias + "."
+			importsManager.MergeImport(enum.Import)
 		}
 		enumConvertFuncName := fmt.Sprintf("%sConvert%sToPb", pkg, enum.GolangName)
 
@@ -268,7 +267,6 @@ func (self *goGrpcParser) goToProto(i *convertingInput) (*convertingValue, error
 			return self.goToProto(&convertingInput{
 				input: &ConverterInput{
 					CurModuleImport: oi.CurModuleImport,
-					PbModuleImport:  oi.PbModuleImport,
 					Type:            childType,
 					VarToConvert:    oi.VarToConvert,
 				},
@@ -282,7 +280,6 @@ func (self *goGrpcParser) goToProto(i *convertingInput) (*convertingValue, error
 			prefixForVariableNaming: &nameWithPrefix,
 			input: &ConverterInput{
 				CurModuleImport: oi.CurModuleImport,
-				PbModuleImport:  oi.PbModuleImport,
 				VarToConvert:    "v",
 				Type:            childType,
 			},
@@ -362,7 +359,6 @@ func (self *goGrpcParser) goToProto(i *convertingInput) (*convertingValue, error
 
 				input: &ConverterInput{
 					CurModuleImport: oi.CurModuleImport,
-					PbModuleImport:  oi.PbModuleImport,
 					Type:            propType,
 					VarToConvert:    propNameWithPrefix,
 				},
@@ -398,13 +394,13 @@ func (self *goGrpcParser) goToProto(i *convertingInput) (*convertingValue, error
 			Prepare:              prepare,
 			IndentationLvl:       i.indentationLvl + 1,
 			Props:                props,
-			TypePkg:              &oi.PbModuleImport.Alias,
+			TypePkg:              &self.pbModuleImport.Alias,
 		})
 		if err != nil {
 			return nil, err
 		}
 
-		pbTypeWithPkg := oi.PbModuleImport.Alias + "." + pbType
+		pbTypeWithPkg := self.pbModuleImport.Alias + "." + pbType
 
 		var mapImports imports.ImportsManager = nil
 		if importsManager.GetImportsLen() != 0 {

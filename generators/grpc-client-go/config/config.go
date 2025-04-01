@@ -11,9 +11,10 @@ import (
 const GENERATOR_NAME = "grpc-client-go"
 
 type GeneratorConfig struct {
-	OutDir            *string `yaml:"OutDir"`
-	ModuleName        string  `yaml:"ModuleName"`
-	ClientsModuleName string  `yaml:"ClientsModuleName"`
+	OutDir      *string `yaml:"OutDir"`
+	ProjectName string  `yaml:"ProjectName"`
+	ProtoPath   string  `yaml:"ProtoPath"`
+	ClientsPath string  `yaml:"ClientsPath"`
 }
 
 func GetConfig(filePath string) *GeneratorConfig {
@@ -41,22 +42,31 @@ func GetConfig(filePath string) *GeneratorConfig {
 		return &GeneratorConfig{}
 	}
 
-	moduleNameAny, ok := params["ModuleName"]
+	projectNameAny, ok := params["ProjectName"]
 	if !ok {
-		log.Fatalf("%s: ModuleName is a required parameter", GENERATOR_NAME)
+		log.Fatalf("%s: ProjectName is a required parameter", GENERATOR_NAME)
 	}
-	moduleName, ok := moduleNameAny.(string)
+	projectName, ok := projectNameAny.(string)
 	if !ok {
-		log.Fatalf("%s: fail to parse ModuleName to string", GENERATOR_NAME)
+		log.Fatalf("%s: fail to parse ProjectName to string", GENERATOR_NAME)
 	}
 
-	clientModuleNameAny, ok := params["ClientModuleName"]
+	protoPathAny, ok := params["ProtoPath"]
 	if !ok {
-		log.Fatalf("%s: ClientModuleName is a required parameter", GENERATOR_NAME)
+		log.Fatalf("%s: ProtoPath is a required parameter", GENERATOR_NAME)
 	}
-	clientModuleName, ok := clientModuleNameAny.(string)
+	protoPath, ok := protoPathAny.(string)
 	if !ok {
-		log.Fatalf("%s: fail to parse ClientModuleName to string", GENERATOR_NAME)
+		log.Fatalf("%s: fail to parse ProtoPath to string", GENERATOR_NAME)
+	}
+
+	clientsPathAny, ok := params["ClientsPath"]
+	if !ok {
+		log.Fatalf("%s: ClientsPath is a required parameter", GENERATOR_NAME)
+	}
+	clientsPath, ok := clientsPathAny.(string)
+	if !ok {
+		log.Fatalf("%s: fail to parse ClientsPath to string", GENERATOR_NAME)
 	}
 
 	var outDir *string = nil
@@ -70,8 +80,9 @@ func GetConfig(filePath string) *GeneratorConfig {
 	}
 
 	return &GeneratorConfig{
-		OutDir:            outDir,
-		ModuleName:        moduleName,
-		ClientsModuleName: clientModuleName,
+		OutDir:      outDir,
+		ProjectName: projectName,
+		ProtoPath:   protoPath,
+		ClientsPath: clientsPath,
 	}
 }

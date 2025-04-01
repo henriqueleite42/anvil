@@ -29,7 +29,6 @@ type convertingValue struct {
 
 type ConverterInput struct {
 	CurModuleImport *imports.Import // Cur module import representation
-	PbModuleImport  *imports.Import // Protobuff module import representation
 	Type            *schemas.Type   // Type to convert
 	VarToConvert    string          // Variable name to access the value to be converted
 }

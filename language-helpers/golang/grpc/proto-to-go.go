@@ -20,13 +20,13 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 	oi := i.input
 	t := oi.Type
 
-	name := t.Name
+	curTypeName := t.Name
 	if i.overwriteTypeName != nil {
-		name = *i.overwriteTypeName
+		curTypeName = *i.overwriteTypeName
 	}
-	nameWithPrefix := name
+	curTypeNameWithPrefix := curTypeName
 	if i.prefixForVariableNaming != nil {
-		nameWithPrefix = *i.prefixForVariableNaming + name
+		curTypeNameWithPrefix = *i.prefixForVariableNaming + curTypeName
 	}
 
 	parsedType, err := self.goTypeParser.ParseType(t)
@@ -57,7 +57,7 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 		}
 
 		if t.Optional {
-			varName := formatter.PascalToCamel(nameWithPrefix)
+			varName := formatter.PascalToCamel(curTypeNameWithPrefix)
 			prepareOptional, err := self.templateManager.Parse("input-prop-optional", &templates.InputPropOptionalTemplInput{
 				VarName:              varName,
 				OriginalVariableName: oi.VarToConvert,
@@ -91,7 +91,7 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 		}
 
 		if t.Optional {
-			varName := formatter.PascalToCamel(nameWithPrefix)
+			varName := formatter.PascalToCamel(curTypeNameWithPrefix)
 			prepareOptional, err := self.templateManager.Parse("input-prop-optional", &templates.InputPropOptionalTemplInput{
 				VarName:              varName,
 				OriginalVariableName: oi.VarToConvert,
@@ -125,7 +125,7 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 		}
 
 		if t.Optional {
-			varName := formatter.PascalToCamel(nameWithPrefix)
+			varName := formatter.PascalToCamel(curTypeNameWithPrefix)
 			prepareOptional, err := self.templateManager.Parse("input-prop-optional", &templates.InputPropOptionalTemplInput{
 				VarName:              varName,
 				OriginalVariableName: oi.VarToConvert,
@@ -159,7 +159,7 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 		}
 
 		if t.Optional {
-			varName := formatter.PascalToCamel(nameWithPrefix)
+			varName := formatter.PascalToCamel(curTypeNameWithPrefix)
 			prepareOptional, err := self.templateManager.Parse("input-prop-optional", &templates.InputPropOptionalTemplInput{
 				VarName:              varName,
 				OriginalVariableName: oi.VarToConvert,
@@ -193,7 +193,7 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 		}
 
 		if t.Optional {
-			varName := formatter.PascalToCamel(nameWithPrefix)
+			varName := formatter.PascalToCamel(curTypeNameWithPrefix)
 			prepareOptional, err := self.templateManager.Parse("input-prop-optional", &templates.InputPropOptionalTemplInput{
 				VarName:              varName,
 				OriginalVariableName: oi.VarToConvert,
@@ -227,7 +227,7 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 		}
 
 		if t.Optional {
-			varName := formatter.PascalToCamel(nameWithPrefix)
+			varName := formatter.PascalToCamel(curTypeNameWithPrefix)
 			prepareOptional, err := self.templateManager.Parse("input-prop-optional", &templates.InputPropOptionalTemplInput{
 				VarName:              varName,
 				OriginalVariableName: oi.VarToConvert,
@@ -261,7 +261,7 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 		}
 
 		if t.Optional {
-			varName := formatter.PascalToCamel(nameWithPrefix)
+			varName := formatter.PascalToCamel(curTypeNameWithPrefix)
 			prepareOptional, err := self.templateManager.Parse("input-prop-optional", &templates.InputPropOptionalTemplInput{
 				VarName:              varName,
 				OriginalVariableName: oi.VarToConvert,
@@ -296,7 +296,7 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 		}
 
 		if t.Optional {
-			varName := formatter.PascalToCamel(nameWithPrefix)
+			varName := formatter.PascalToCamel(curTypeNameWithPrefix)
 			prepareOptional, err := self.templateManager.Parse("input-prop-optional", &templates.InputPropOptionalTemplInput{
 				VarName:              varName,
 				OriginalVariableName: oi.VarToConvert,
@@ -324,7 +324,7 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 	}
 	if t.Type == schemas.TypeType_Enum {
 		if t.EnumHash == nil {
-			return nil, fmt.Errorf("enum for type \"%s\" not found", name)
+			return nil, fmt.Errorf("enum for type \"%s\" not found", curTypeName)
 		}
 
 		schemaEnum, ok := self.schema.Enums.Enums[*t.EnumHash]
@@ -337,17 +337,16 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 		}
 
 		importsManager := imports.NewImportsManager()
-		importsManager.MergeImport(oi.PbModuleImport)
+		importsManager.MergeImport(self.pbModuleImport)
 
-		pbType := oi.PbModuleImport.Alias + "." + enum.GolangName
+		pbType := self.pbModuleImport.Alias + "." + enum.GolangName
 
-		enumConversionImport := self.getEnumConversionImpt(schemaEnum)
 		var pkg string
-		if enumConversionImport.Alias == oi.CurModuleImport.Alias {
+		if enum.Import.Alias == oi.CurModuleImport.Alias {
 			importsManager.MergeImport(enum.Import)
 		} else {
-			pkg = enumConversionImport.Alias + "."
-			importsManager.MergeImport(enumConversionImport)
+			pkg = enum.Import.Alias + "."
+			importsManager.MergeImport(enum.Import)
 		}
 		enumConvertFuncName := fmt.Sprintf("%sConvertPbTo%s", pkg, enum.GolangName)
 
@@ -361,7 +360,7 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 		}
 
 		if t.Optional {
-			varName := formatter.PascalToCamel(nameWithPrefix)
+			varName := formatter.PascalToCamel(curTypeNameWithPrefix)
 			prepareOptional, err := self.templateManager.Parse("input-prop-optional", &templates.InputPropOptionalTemplInput{
 				VarName:              varName,
 				OriginalVariableName: oi.VarToConvert,
@@ -385,10 +384,10 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 	}
 	if t.Type == schemas.TypeType_List {
 		if t.ChildTypes == nil {
-			return nil, fmt.Errorf("ChildTypes for \"%s\" not found", name)
+			return nil, fmt.Errorf("ChildTypes for \"%s\" not found", curTypeName)
 		}
 		if len(t.ChildTypes) != 1 {
-			return nil, fmt.Errorf("ChildTypes for \"%s\" must have exactly one item", name)
+			return nil, fmt.Errorf("ChildTypes for \"%s\" must have exactly one item", curTypeName)
 		}
 
 		childType, ok := self.schema.Types.Types[t.ChildTypes[0].TypeHash]
@@ -400,21 +399,19 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 			return self.goToProto(&convertingInput{
 				input: &ConverterInput{
 					CurModuleImport: oi.CurModuleImport,
-					PbModuleImport:  oi.PbModuleImport,
 					Type:            childType,
 					VarToConvert:    oi.VarToConvert,
 				},
 			})
 		}
 
-		varName := formatter.PascalToCamel(nameWithPrefix)
+		varName := formatter.PascalToCamel(curTypeNameWithPrefix)
 
 		r, err := self.protoToGo(&convertingInput{
 			indentationLvl:          i.indentationLvl + 1,
-			prefixForVariableNaming: &nameWithPrefix,
+			prefixForVariableNaming: &curTypeNameWithPrefix,
 			input: &ConverterInput{
 				CurModuleImport: oi.CurModuleImport,
-				PbModuleImport:  oi.PbModuleImport,
 				VarToConvert:    "v",
 				Type:            childType,
 			},
@@ -448,7 +445,7 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 	}
 	if t.Type == schemas.TypeType_Map {
 		if t.ChildTypes == nil {
-			return nil, fmt.Errorf("ChildTypes for \"%s\" not found", name)
+			return nil, fmt.Errorf("ChildTypes for \"%s\" not found", curTypeName)
 		}
 
 		biggestName := 0
@@ -462,7 +459,7 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 			}
 		}
 
-		varName := formatter.PascalToCamel(nameWithPrefix)
+		varName := formatter.PascalToCamel(curTypeNameWithPrefix)
 
 		props := make([]*templates.InputPropMapTemplProp, 0, len(t.ChildTypes))
 		var prepare []string = nil
@@ -487,15 +484,14 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 				continue
 			}
 
-			overwriteTypeName := name + *v.PropName
+			overwriteTypeName := curTypeName + *v.PropName
 			r, err := self.protoToGo(&convertingInput{
 				indentationLvl:          i.indentationLvl + 1,
 				overwriteTypeName:       &overwriteTypeName,
-				prefixForVariableNaming: &nameWithPrefix,
+				prefixForVariableNaming: &curTypeNameWithPrefix,
 
 				input: &ConverterInput{
 					CurModuleImport: oi.CurModuleImport,
-					PbModuleImport:  oi.PbModuleImport,
 					Type:            propType,
 					VarToConvert:    propNameWithPrefix,
 				},
@@ -546,7 +542,7 @@ func (self *goGrpcParser) protoToGo(i *convertingInput) (*convertingValue, error
 		if err != nil {
 			return nil, err
 		}
-		pbTypeWithPkg := oi.PbModuleImport.Alias + "." + pbType
+		pbTypeWithPkg := self.pbModuleImport.Alias + "." + pbType
 
 		var mapImports imports.ImportsManager = nil
 		if importsManager.GetImportsLen() != 0 {
