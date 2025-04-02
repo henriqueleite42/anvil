@@ -991,7 +991,7 @@
 									},
 									"Bulk": {
 										"type": "boolean",
-										"description": "If it process the queues one-by-one or in bulk."
+										"description": "If it process the queues in bulk or one-by-one."
 									}
 								},
 								"required": [

@@ -3,14 +3,14 @@ package parser
 import (
 	"fmt"
 
+	"github.com/ettle/strcase"
 	"github.com/henriqueleite42/anvil/generators/go-project/internal/templates"
-	"github.com/henriqueleite42/anvil/language-helpers/golang/formatter"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/imports"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
 func (self *Parser) resolveRepositoryMethod(rpt *schemas.RepositoryMethod) error {
-	pkgName := formatter.PascalToSnake(rpt.Domain) + "_repository"
+	pkgName := strcase.ToSnake(rpt.Domain) + "_repository"
 
 	methodImportsManager := imports.NewImportsManager()
 

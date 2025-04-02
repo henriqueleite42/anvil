@@ -155,13 +155,13 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig,
 			return parser.grpcTypesParser[shm.Domain].types[i].Name < parser.grpcTypesParser[shm.Domain].types[j].Name
 		})
 		templInput := &templates.ProtofileTemplInput{
-			Domain:   shm.Domain,
-			Imports:  make([]string, 0, parser.grpcTypesParser[shm.Domain].imports.GetImportsLen()),
-			Enums:    make([]*templates.ProtofileTemplInputEnum, 0, len(parser.grpcTypesParser[shm.Domain].enums)),
-			Methods:  parser.grpcTypesParser[shm.Domain].methods,
-			Types:    parser.grpcTypesParser[shm.Domain].types,
-			Events:   parser.grpcTypesParser[shm.Domain].events,
-			Entities: parser.grpcTypesParser[shm.Domain].entities,
+			DomainPascal: shm.Domain,
+			Imports:      make([]string, 0, parser.grpcTypesParser[shm.Domain].imports.GetImportsLen()),
+			Enums:        make([]*templates.ProtofileTemplInputEnum, 0, len(parser.grpcTypesParser[shm.Domain].enums)),
+			Methods:      parser.grpcTypesParser[shm.Domain].methods,
+			Types:        parser.grpcTypesParser[shm.Domain].types,
+			Events:       parser.grpcTypesParser[shm.Domain].events,
+			Entities:     parser.grpcTypesParser[shm.Domain].entities,
 		}
 		for _, v := range parser.grpcTypesParser[shm.Domain].imports.GetImportsUnorganized() {
 			templInput.Imports = append(templInput.Imports, v.Path)

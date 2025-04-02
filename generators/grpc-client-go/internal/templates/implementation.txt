@@ -13,7 +13,7 @@ type {{ .DomainCamel }}ApiImplementation struct {
 	timeout time.Duration
 	conn 		*grpc.ClientConn
 
-	{{ .DomainCamel }}ApiClient pb.{{ .Domain }}ApiClient
+	{{ .DomainCamel }}ApiClient pb.{{ .DomainPascal }}ApiClient
 
 }
 {{ range $enum := .Enums }}
@@ -99,9 +99,9 @@ func (self *{{ $dot.DomainCamel }}ApiImplementation) {{ $method.MethodName }}(i 
 }
 {{- end }}
 
-func New{{ .Domain }}Api(i *{{ .Domain }}ApiInput) ({{ .Domain }}Api, error) {
+func New{{ .DomainPascal }}Api(i *{{ .DomainPascal }}ApiInput) ({{ .DomainPascal }}Api, error) {
 	if i == nil {
-		return nil, errors.New("\"New{{ .Domain }}Api\": input must not be nil")
+		return nil, errors.New("\"New{{ .DomainPascal }}Api\": input must not be nil")
 	}
 
 	if i.Addr == "" {
@@ -121,7 +121,7 @@ func New{{ .Domain }}Api(i *{{ .Domain }}ApiInput) ({{ .Domain }}Api, error) {
 	}
 
 	return &{{ .DomainCamel }}ApiImplementation{
-		{{ .DomainCamel }}ApiClient: pb.New{{ .Domain }}ApiClient(conn),
+		{{ .DomainCamel }}ApiClient: pb.New{{ .DomainPascal }}ApiClient(conn),
 		timeout:{{ .SpacingRelativeToDomainName }}timeout,
 		conn:   {{ .SpacingRelativeToDomainName }}conn,
 	}, nil

@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/ettle/strcase"
 	generator_config "github.com/henriqueleite42/anvil/generators/go-project/config"
 	"github.com/henriqueleite42/anvil/generators/go-project/internal/parser"
 	"github.com/henriqueleite42/anvil/generators/go-project/internal/templates"
-	"github.com/henriqueleite42/anvil/language-helpers/golang/formatter"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/imports"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/template"
@@ -23,6 +23,8 @@ var templatesNamesValues = map[string]string{
 	"usecase-method":              templates.UsecaseMethodTempl,
 	"grpc-delivery-module-helper": templates.GrpcDeliveryModuleHelperTempl,
 	"grpc-delivery-module":        templates.GrpcDeliveryModuleTempl,
+	"queue-delivery-module":       templates.QueueDeliveryModuleTempl,
+	"queue-delivery":              templates.QueueDeliveryTempl,
 	"go-mod":                      templates.GoModTempl,
 	"validator-implementation":    templates.ValidatorImplementationTempl,
 }
@@ -90,9 +92,14 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 	if err != nil {
 		return nil, err
 	}
+	queueDeliveriesPerDomain, err := typeParser.GetQueueDeliveries()
+	if err != nil {
+		return nil, err
+	}
 
 	var hasDelivery bool
 	var hasGrpcDelivery bool
+	var hasQueueDelivery bool
 
 	for _, scm := range schema.Schemas {
 		var hasModels bool
@@ -100,13 +107,14 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 		var hasUsecase bool
 		var domainHasEnums bool
 		var domainHasGrpcDelivery bool
+		var domainHasQueueDelivery bool
 
 		curDomain := scm.Domain
 
 		templInput := &templates.TemplInput{
-			Domain:                      curDomain,
-			DomainSnake:                 formatter.PascalToSnake(curDomain),
-			DomainCamel:                 formatter.PascalToCamel(curDomain),
+			DomainPascal:                curDomain,
+			DomainSnake:                 strcase.ToSnake(curDomain),
+			DomainCamel:                 strcase.ToCamel(curDomain),
 			SpacingRelativeToDomainName: strings.Repeat(" ", len(curDomain)),
 		}
 
@@ -233,10 +241,10 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 				typeParser.ImportsGrpcDelivery[curDomain].AddImport("google.golang.org/grpc", nil)
 				typeParser.ImportsGrpcDelivery[curDomain].AddImport("github.com/rs/zerolog", nil)
 				typeParser.ImportsGrpcDelivery[curDomain].MergeImport(config.PbModuleImport)
-				typeParser.ImportsGrpcDelivery[curDomain].AddImport(config.ModuleName+"/internal/adapters", nil)
+				typeParser.ImportsGrpcDelivery[curDomain].AddImport(config.ProjectName+"/internal/adapters", nil)
 
 				if _, ok := enumsPerDomain[curDomain]; ok {
-					typeParser.ImportsGrpcDeliveryHelper[curDomain].AddImport(config.ModuleName+"/internal/models", nil)
+					typeParser.ImportsGrpcDeliveryHelper[curDomain].AddImport(config.ProjectName+"/internal/models", nil)
 				}
 
 				templInput.MethodsGrpcDelivery = grpcDelivery.Methods
@@ -253,6 +261,32 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 			templInput.DomainSnake+"_grpc_delivery_helper",
 		)
 		templInput.ImportsGrpcDeliveryHelper = importsGrpcDeliveryHelper
+
+		// Queue Delivery
+		if queueDeliveriesPerDomain != nil {
+			if queueDelivery, ok := queueDeliveriesPerDomain[curDomain]; ok {
+				hasDelivery = true
+				hasQueueDelivery = true
+				domainHasQueueDelivery = true
+
+				for _, method := range queueDelivery.Methods {
+					if method.Input != nil {
+						typeParser.ImportsQueueDelivery[curDomain].MergeImport(method.Input.ModuleImport)
+					}
+				}
+
+				typeParser.ImportsQueueDelivery[curDomain].AddImport("encoding/json", nil)
+				typeParser.ImportsQueueDelivery[curDomain].AddImport(config.ProjectName+"/internal/adapters", nil)
+
+				templInput.MethodsQueueDelivery = queueDelivery.Methods
+			}
+		}
+
+		importsQueueDelivery := imports.ResolveImports(
+			typeParser.ImportsQueueDelivery[curDomain].GetImportsUnorganized(),
+			templInput.DomainSnake+"_queue_delivery",
+		)
+		templInput.ImportsQueueDelivery = importsQueueDelivery
 
 		// -----------
 		//
@@ -294,7 +328,7 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 
 			for _, v := range templInput.MethodsRepository {
 				repositoryMethod, err := templateManager.Parse("repository-method", &templates.RepositoryMethodTemplInput{
-					Domain:         templInput.Domain,
+					DomainPascal:   templInput.DomainPascal,
 					DomainCamel:    templInput.DomainCamel,
 					DomainSnake:    templInput.DomainSnake,
 					MethodName:     v.MethodName,
@@ -305,7 +339,7 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 				if err != nil {
 					return nil, err
 				}
-				methodNameSnake := formatter.PascalToSnake(v.MethodName)
+				methodNameSnake := strcase.ToSnake(v.MethodName)
 				files = append(files, &File{
 					Name:    fmt.Sprintf("internal/repository/%s/%s.go", templInput.DomainSnake, methodNameSnake),
 					Content: repositoryMethod,
@@ -335,7 +369,7 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 
 			for _, v := range templInput.MethodsUsecase {
 				usecaseMethod, err := templateManager.Parse("usecase-method", &templates.UsecaseMethodTemplInput{
-					Domain:         templInput.Domain,
+					DomainPascal:   templInput.DomainPascal,
 					DomainCamel:    templInput.DomainCamel,
 					DomainSnake:    templInput.DomainSnake,
 					MethodName:     v.MethodName,
@@ -346,7 +380,7 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 				if err != nil {
 					return nil, err
 				}
-				methodNameSnake := formatter.PascalToSnake(v.MethodName)
+				methodNameSnake := strcase.ToSnake(v.MethodName)
 				files = append(files, &File{
 					Name:    fmt.Sprintf("internal/usecase/%s/%s.go", templInput.DomainSnake, methodNameSnake),
 					Content: usecaseMethod,
@@ -382,6 +416,21 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 					},
 				)
 			}
+		}
+
+		if domainHasQueueDelivery {
+			queueModule, err := templateManager.Parse("queue-delivery-module", templInput)
+			if err != nil {
+				return nil, err
+			}
+			files = append(
+				files,
+				&File{
+					Name:      fmt.Sprintf("internal/delivery/queue/%s.go", templInput.DomainSnake),
+					Content:   queueModule,
+					Overwrite: true,
+				},
+			)
 		}
 	}
 
@@ -430,8 +479,23 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 		)
 	}
 
+	if hasQueueDelivery {
+		queueImplementation, err := templateManager.Parse("queue-delivery", config)
+		if err != nil {
+			return nil, err
+		}
+
+		files = append(
+			files,
+			&File{
+				Name:    "internal/delivery/queue/queue.go",
+				Content: queueImplementation,
+			},
+		)
+	}
+
 	goConfig, err := templateManager.Parse("go-mod", &templates.GoConfig{
-		PkgName:   config.ModuleName,
+		PkgName:   config.ProjectName,
 		GoVersion: config.GoVersion,
 	})
 	if err != nil {

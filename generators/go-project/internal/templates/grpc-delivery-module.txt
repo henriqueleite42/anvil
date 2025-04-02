@@ -1,5 +1,5 @@
 {{- define "logger" }}	logger := self.logger.With().
-		Str("dmn", "{{ .Domain }}").
+		Str("dmn", "{{ .DomainPascal }}").
 		Str("mtd", "{{ .MethodName }}").
 		Str("reqId", xid.New().String()).
 		Logger()
@@ -127,11 +127,11 @@ import (
 )
 
 type {{ .DomainCamel }}Controller struct {
-	pb.Unimplemented{{ .Domain }}ApiServer
+	pb.Unimplemented{{ .DomainPascal }}ApiServer
 
 	logger   {{ .SpacingRelativeToDomainName }}*zerolog.Logger
 	validator{{ .SpacingRelativeToDomainName }}adapters.Validator
-	{{ .DomainCamel }}Usecase  {{ .DomainSnake }}_usecase.{{ .Domain }}Usecase
+	{{ .DomainCamel }}Usecase  {{ .DomainSnake }}_usecase.{{ .DomainPascal }}Usecase
 }
 
 {{ range .MethodsGrpcDelivery -}}
@@ -150,17 +150,17 @@ type {{ .DomainCamel }}Controller struct {
 	{{- end }}
 {{- end }}
 
-type Add{{ .Domain }}ControllerInput struct {
+type Add{{ .DomainPascal }}ControllerInput struct {
 	Server   {{ .SpacingRelativeToDomainName }}*grpc.Server
 	Logger   {{ .SpacingRelativeToDomainName }}*zerolog.Logger
 	Validator{{ .SpacingRelativeToDomainName }}adapters.Validator
-	{{ .Domain }}Usecase  {{ .DomainSnake }}_usecase.{{ .Domain }}Usecase
+	{{ .DomainPascal }}Usecase  {{ .DomainSnake }}_usecase.{{ .DomainPascal }}Usecase
 }
 
-func Add{{ .Domain }}Controller(i *Add{{ .Domain }}ControllerInput) {
-	pb.Register{{ .Domain }}ApiServer(i.Server, &{{ .DomainCamel }}Controller{
+func Add{{ .DomainPascal }}Controller(i *Add{{ .DomainPascal }}ControllerInput) {
+	pb.Register{{ .DomainPascal }}ApiServer(i.Server, &{{ .DomainCamel }}Controller{
 		logger:   {{ .SpacingRelativeToDomainName }}i.Logger,
 		validator:{{ .SpacingRelativeToDomainName }}i.Validator,
-		{{ .DomainCamel }}Usecase: i.{{ .Domain }}Usecase,
+		{{ .DomainCamel }}Usecase: i.{{ .DomainPascal }}Usecase,
 	})
 }

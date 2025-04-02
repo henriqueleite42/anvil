@@ -1,0 +1,59 @@
+package queue
+
+import (
+	"context"
+	"sync"
+	"time"
+
+	"github.com/rs/zerolog"
+
+	"{{ .ProjectName }}/internal/adapters"
+	"{{ .ProjectName }}/internal/delivery"
+	"{{ .ProjectName }}/internal/utils"
+)
+
+type queueDelivery struct {
+	ctx    context.Context
+	cancel context.CancelFunc
+	wg     *sync.WaitGroup
+
+	logger *zerolog.Logger
+
+	messagingAdapter adapters.Messaging
+	secretsAdapter	 *adapters.Secrets
+}
+
+type NewQueueDeliveryInput struct {
+	Logger       		 *zerolog.Logger
+	MessagingAdapter adapters.Messaging
+	SecretsAdapter 	 *adapters.Messaging
+}
+
+func (self *queueDelivery) Name() string {
+	return "QueueDelivery"
+}
+
+func (self *queueDelivery) Listen() {
+	// Add routers here
+}
+
+func (self *queueDelivery) Cancel(timeout time.Duration) {
+	self.cancel()
+
+	if err := utils.WaitWithTimeout(self.wg, timeout); err != nil {
+		self.logger.Error().Err(err).Msg("queue delivery timeout")
+	}
+}
+
+func NewQueueDelivery(i *NewQueueDeliveryInput) delivery.Delivery {
+	ctx, cancel := context.WithCancel(context.Background())
+	var wg sync.WaitGroup
+
+	return &queueDelivery{
+		ctx:              ctx,
+		cancel:           cancel,
+		wg:               &wg,
+		logger:           i.Logger,
+		messagingAdapter: i.MessagingAdapter,
+	}
+}

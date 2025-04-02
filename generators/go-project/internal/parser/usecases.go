@@ -3,14 +3,14 @@ package parser
 import (
 	"fmt"
 
+	"github.com/ettle/strcase"
 	"github.com/henriqueleite42/anvil/generators/go-project/internal/templates"
-	"github.com/henriqueleite42/anvil/language-helpers/golang/formatter"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/imports"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
 func (self *Parser) resolveUsecaseMethod(usc *schemas.UsecaseMethod) error {
-	pkgName := formatter.PascalToSnake(usc.Domain) + "_usecase"
+	pkgName := strcase.ToSnake(usc.Domain) + "_usecase"
 
 	methodImportsManager := imports.NewImportsManager()
 

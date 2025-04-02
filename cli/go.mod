@@ -3,6 +3,7 @@ module github.com/henriqueleite42/anvil/cli
 go 1.22.4
 
 require (
+	github.com/ettle/strcase v0.2.0
 	github.com/go-playground/validator/v10 v10.22.1
 	github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20241105112651-8b63812aa8ed
 	github.com/spf13/cobra v1.8.1

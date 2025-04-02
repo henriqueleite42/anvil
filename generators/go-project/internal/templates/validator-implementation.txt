@@ -3,7 +3,7 @@ package go_validator
 import (
 	"github.com/go-playground/validator/v10"
 
-	"{{ .ModuleName }}/internal/adapters"
+	"{{ .ProjectName }}/internal/adapters"
 )
 
 type playgroundValidator struct {

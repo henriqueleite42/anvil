@@ -50,13 +50,13 @@ type ProtofileTemplInputType struct {
 }
 
 type ProtofileTemplInput struct {
-	Domain   string
-	Imports  []string
-	Methods  []*ProtofileTemplInputMethod
-	Enums    []*ProtofileTemplInputEnum
-	Types    []*ProtofileTemplInputType
-	Events   []*ProtofileTemplInputType
-	Entities []*ProtofileTemplInputType
+	DomainPascal string
+	Imports      []string
+	Methods      []*ProtofileTemplInputMethod
+	Enums        []*ProtofileTemplInputEnum
+	Types        []*ProtofileTemplInputType
+	Events       []*ProtofileTemplInputType
+	Entities     []*ProtofileTemplInputType
 }
 
 //go:embed protofile.txt

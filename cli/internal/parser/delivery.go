@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 
+	"github.com/ettle/strcase"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/hashing"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
@@ -167,7 +168,112 @@ func (self *anvToAnvpParser) delivery(curDomain string, file map[string]any) err
 
 	// TODO parse http
 
-	// TODO parse queue
+	queueAny, ok := deliveryMap["Queue"]
+	if ok {
+		queueMap, ok := queueAny.(map[string]any)
+		if !ok {
+			return fmt.Errorf("fail to parse \"%s.Queue\" to `map[string]any`", path)
+		}
+
+		self.schema.Deliveries.Deliveries[curDomain].Queue = &schemas.DeliveryQueue{
+			Queues: map[string]*schemas.DeliveryQueueQueue{},
+		}
+
+		queuesAny, ok := queueMap["Queues"]
+		if !ok {
+			return fmt.Errorf("\"Queues\" is a required property to \"%s.Queue\"", path)
+		}
+		queuesArr, ok := queuesAny.([]any)
+		if !ok {
+			return fmt.Errorf("fail to parse \"%s.Queue.Queues\" to `[]any`", path)
+		}
+
+		for k, v := range queuesArr {
+			vMap, ok := v.(map[string]any)
+			if !ok {
+				return fmt.Errorf("fail to parse \"%s.Queue.Queues.%d\" to `map[string]any`", path, k)
+			}
+
+			usecaseMethodAny, ok := vMap["UsecaseMethod"]
+			if !ok {
+				return fmt.Errorf("\"UsecaseMethod\" is a required property to \"%s.Queue.Queues.%d\"", path, k)
+			}
+			usecaseMethodString, ok := usecaseMethodAny.(string)
+			if !ok {
+				return fmt.Errorf("fail to parse \"%s.Queue.Queues.%d.UsecaseMethod\" to `string`", path, k)
+			}
+
+			usecaseMethodRef := self.getRef(curDomain, "Usecase."+usecaseMethodString)
+			usecaseMethodHash := hashing.String(usecaseMethodRef)
+
+			idAny, ok := vMap["Id"]
+			if !ok {
+				return fmt.Errorf("\"Id\" is a required property to \"%s.Queue.Queues.%d\"", path, k)
+			}
+			idString, ok := idAny.(string)
+			if !ok {
+				return fmt.Errorf("fail to parse \"%s.Queue.Queues.%d.Id\" to `string`", path, k)
+			}
+
+			var bulk bool
+			bulkAny, ok := vMap["Bulk"]
+			if ok {
+				bulkBool, ok := bulkAny.(bool)
+				if !ok {
+					return fmt.Errorf("fail to parse \"%s.Queue.Queues.%d.Bulk\" to `bool`", path, k)
+				}
+				bulk = bulkBool
+			}
+
+			// TODO parse examples
+
+			originalPath := fmt.Sprintf("%s.Queue.Queues.%d", path, k)
+			ref := self.getRef(curDomain, "Queue.Queues."+strcase.ToPascal(idString))
+
+			queue := &schemas.DeliveryQueueQueue{
+				Ref:               ref,
+				OriginalPath:      originalPath,
+				Domain:            curDomain,
+				UsecaseMethodHash: usecaseMethodHash,
+				QueueId:           idString,
+				Bulk:              bulk,
+			}
+
+			stateHash, err := hashing.Struct(queue)
+			if err != nil {
+				return fmt.Errorf("fail to get state hash for \"%s.Queue.Queues.%d\"", path, k)
+			}
+			queue.StateHash = stateHash
+
+			self.schema.Deliveries.Deliveries[curDomain].Queue.Queues[ref] = queue
+		}
+
+		// Validate duplicated Rpcs
+		existentRpcs := make(map[string]bool, len(self.schema.Deliveries.Deliveries[curDomain].Grpc.Rpcs))
+		for _, v := range self.schema.Deliveries.Deliveries[curDomain].Grpc.Rpcs {
+			if existentRpcs[v.Ref] {
+				return fmt.Errorf("duplicated grpc rpc \"%s\"", v.OriginalPath)
+			}
+
+			existentRpcs[v.Ref] = true
+		}
+
+		// Validate duplicated Queues
+		existentQueues := make(map[string]bool, len(self.schema.Deliveries.Deliveries[curDomain].Queue.Queues))
+		for _, v := range self.schema.Deliveries.Deliveries[curDomain].Queue.Queues {
+			if existentQueues[v.Ref] {
+				return fmt.Errorf("duplicated queue \"%s\"", v.OriginalPath)
+			}
+
+			existentQueues[v.Ref] = true
+		}
+
+		stateHash, err := hashing.Struct(self.schema.Deliveries.Deliveries[curDomain].Queue)
+		if err != nil {
+			return fmt.Errorf("fail to get state hash for \"%s.Queue\"", path)
+		}
+		self.schema.Deliveries.Deliveries[curDomain].Queue.StateHash = stateHash
+	}
 
 	stateHash, err := hashing.Struct(self.schema.Deliveries.Deliveries[curDomain])
 	if err != nil {

@@ -82,6 +82,11 @@ func (self *Parser) Parse() error {
 		return err
 	}
 
+	err = self.parseDeliveriesQueue()
+	if err != nil {
+		return err
+	}
+
 	self.sortMethods()
 
 	return nil

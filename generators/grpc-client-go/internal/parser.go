@@ -278,7 +278,7 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig,
 		importsContract := contractsImportsPerDomain[shm.Domain].ResolveImports(pkg)
 
 		templInput := &templates.TemplInput{
-			Domain:                      shm.Domain,
+			DomainPascal:                shm.Domain,
 			DomainCamel:                 formatter.PascalToCamel(shm.Domain),
 			DomainSnake:                 domainSnake,
 			SpacingRelativeToDomainName: strings.Repeat(" ", len(shm.Domain)),

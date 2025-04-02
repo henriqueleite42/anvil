@@ -16,7 +16,7 @@ type {{ $type.GolangType }} struct {
 }
 {{- end }}
 
-type {{ .Domain }}Usecase interface {
+type {{ .DomainPascal }}Usecase interface {
 {{- range $method := .MethodsUsecase }}
 {{- if not $method.OutputTypeName }}
 	{{- if not $method.InputTypeName }}
