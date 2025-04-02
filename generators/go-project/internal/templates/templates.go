@@ -6,6 +6,7 @@ import (
 	"github.com/henriqueleite42/anvil/language-helpers/golang/grpc"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/imports"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
+	types_parser "github.com/henriqueleite42/anvil/language-helpers/golang/types"
 )
 
 type TemplEnumValue struct {
@@ -25,7 +26,7 @@ type TemplEnum struct {
 }
 
 type UsecaseMethodTemplInput struct {
-	Domain         string
+	DomainPascal   string
 	DomainCamel    string
 	DomainSnake    string
 	MethodName     string
@@ -35,7 +36,7 @@ type UsecaseMethodTemplInput struct {
 }
 
 type RepositoryMethodTemplInput struct {
-	Domain         string
+	DomainPascal   string
 	DomainCamel    string
 	DomainSnake    string
 	MethodName     string
@@ -44,14 +45,23 @@ type RepositoryMethodTemplInput struct {
 	Imports        [][]string
 }
 
-type TemplMethodDelivery struct {
-	Domain      string
-	DomainCamel string
-	DomainSnake string
-	MethodName  string
-	Order       uint
-	Input       *grpc.ConvertedValue
-	Output      *grpc.ConvertedValue
+type TemplGrpcMethodDelivery struct {
+	DomainPascal string
+	DomainCamel  string
+	DomainSnake  string
+	MethodName   string
+	Order        uint
+	Input        *grpc.ConvertedValue
+	Output       *grpc.ConvertedValue
+}
+
+type TemplQueueMethodDelivery struct {
+	DomainPascal  string
+	DomainCamel   string
+	MethodName    string
+	QueueIdPascal string
+	InputName     string
+	Input         *types_parser.Type
 }
 
 type TemplMethod struct {
@@ -87,7 +97,7 @@ type TemplType struct {
 }
 
 type TemplInput struct {
-	Domain                      string
+	DomainPascal                string
 	DomainCamel                 string
 	DomainSnake                 string
 	SpacingRelativeToDomainName string
@@ -97,6 +107,7 @@ type TemplInput struct {
 	ImportsUsecase            [][]string
 	ImportsGrpcDelivery       [][]string
 	ImportsGrpcDeliveryHelper [][]string
+	ImportsQueueDelivery      [][]string
 
 	Enums    []*TemplEnum
 	Types    []*TemplType
@@ -106,9 +117,10 @@ type TemplInput struct {
 	TypesRepository []*TemplType
 	TypesUsecase    []*TemplType
 
-	MethodsRepository   []*TemplMethod
-	MethodsUsecase      []*TemplMethod
-	MethodsGrpcDelivery []*TemplMethodDelivery
+	MethodsRepository    []*TemplMethod
+	MethodsUsecase       []*TemplMethod
+	MethodsGrpcDelivery  []*TemplGrpcMethodDelivery
+	MethodsQueueDelivery []*TemplQueueMethodDelivery
 }
 
 //go:embed delivery-gratefully-shutdown.txt
@@ -140,6 +152,12 @@ var MainTempl string
 
 //go:embed models.txt
 var ModelsTempl string
+
+//go:embed queue-delivery-module.txt
+var QueueDeliveryModuleTempl string
+
+//go:embed queue-delivery.txt
+var QueueDeliveryTempl string
 
 //go:embed readme.txt
 var ReadMeTempl string

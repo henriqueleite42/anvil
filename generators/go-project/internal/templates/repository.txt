@@ -16,7 +16,7 @@ type {{ $type.GolangType }} struct {
 }
 {{- end }}
 
-type {{ .Domain }}Repository interface {
+type {{ .DomainPascal }}Repository interface {
 {{- range $method := .MethodsRepository }}
 {{- if not $method.OutputTypeName }}
 	{{- if not $method.InputTypeName }}

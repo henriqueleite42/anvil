@@ -5,8 +5,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/ettle/strcase"
 	"github.com/henriqueleite42/anvil/generators/go-project/internal/templates"
-	"github.com/henriqueleite42/anvil/language-helpers/golang/formatter"
 	types_parser "github.com/henriqueleite42/anvil/language-helpers/golang/types"
 )
 
@@ -202,7 +202,7 @@ func (self *Parser) GetRepositoryTypes() (map[string][]*templates.TemplType, err
 			repositoryTypesByDomain[t.AnvilType.Domain] = []*templates.TemplType{}
 		}
 
-		templType := typeToTemplType(formatter.PascalToSnake(t.AnvilType.Domain)+"_repository", t)
+		templType := typeToTemplType(strcase.ToSnake(t.AnvilType.Domain)+"_repository", t)
 
 		repositoryTypesByDomain[t.AnvilType.Domain] = append(repositoryTypesByDomain[t.AnvilType.Domain], templType)
 	}
@@ -223,7 +223,7 @@ func (self *Parser) GetUsecaseTypes() (map[string][]*templates.TemplType, error)
 			usecaseTypesByDomain[t.AnvilType.Domain] = []*templates.TemplType{}
 		}
 
-		templType := typeToTemplType(formatter.PascalToSnake(t.AnvilType.Domain)+"_usecase", t)
+		templType := typeToTemplType(strcase.ToSnake(t.AnvilType.Domain)+"_usecase", t)
 
 		usecaseTypesByDomain[t.AnvilType.Domain] = append(usecaseTypesByDomain[t.AnvilType.Domain], templType)
 	}
@@ -246,4 +246,8 @@ func (self *Parser) GetUsecases() (map[string]*ParserUsecase, error) {
 
 func (self *Parser) GetGrpcDeliveries() (map[string]*ParserGrpcDelivery, error) {
 	return self.grpcDeliveries, nil
+}
+
+func (self *Parser) GetQueueDeliveries() (map[string]*ParserQueueDelivery, error) {
+	return self.queueDeliveries, nil
 }

@@ -10,13 +10,13 @@ type {{ .DomainCamel }}RepositoryImplementation struct {
 	logger *zerolog.Logger
 }
 
-type New{{ .Domain }}RepositoryInput struct {
+type New{{ .DomainPascal }}RepositoryInput struct {
 	Logger *zerolog.Logger
 }
 
-func New{{ .Domain }}Repository(i *New{{ .Domain }}RepositoryInput) ({{ .Domain }}Repository, error) {
+func New{{ .DomainPascal }}Repository(i *New{{ .DomainPascal }}RepositoryInput) ({{ .DomainPascal }}Repository, error) {
 	if i == nil {
-		return nil, errors.New("New{{ .Domain }}Repository: input must not be nil")
+		return nil, errors.New("New{{ .DomainPascal }}Repository: input must not be nil")
 	}
 
 	return &{{ .DomainCamel }}RepositoryImplementation{

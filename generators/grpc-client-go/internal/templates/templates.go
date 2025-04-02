@@ -49,7 +49,7 @@ type TemplMethod struct {
 }
 
 type TemplInput struct {
-	Domain                      string
+	DomainPascal                string
 	DomainCamel                 string
 	DomainSnake                 string
 	SpacingRelativeToDomainName string

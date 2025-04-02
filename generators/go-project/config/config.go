@@ -13,7 +13,7 @@ const GENERATOR_NAME = "go-project"
 
 type GeneratorConfig struct {
 	OutDir         *string         `yaml:"OutDir"`
-	ModuleName     string          `yaml:"ModuleName"`
+	ProjectName    string          `yaml:"ProjectName"`
 	GoVersion      string          `yaml:"GoVersion"`
 	PbModuleImport *imports.Import // PbModulePath resolved
 }
@@ -53,13 +53,13 @@ func GetConfig(filePath string) *GeneratorConfig {
 		outDir = &outDirString
 	}
 
-	moduleNameAny, ok := params["ModuleName"]
+	moduleNameAny, ok := params["ProjectName"]
 	if !ok {
-		log.Fatalf("%s: ModuleName is a required parameter", GENERATOR_NAME)
+		log.Fatalf("%s: ProjectName is a required parameter", GENERATOR_NAME)
 	}
-	moduleName, ok := moduleNameAny.(string)
+	ProjectName, ok := moduleNameAny.(string)
 	if !ok {
-		log.Fatalf("%s: fail to parse ModuleName to string", GENERATOR_NAME)
+		log.Fatalf("%s: fail to parse ProjectName to string", GENERATOR_NAME)
 	}
 
 	goVersionAny, ok := params["GoVersion"]
@@ -80,13 +80,13 @@ func GetConfig(filePath string) *GeneratorConfig {
 		}
 		pbModulePath = pbModulePathString
 	} else {
-		pbModulePath = moduleName + "/internal/delivery/grpc/pb"
+		pbModulePath = ProjectName + "/internal/delivery/grpc/pb"
 	}
 	pbModuleImport := imports.NewImport(pbModulePath, nil)
 
 	return &GeneratorConfig{
 		OutDir:         outDir,
-		ModuleName:     moduleName,
+		ProjectName:    ProjectName,
 		GoVersion:      goVersion,
 		PbModuleImport: pbModuleImport,
 	}

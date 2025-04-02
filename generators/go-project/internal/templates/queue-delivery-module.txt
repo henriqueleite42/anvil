@@ -1,0 +1,41 @@
+package queue
+
+import (
+{{- range .ImportsQueueDelivery }}
+	{{- range . }}
+	{{ . }}
+	{{- end }}
+{{ end -}}
+)
+
+{{ range .MethodsQueueDelivery }}
+func (self *queueDelivery) {{ .DomainPascal }}{{ .MethodName }}() {
+	go func() {
+		self.messagingAdapter.CreateListener(&adapters.CreateListenerInput{
+			ListenerId: self.secretsAdapter.{{ .DomainPascal }}{{ .QueueIdPascal  }}QueueId,
+			Ctx:        self.ctx,
+			Wg:         self.wg,
+			Fn: func(i []adapters.JsonEvent) {
+				var events []{{ .InputName }}
+				for _, v := range i {
+					event := {{ .InputName }}{}
+					err := json.Unmarshal(v, &event)
+					if err != nil {
+						self.logger.Error().Err(err).Msg(err.Error())
+						continue
+					}
+
+					events = append(events, event)
+				}
+
+				self.logger.Debug().
+					Str("func", "{{ .MethodName }}").
+					Any("events", events).
+					Msg("processing events")
+
+				self.{{ .DomainCamel }}Usecase.{{ .MethodName }}(events)
+			},
+		})
+	}()
+}
+{{ end }}

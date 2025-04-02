@@ -4,7 +4,7 @@ syntax = "proto3";
 import "{{ . }}";
 {{ end }}
 {{ if .Methods -}}
-service {{ .Domain }}Api {
+service {{ .DomainPascal }}Api {
 	{{- range .Methods -}}
 		{{- if .Input }}
 			{{- if .Output }}

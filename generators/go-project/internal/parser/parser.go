@@ -1,9 +1,9 @@
 package parser
 
 import (
+	"github.com/ettle/strcase"
 	generator_config "github.com/henriqueleite42/anvil/generators/go-project/config"
 	"github.com/henriqueleite42/anvil/generators/go-project/internal/templates"
-	"github.com/henriqueleite42/anvil/language-helpers/golang/formatter"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/imports"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 	types_parser "github.com/henriqueleite42/anvil/language-helpers/golang/types"
@@ -18,7 +18,10 @@ type ParserUsecase struct {
 }
 
 type ParserGrpcDelivery struct {
-	Methods []*templates.TemplMethodDelivery
+	Methods []*templates.TemplGrpcMethodDelivery
+}
+type ParserQueueDelivery struct {
+	Methods []*templates.TemplQueueMethodDelivery
 }
 
 type Parser struct {
@@ -27,22 +30,24 @@ type Parser struct {
 
 	GoTypesParser types_parser.TypesParser
 
-	repositories   map[string]*ParserRepository
-	usecases       map[string]*ParserUsecase
-	grpcDeliveries map[string]*ParserGrpcDelivery
+	repositories    map[string]*ParserRepository
+	usecases        map[string]*ParserUsecase
+	grpcDeliveries  map[string]*ParserGrpcDelivery
+	queueDeliveries map[string]*ParserQueueDelivery
 
 	ImportsModels             map[string]imports.ImportsManager
 	ImportsRepository         map[string]imports.ImportsManager
 	ImportsUsecase            map[string]imports.ImportsManager
 	ImportsGrpcDelivery       map[string]imports.ImportsManager
 	ImportsGrpcDeliveryHelper map[string]imports.ImportsManager
+	ImportsQueueDelivery      map[string]imports.ImportsManager
 }
 
 func NewTypesParser(
 	schema *schemas.AnvpSchema,
 	config *generator_config.GeneratorConfig,
 ) (*Parser, error) {
-	modelsImport := imports.NewImport(config.ModuleName+"/internal/models", nil)
+	modelsImport := imports.NewImport(config.ProjectName+"/internal/models", nil)
 
 	goTypesParser, err := types_parser.NewTypeParser(&types_parser.NewTypeParserInput{
 		Schema: schema,
@@ -59,15 +64,15 @@ func NewTypesParser(
 			return modelsImport
 		},
 		GetRepositoryImport: func(t *schemas.Type) *imports.Import {
-			domainSnake := formatter.PascalToSnake(t.Domain)
-			path := config.ModuleName + "/internal/repository/" + domainSnake
+			domainSnake := strcase.ToSnake(t.Domain)
+			path := config.ProjectName + "/internal/repository/" + domainSnake
 			alias := domainSnake + "_repository"
 
 			return imports.NewImport(path, &alias)
 		},
 		GetUsecaseImport: func(t *schemas.Type) *imports.Import {
-			domainSnake := formatter.PascalToSnake(t.Domain)
-			path := config.ModuleName + "/internal/usecase/" + domainSnake
+			domainSnake := strcase.ToSnake(t.Domain)
+			path := config.ProjectName + "/internal/usecase/" + domainSnake
 			alias := domainSnake + "_usecase"
 
 			return imports.NewImport(path, &alias)
@@ -83,15 +88,17 @@ func NewTypesParser(
 
 		GoTypesParser: goTypesParser,
 
-		repositories:   map[string]*ParserRepository{},
-		usecases:       map[string]*ParserUsecase{},
-		grpcDeliveries: map[string]*ParserGrpcDelivery{},
+		repositories:    map[string]*ParserRepository{},
+		usecases:        map[string]*ParserUsecase{},
+		grpcDeliveries:  map[string]*ParserGrpcDelivery{},
+		queueDeliveries: map[string]*ParserQueueDelivery{},
 
 		ImportsModels:             map[string]imports.ImportsManager{},
 		ImportsRepository:         map[string]imports.ImportsManager{},
 		ImportsUsecase:            map[string]imports.ImportsManager{},
 		ImportsGrpcDelivery:       map[string]imports.ImportsManager{},
 		ImportsGrpcDeliveryHelper: map[string]imports.ImportsManager{},
+		ImportsQueueDelivery:      map[string]imports.ImportsManager{},
 	}
 
 	for _, v := range schema.Schemas {
@@ -100,6 +107,7 @@ func NewTypesParser(
 		parser.ImportsUsecase[v.Domain] = imports.NewImportsManager()
 		parser.ImportsGrpcDelivery[v.Domain] = imports.NewImportsManager()
 		parser.ImportsGrpcDeliveryHelper[v.Domain] = imports.NewImportsManager()
+		parser.ImportsQueueDelivery[v.Domain] = imports.NewImportsManager()
 	}
 
 	return parser, nil
