@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/ettle/strcase"
 	"github.com/henriqueleite42/anvil/generators/go-project/internal/templates"
@@ -44,13 +45,16 @@ func (self *Parser) resolveQueueDelivery(
 	}
 
 	domainCamel := strcase.ToCamel(dlv.Domain)
+	inputName := input.GetTypeName("queue")
+	// TODO Fix the line bellow. This is an workaround and a terrible way to solve this, but it's fast enough
+	inputName = strings.Replace(inputName, "[]*", "", 1)
 	self.queueDeliveries[dlv.Domain].Methods = append(self.queueDeliveries[dlv.Domain].Methods, &templates.TemplQueueMethodDelivery{
 		DomainPascal:  dlv.Domain,
 		DomainCamel:   domainCamel,
 		MethodName:    method.Name,
 		QueueIdPascal: strcase.ToPascal(dlv.QueueId),
 		Input:         input,
-		InputName:     input.GetTypeName("queue"),
+		InputName:     inputName,
 	})
 
 	return nil

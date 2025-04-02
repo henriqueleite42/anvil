@@ -16,9 +16,9 @@ func (self *queueDelivery) {{ .DomainPascal }}{{ .MethodName }}() {
 			Ctx:        self.ctx,
 			Wg:         self.wg,
 			Fn: func(i []adapters.JsonEvent) {
-				var events []{{ .InputName }}
+				var events []*{{ .InputName }}
 				for _, v := range i {
-					event := {{ .InputName }}{}
+					event := &{{ .InputName }}{}
 					err := json.Unmarshal(v, &event)
 					if err != nil {
 						self.logger.Error().Err(err).Msg(err.Error())
@@ -33,7 +33,7 @@ func (self *queueDelivery) {{ .DomainPascal }}{{ .MethodName }}() {
 					Any("events", events).
 					Msg("processing events")
 
-				self.{{ .DomainCamel }}Usecase.{{ .MethodName }}(events)
+				self.{{ .DomainCamel }}Usecase.{{ .MethodName }}(self.ctx, events)
 			},
 		})
 	}()
