@@ -20,6 +20,9 @@ type ParserUsecase struct {
 type ParserGrpcDelivery struct {
 	Methods []*templates.TemplGrpcMethodDelivery
 }
+type ParserHttpDelivery struct {
+	Methods []*templates.TemplHttpMethodDelivery
+}
 type ParserQueueDelivery struct {
 	Methods []*templates.TemplQueueMethodDelivery
 }
@@ -33,12 +36,14 @@ type Parser struct {
 	repositories    map[string]*ParserRepository
 	usecases        map[string]*ParserUsecase
 	grpcDeliveries  map[string]*ParserGrpcDelivery
+	httpDeliveries  map[string]*ParserHttpDelivery
 	queueDeliveries map[string]*ParserQueueDelivery
 
 	ImportsModels             map[string]imports.ImportsManager
 	ImportsRepository         map[string]imports.ImportsManager
 	ImportsUsecase            map[string]imports.ImportsManager
 	ImportsGrpcDelivery       map[string]imports.ImportsManager
+	ImportsHttpDelivery       map[string]imports.ImportsManager
 	ImportsGrpcDeliveryHelper map[string]imports.ImportsManager
 	ImportsQueueDelivery      map[string]imports.ImportsManager
 }
@@ -91,6 +96,7 @@ func NewTypesParser(
 		repositories:    map[string]*ParserRepository{},
 		usecases:        map[string]*ParserUsecase{},
 		grpcDeliveries:  map[string]*ParserGrpcDelivery{},
+		httpDeliveries:  map[string]*ParserHttpDelivery{},
 		queueDeliveries: map[string]*ParserQueueDelivery{},
 
 		ImportsModels:             map[string]imports.ImportsManager{},
@@ -98,6 +104,7 @@ func NewTypesParser(
 		ImportsUsecase:            map[string]imports.ImportsManager{},
 		ImportsGrpcDelivery:       map[string]imports.ImportsManager{},
 		ImportsGrpcDeliveryHelper: map[string]imports.ImportsManager{},
+		ImportsHttpDelivery:       map[string]imports.ImportsManager{},
 		ImportsQueueDelivery:      map[string]imports.ImportsManager{},
 	}
 
@@ -107,6 +114,7 @@ func NewTypesParser(
 		parser.ImportsUsecase[v.Domain] = imports.NewImportsManager()
 		parser.ImportsGrpcDelivery[v.Domain] = imports.NewImportsManager()
 		parser.ImportsGrpcDeliveryHelper[v.Domain] = imports.NewImportsManager()
+		parser.ImportsHttpDelivery[v.Domain] = imports.NewImportsManager()
 		parser.ImportsQueueDelivery[v.Domain] = imports.NewImportsManager()
 	}
 

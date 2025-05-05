@@ -23,6 +23,9 @@ var templatesNamesValues = map[string]string{
 	"usecase-method":              templates.UsecaseMethodTempl,
 	"grpc-delivery-module-helper": templates.GrpcDeliveryModuleHelperTempl,
 	"grpc-delivery-module":        templates.GrpcDeliveryModuleTempl,
+	"http-delivery-module":        templates.HttpDeliveryModuleTempl,
+	"http-delivery-route":         templates.HttpDeliveryRouteTempl,
+	"http-delivery":               templates.HttpDeliveryTempl,
 	"queue-delivery-module":       templates.QueueDeliveryModuleTempl,
 	"queue-delivery":              templates.QueueDeliveryTempl,
 	"go-mod":                      templates.GoModTempl,
@@ -92,6 +95,10 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 	if err != nil {
 		return nil, err
 	}
+	httpDeliveriesPerDomain, err := typeParser.GetHttpDeliveries()
+	if err != nil {
+		return nil, err
+	}
 	queueDeliveriesPerDomain, err := typeParser.GetQueueDeliveries()
 	if err != nil {
 		return nil, err
@@ -99,6 +106,7 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 
 	var hasDelivery bool
 	var hasGrpcDelivery bool
+	var hasHttpDelivery bool
 	var hasQueueDelivery bool
 
 	for _, scm := range schema.Schemas {
@@ -107,6 +115,7 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 		var hasUsecase bool
 		var domainHasEnums bool
 		var domainHasGrpcDelivery bool
+		var domainHasHttpDelivery bool
 		var domainHasQueueDelivery bool
 
 		curDomain := scm.Domain
@@ -261,6 +270,27 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 			templInput.DomainSnake+"_grpc_delivery_helper",
 		)
 		templInput.ImportsGrpcDeliveryHelper = importsGrpcDeliveryHelper
+
+		// Http Delivery
+		if httpDeliveriesPerDomain != nil {
+			if httpDelivery, ok := httpDeliveriesPerDomain[curDomain]; ok {
+				hasDelivery = true
+				hasHttpDelivery = true
+				domainHasHttpDelivery = true
+
+				typeParser.ImportsHttpDelivery[curDomain].AddImport("github.com/rs/zerolog", nil)
+				typeParser.ImportsHttpDelivery[curDomain].AddImport(config.ProjectName+"/internal/adapters", nil)
+				typeParser.ImportsHttpDelivery[curDomain].AddImport(config.ProjectName+"/internal/usecase/"+templInput.DomainSnake, nil)
+
+				templInput.MethodsHttpDelivery = httpDelivery.Methods
+			}
+		}
+
+		importsHttpDelivery := imports.ResolveImports(
+			typeParser.ImportsHttpDelivery[curDomain].GetImportsUnorganized(),
+			templInput.DomainSnake+"_http_delivery",
+		)
+		templInput.ImportsHttpDelivery = importsHttpDelivery
 
 		// Queue Delivery
 		if queueDeliveriesPerDomain != nil {
@@ -418,6 +448,34 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 			}
 		}
 
+		if domainHasHttpDelivery {
+			httpModule, err := templateManager.Parse("http-delivery-module", templInput)
+			if err != nil {
+				return nil, err
+			}
+			files = append(
+				files,
+				&File{
+					Name:    fmt.Sprintf("internal/delivery/http/%s/%s.go", templInput.DomainSnake, templInput.DomainSnake),
+					Content: httpModule,
+				},
+			)
+
+			for _, route := range templInput.MethodsHttpDelivery {
+				httpRoute, err := templateManager.Parse("http-delivery-route", route)
+				if err != nil {
+					return nil, err
+				}
+				files = append(
+					files,
+					&File{
+						Name:    fmt.Sprintf("internal/delivery/http/%s/%s.go", route.DomainSnake, route.RouteNameSnake),
+						Content: httpRoute,
+					},
+				)
+			}
+		}
+
 		if domainHasQueueDelivery {
 			queueModule, err := templateManager.Parse("queue-delivery-module", templInput)
 			if err != nil {
@@ -475,6 +533,21 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 			&File{
 				Name:    "internal/delivery/grpc/grpc.go",
 				Content: templates.GrpcDeliveryTempl,
+			},
+		)
+	}
+
+	if hasHttpDelivery {
+		httpImplementation, err := templateManager.Parse("http-delivery", config)
+		if err != nil {
+			return nil, err
+		}
+
+		files = append(
+			files,
+			&File{
+				Name:    "internal/delivery/http/http.go",
+				Content: httpImplementation,
 			},
 		)
 	}

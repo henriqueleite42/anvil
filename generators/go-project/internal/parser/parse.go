@@ -82,6 +82,11 @@ func (self *Parser) Parse() error {
 		return err
 	}
 
+	err = self.parseDeliveriesHttp(self.config)
+	if err != nil {
+		return err
+	}
+
 	err = self.parseDeliveriesQueue()
 	if err != nil {
 		return err

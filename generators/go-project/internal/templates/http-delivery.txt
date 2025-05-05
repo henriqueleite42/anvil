@@ -1,0 +1,92 @@
+package http_delivery
+
+import (
+	"context"
+	"fmt"
+	"net/http"
+	"os"
+	"sync"
+	"time"
+
+	"github.com/rs/zerolog"
+
+	"{{ .ProjectName }}/internal/adapters"
+	"{{ .ProjectName }}/internal/delivery"
+	"{{ .ProjectName }}/internal/utils"
+)
+
+type httpDelivery struct {
+	server 		*http.Server
+	logger		*zerolog.Logger
+	validator adapters.Validator
+}
+
+type NewHttpDeliveryInput struct {
+	Logger		*zerolog.Logger
+	Validator adapters.Validator
+}
+
+func (self *httpDelivery) Name() string {
+	return "HttpDelivery"
+}
+
+func (self *httpDelivery) Listen() {
+	go func() {
+		// Add routers here
+
+		self.logger.Info().
+			Msgf("HTTP server initialized at %v", self.server.Addr)
+
+		if err := self.server.ListenAndServe(); err != http.ErrServerClosed {
+			self.logger.Error().
+				Err(err).
+				Msgf("error starting HTTP server")
+			return
+		}
+
+		self.logger.Info().
+			Msg("HTTP server stopped serving new connections")
+	}()
+}
+
+func (self *httpDelivery) Cancel(timeout time.Duration) {
+	// Create a context with a timeout for the shutdown process
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		if err := self.server.Shutdown(ctx); err != nil {
+			self.logger.Error().
+				Err(err).
+				Msg("HTTP server shutdown error")
+		}
+	}()
+
+	if err := utils.WaitWithTimeout(&wg, timeout); err != nil {
+		self.logger.Error().Err(err).Msg("http delivery shutdown timeout")
+	}
+}
+
+func NewHttpDelivery(i *NewHttpDeliveryInput) delivery.Delivery {
+	port := fmt.Sprintf(":%v", os.Getenv("PORT"))
+
+	server := &http.Server{
+		Addr:    port,
+		Handler: nil, // Use the default ServeMux
+		// Optionally configure timeouts for graceful shutdown
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  15 * time.Second,
+	}
+
+	return &httpDelivery{
+		server: 	 server,
+		logger: 	 i.Logger,
+		validator: i.Validator,
+	}
+}

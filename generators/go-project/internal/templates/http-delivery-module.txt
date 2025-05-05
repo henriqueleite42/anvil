@@ -1,0 +1,26 @@
+package {{ .DomainSnake }}_delivery_http
+
+import (
+{{- range .ImportsHttpDelivery }}
+	{{- range . }}
+	{{ . }}
+	{{- end }}
+{{ end -}}
+)
+
+type {{ .DomainCamel }}Controller struct {
+	logger   {{ .SpacingRelativeToDomainName }}*zerolog.Logger
+	validator{{ .SpacingRelativeToDomainName }}adapters.Validator
+	{{ .DomainCamel }}Usecase  {{ .DomainSnake }}_usecase.{{ .DomainPascal }}Usecase
+}
+
+type Add{{ .DomainPascal }}ControllerInput struct {
+	Logger   {{ .SpacingRelativeToDomainName }}*zerolog.Logger
+	Validator{{ .SpacingRelativeToDomainName }}adapters.Validator
+	{{ .DomainPascal }}Usecase  {{ .DomainSnake }}_usecase.{{ .DomainPascal }}Usecase
+}
+
+func Add{{ .DomainPascal }}Controller(i *Add{{ .DomainPascal }}ControllerInput) {
+	// Add routes here. Ex:
+	// http.HandleFunc("/", self.Handler)
+}

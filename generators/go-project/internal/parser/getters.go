@@ -248,6 +248,10 @@ func (self *Parser) GetGrpcDeliveries() (map[string]*ParserGrpcDelivery, error) 
 	return self.grpcDeliveries, nil
 }
 
+func (self *Parser) GetHttpDeliveries() (map[string]*ParserHttpDelivery, error) {
+	return self.httpDeliveries, nil
+}
+
 func (self *Parser) GetQueueDeliveries() (map[string]*ParserQueueDelivery, error) {
 	return self.queueDeliveries, nil
 }

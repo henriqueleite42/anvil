@@ -1,0 +1,7 @@
+package {{ .DomainSnake }}_delivery_http
+
+import "net/http"
+
+func (self *{{ .DomainCamel }}Controller) {{ .RouteNamePascal }}(w http.ResponseWriter, r *http.Request) {
+	// Add logic here
+}
