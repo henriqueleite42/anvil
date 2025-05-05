@@ -55,6 +55,15 @@ type TemplGrpcMethodDelivery struct {
 	Output       *grpc.ConvertedValue
 }
 
+type TemplHttpMethodDelivery struct {
+	DomainPascal    string
+	DomainCamel     string
+	DomainSnake     string
+	RouteNamePascal string
+	RouteNameSnake  string
+	Order           uint
+}
+
 type TemplQueueMethodDelivery struct {
 	DomainPascal  string
 	DomainCamel   string
@@ -107,6 +116,7 @@ type TemplInput struct {
 	ImportsUsecase            [][]string
 	ImportsGrpcDelivery       [][]string
 	ImportsGrpcDeliveryHelper [][]string
+	ImportsHttpDelivery       [][]string
 	ImportsQueueDelivery      [][]string
 
 	Enums    []*TemplEnum
@@ -120,6 +130,7 @@ type TemplInput struct {
 	MethodsRepository    []*TemplMethod
 	MethodsUsecase       []*TemplMethod
 	MethodsGrpcDelivery  []*TemplGrpcMethodDelivery
+	MethodsHttpDelivery  []*TemplHttpMethodDelivery
 	MethodsQueueDelivery []*TemplQueueMethodDelivery
 }
 
@@ -146,6 +157,15 @@ var GrpcDeliveryModuleTempl string
 
 //go:embed grpc-delivery.txt
 var GrpcDeliveryTempl string
+
+//go:embed http-delivery-module.txt
+var HttpDeliveryModuleTempl string
+
+//go:embed http-delivery-route.txt
+var HttpDeliveryRouteTempl string
+
+//go:embed http-delivery.txt
+var HttpDeliveryTempl string
 
 //go:embed main.txt
 var MainTempl string

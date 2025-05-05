@@ -166,7 +166,101 @@ func (self *anvToAnvpParser) delivery(curDomain string, file map[string]any) err
 		self.schema.Deliveries.Deliveries[curDomain].Grpc.StateHash = stateHash
 	}
 
-	// TODO parse http
+	httpAny, ok := deliveryMap["Http"]
+	if ok {
+		httpMap, ok := httpAny.(map[string]any)
+		if !ok {
+			return fmt.Errorf("fail to parse \"%s.Http\" to `map[string]any`", path)
+		}
+
+		self.schema.Deliveries.Deliveries[curDomain].Http = &schemas.DeliveryHttp{
+			Routes: map[string]*schemas.DeliveryHttpRoute{},
+		}
+
+		routesAny, ok := httpMap["Routes"]
+		if !ok {
+			return fmt.Errorf("\"Queues\" is a required property to \"%s.Queue\"", path)
+		}
+		routesArr, ok := routesAny.([]any)
+		if !ok {
+			return fmt.Errorf("fail to parse \"%s.Http.Routes\" to `[]any`", path)
+		}
+
+		for k, v := range routesArr {
+			vMap, ok := v.(map[string]any)
+			if !ok {
+				return fmt.Errorf("fail to parse \"%s.Http.Routes.%d\" to `map[string]any`", path, k)
+			}
+
+			usecaseMethodAny, ok := vMap["UsecaseMethod"]
+			if !ok {
+				return fmt.Errorf("\"UsecaseMethod\" is a required property to \"%s.Http.Routes.%d\"", path, k)
+			}
+			usecaseMethodString, ok := usecaseMethodAny.(string)
+			if !ok {
+				return fmt.Errorf("fail to parse \"%s.Http.Routes.%d.UsecaseMethod\" to `string`", path, k)
+			}
+
+			usecaseMethodRef := self.getRef(curDomain, "Usecase."+usecaseMethodString)
+			usecaseMethodHash := hashing.String(usecaseMethodRef)
+
+			pathAny, ok := vMap["Path"]
+			if !ok {
+				return fmt.Errorf("\"Path\" is a required property to \"%s.Http.Routes.%d\"", path, k)
+			}
+			pathString, ok := pathAny.(string)
+			if !ok {
+				return fmt.Errorf("fail to parse \"%s.Http.Routes.%d.Path\" to `string`", path, k)
+			}
+
+			methodAny, ok := vMap["Method"]
+			if !ok {
+				return fmt.Errorf("\"Method\" is a required property to \"%s.Http.Routes.%d\"", path, k)
+			}
+			methodString, ok := methodAny.(string)
+			if !ok {
+				return fmt.Errorf("fail to parse \"%s.Http.Routes.%d.Method\" to `string`", path, k)
+			}
+
+			// TODO parse other properties
+
+			originalPath := fmt.Sprintf("%s.QHttp.Routes.%d", path, k)
+			ref := self.getRef(curDomain, "Http.Routes."+strcase.ToPascal(pathString))
+
+			route := &schemas.DeliveryHttpRoute{
+				Ref:               ref,
+				OriginalPath:      originalPath,
+				Domain:            curDomain,
+				UsecaseMethodHash: usecaseMethodHash,
+				Path:              pathString,
+				HttpMethod:        methodString,
+			}
+
+			stateHash, err := hashing.Struct(route)
+			if err != nil {
+				return fmt.Errorf("fail to get state hash for \"%s.Http.Routes.%d\"", path, k)
+			}
+			route.StateHash = stateHash
+
+			self.schema.Deliveries.Deliveries[curDomain].Http.Routes[ref] = route
+		}
+
+		// Validate duplicated Routes
+		existentRoutes := make(map[string]bool, len(self.schema.Deliveries.Deliveries[curDomain].Http.Routes))
+		for _, v := range self.schema.Deliveries.Deliveries[curDomain].Http.Routes {
+			if existentRoutes[v.Ref] {
+				return fmt.Errorf("duplicated http route \"%s\"", v.OriginalPath)
+			}
+
+			existentRoutes[v.Ref] = true
+		}
+
+		stateHash, err := hashing.Struct(self.schema.Deliveries.Deliveries[curDomain].Http)
+		if err != nil {
+			return fmt.Errorf("fail to get state hash for \"%s.Http\"", path)
+		}
+		self.schema.Deliveries.Deliveries[curDomain].Http.StateHash = stateHash
+	}
 
 	queueAny, ok := deliveryMap["Queue"]
 	if ok {
@@ -246,16 +340,6 @@ func (self *anvToAnvpParser) delivery(curDomain string, file map[string]any) err
 			queue.StateHash = stateHash
 
 			self.schema.Deliveries.Deliveries[curDomain].Queue.Queues[ref] = queue
-		}
-
-		// Validate duplicated Rpcs
-		existentRpcs := make(map[string]bool, len(self.schema.Deliveries.Deliveries[curDomain].Grpc.Rpcs))
-		for _, v := range self.schema.Deliveries.Deliveries[curDomain].Grpc.Rpcs {
-			if existentRpcs[v.Ref] {
-				return fmt.Errorf("duplicated grpc rpc \"%s\"", v.OriginalPath)
-			}
-
-			existentRpcs[v.Ref] = true
 		}
 
 		// Validate duplicated Queues
