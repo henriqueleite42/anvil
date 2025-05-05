@@ -11,16 +11,27 @@ import (
 type {{ .DomainCamel }}Controller struct {
 	logger   {{ .SpacingRelativeToDomainName }}*zerolog.Logger
 	validator{{ .SpacingRelativeToDomainName }}adapters.Validator
-	{{ .DomainCamel }}Usecase  {{ .DomainSnake }}_usecase.{{ .DomainPascal }}Usecase
+	idAdapter{{ .SpacingRelativeToDomainName }}adapters.Id
+	{{ .DomainCamel }}Usecase {{ .DomainSnake }}_usecase.{{ .DomainPascal }}Usecase
 }
 
 type Add{{ .DomainPascal }}ControllerInput struct {
-	Logger   {{ .SpacingRelativeToDomainName }}*zerolog.Logger
-	Validator{{ .SpacingRelativeToDomainName }}adapters.Validator
-	{{ .DomainPascal }}Usecase  {{ .DomainSnake }}_usecase.{{ .DomainPascal }}Usecase
+	Logger *zerolog.Logger
+
+	Validator adapters.Validator
+	IdAdapter adapters.Id
+
+	{{ .DomainPascal }}Usecase {{ .DomainSnake }}_usecase.{{ .DomainPascal }}Usecase
 }
 
 func Add{{ .DomainPascal }}Controller(i *Add{{ .DomainPascal }}ControllerInput) {
+	{{ .DomainCamel }}Controller := &{{ .DomainCamel }}Controller{
+		logger:   {{ .SpacingRelativeToDomainName }}i.Logger,
+		validator:{{ .SpacingRelativeToDomainName }}i.Validator,
+		idAdapter:{{ .SpacingRelativeToDomainName }}i.IdAdapter,
+		{{ .DomainCamel }}Usecase: i.{{ .DomainPascal }}Usecase,
+	}
+
 	// Add routes here. Ex:
 	// http.HandleFunc("/", self.Handler)
 }

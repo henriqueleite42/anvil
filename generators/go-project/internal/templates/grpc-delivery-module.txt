@@ -131,7 +131,7 @@ type {{ .DomainCamel }}Controller struct {
 
 	logger   {{ .SpacingRelativeToDomainName }}*zerolog.Logger
 	validator{{ .SpacingRelativeToDomainName }}adapters.Validator
-	{{ .DomainCamel }}Usecase  {{ .DomainSnake }}_usecase.{{ .DomainPascal }}Usecase
+	{{ .DomainCamel }}Usecase {{ .DomainSnake }}_usecase.{{ .DomainPascal }}Usecase
 }
 
 {{ range .MethodsGrpcDelivery -}}
@@ -154,7 +154,7 @@ type Add{{ .DomainPascal }}ControllerInput struct {
 	Server   {{ .SpacingRelativeToDomainName }}*grpc.Server
 	Logger   {{ .SpacingRelativeToDomainName }}*zerolog.Logger
 	Validator{{ .SpacingRelativeToDomainName }}adapters.Validator
-	{{ .DomainPascal }}Usecase  {{ .DomainSnake }}_usecase.{{ .DomainPascal }}Usecase
+	{{ .DomainPascal }}Usecase {{ .DomainSnake }}_usecase.{{ .DomainPascal }}Usecase
 }
 
 func Add{{ .DomainPascal }}Controller(i *Add{{ .DomainPascal }}ControllerInput) {

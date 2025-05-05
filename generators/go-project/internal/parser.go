@@ -124,7 +124,7 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 			DomainPascal:                curDomain,
 			DomainSnake:                 strcase.ToSnake(curDomain),
 			DomainCamel:                 strcase.ToCamel(curDomain),
-			SpacingRelativeToDomainName: strings.Repeat(" ", len(curDomain)),
+			SpacingRelativeToDomainName: strings.Repeat(" ", len(curDomain)-1),
 		}
 
 		// Models
@@ -280,7 +280,8 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 
 				typeParser.ImportsHttpDelivery[curDomain].AddImport("github.com/rs/zerolog", nil)
 				typeParser.ImportsHttpDelivery[curDomain].AddImport(config.ProjectName+"/internal/adapters", nil)
-				typeParser.ImportsHttpDelivery[curDomain].AddImport(config.ProjectName+"/internal/usecase/"+templInput.DomainSnake, nil)
+				usecaseAlias := templInput.DomainSnake + "_usecase"
+				typeParser.ImportsHttpDelivery[curDomain].AddImport(config.ProjectName+"/internal/usecase/"+templInput.DomainSnake, &usecaseAlias)
 
 				templInput.MethodsHttpDelivery = httpDelivery.Methods
 			}
