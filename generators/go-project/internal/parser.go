@@ -457,7 +457,7 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 			files = append(
 				files,
 				&File{
-					Name:    fmt.Sprintf("internal/delivery/http/%s/%s.go", templInput.DomainSnake, templInput.DomainSnake),
+					Name:    fmt.Sprintf("internal/delivery/http/%s/%s_controller.go", templInput.DomainSnake, templInput.DomainSnake),
 					Content: httpModule,
 				},
 			)

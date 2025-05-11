@@ -2,12 +2,38 @@ package parser
 
 import (
 	"fmt"
+	"net/url"
+	"strings"
+	"unicode"
 
 	"github.com/ettle/strcase"
 	generator_config "github.com/henriqueleite42/anvil/generators/go-project/config"
 	"github.com/henriqueleite42/anvil/generators/go-project/internal/templates"
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
+
+func pathToPascal(path string) string {
+	parsedURL, err := url.Parse(path)
+	if err != nil {
+		panic(err)
+	}
+
+	pathParts := strings.Split(parsedURL.Path, "/")
+
+	pathPascal := ""
+
+	for _, part := range pathParts {
+		if part == "" {
+			continue
+		}
+
+		runes := []rune(strings.ToLower(part))
+		runes[0] = unicode.ToUpper(runes[0])
+		pathPascal += string(runes)
+	}
+
+	return pathPascal
+}
 
 func (self *Parser) resolveHttpDelivery(
 	dlv *schemas.DeliveryHttpRoute,
@@ -24,17 +50,19 @@ func (self *Parser) resolveHttpDelivery(
 		self.schema.Usecases.Usecases[dlv.Domain].Methods.Methods == nil {
 		return nil
 	}
-	method, ok := self.schema.Usecases.Usecases[dlv.Domain].Methods.Methods[dlv.UsecaseMethodHash]
+	_, ok := self.schema.Usecases.Usecases[dlv.Domain].Methods.Methods[dlv.UsecaseMethodHash]
 	if !ok {
 		return fmt.Errorf("usecase method \"%s\" not found", dlv.UsecaseMethodHash)
 	}
+
+	pathPascal := pathToPascal(dlv.Path)
 
 	self.httpDeliveries[dlv.Domain].Methods = append(self.httpDeliveries[dlv.Domain].Methods, &templates.TemplHttpMethodDelivery{
 		DomainPascal:    dlv.Domain,
 		DomainCamel:     strcase.ToCamel(dlv.Domain),
 		DomainSnake:     strcase.ToSnake(dlv.Domain),
-		RouteNamePascal: method.Name,
-		RouteNameSnake:  strcase.ToSnake(method.Name),
+		RouteNamePascal: pathPascal,
+		RouteNameSnake:  strcase.ToSnake(pathPascal),
 		Order:           dlv.Order,
 	})
 
