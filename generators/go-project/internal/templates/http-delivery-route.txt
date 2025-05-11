@@ -7,7 +7,7 @@ func (self *{{ .DomainCamel }}Controller) {{ .RouteNamePascal }}(w http.Response
 
 	logger := self.logger.With().
 		Str("dmn", "Account").
-		Str("mtd", "GetProfileByHandle").
+		Str("mtd", "{{ .RouteNamePascal }}").
 		Str("reqId", reqId).
 		Logger()
 

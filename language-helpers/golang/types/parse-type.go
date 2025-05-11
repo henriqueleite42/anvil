@@ -157,15 +157,26 @@ func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
 				Type: propType,
 			}
 
-			if !childType.Optional &&
-				!slices.Contains(childType.Validate, "required") &&
-				// Only applies it to pointer types, because when you use the "required"
-				// tag on "go-validator", it only checks if the value is != than it's zero
-				// value, what makes booleans fail if false and numbers fail if 0,
-				// what is not the expected intuitive behavior of "required" (it should
-				// be checking if the value was received, and not it's contents)
-				IsTypePointer(childType) {
-				childType.Validate = append(childType.Validate, "required")
+			// Very complicated and counterintuitive, we need to do this.
+			// Learn more in:
+			// https://pkg.go.dev/github.com/go-playground/validator/v10#hdr-Omit_Empty
+			// https://pkg.go.dev/github.com/go-playground/validator/v10#hdr-Required
+			if childType.Optional {
+				if !slices.Contains(childType.Validate, "omitempty") {
+					// Needs to be the first thing on the slice
+					childType.Validate = append([]string{"omitempty"}, childType.Validate...)
+				}
+			} else {
+				if !slices.Contains(childType.Validate, "required") &&
+					// Only applies it to pointer types, because when you use the "required"
+					// tag on "go-playground/validator", it only checks if the value is != than it's zero
+					// value, what makes booleans fail if false and numbers fail if 0,
+					// what is not the expected intuitive behavior of "required" (it should
+					// be checking if the value was received, and not it's contents)
+					IsTypePointer(childType) {
+					// Needs to be the first thing on the slice
+					childType.Validate = append([]string{"required"}, childType.Validate...)
+				}
 			}
 
 			if len(childType.Validate) > 0 {
