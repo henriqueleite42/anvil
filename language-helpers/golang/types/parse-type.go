@@ -173,7 +173,7 @@ func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
 					// value, what makes booleans fail if false and numbers fail if 0,
 					// what is not the expected intuitive behavior of "required" (it should
 					// be checking if the value was received, and not it's contents)
-					IsTypePointer(childType) {
+					!IsTypeBool(childType) {
 					// Needs to be the first thing on the slice
 					childType.Validate = append([]string{"required"}, childType.Validate...)
 				}

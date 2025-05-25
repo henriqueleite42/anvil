@@ -1,4 +1,4 @@
-package queue
+package queue_delivery
 
 import (
 	"context"
@@ -26,7 +26,7 @@ type queueDelivery struct {
 type NewQueueDeliveryInput struct {
 	Logger       		 *zerolog.Logger
 	MessagingAdapter adapters.Messaging
-	SecretsAdapter 	 *adapters.Messaging
+	SecretsAdapter 	 *adapters.Secrets
 }
 
 func (self *queueDelivery) Name() string {
@@ -55,5 +55,6 @@ func NewQueueDelivery(i *NewQueueDeliveryInput) delivery.Delivery {
 		wg:               &wg,
 		logger:           i.Logger,
 		messagingAdapter: i.MessagingAdapter,
+		secretsAdapter:   i.SecretsAdapter,
 	}
 }
