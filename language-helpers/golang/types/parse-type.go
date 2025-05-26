@@ -189,7 +189,7 @@ func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
 				}
 
 				if len(childType.Transform) > 0 {
-					prop.Tags = append(prop.Tags, fmt.Sprintf("transform:\"%s\"", strings.Join(childType.Transform, ",")))
+					prop.Tags = append(prop.Tags, fmt.Sprintf("mod:\"%s\"", strings.Join(childType.Transform, ",")))
 				}
 
 				if childType.DbName != nil {
