@@ -173,22 +173,28 @@ func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
 					// value, what makes booleans fail if false and numbers fail if 0,
 					// what is not the expected intuitive behavior of "required" (it should
 					// be checking if the value was received, and not it's contents)
-					IsTypePointer(childType) {
+					!IsTypeBool(childType) {
 					// Needs to be the first thing on the slice
 					childType.Validate = append([]string{"required"}, childType.Validate...)
 				}
 			}
 
-			if len(childType.Validate) > 0 {
+			if len(childType.Validate) > 0 || len(childType.Transform) > 0 || childType.DbName != nil {
 				if prop.Tags == nil {
 					prop.Tags = []string{}
 				}
 
-				prop.Tags = append(prop.Tags, fmt.Sprintf("validate:\"%s\"", strings.Join(childType.Validate, ",")))
-			}
+				if len(childType.Validate) > 0 {
+					prop.Tags = append(prop.Tags, fmt.Sprintf("validate:\"%s\"", strings.Join(childType.Validate, ",")))
+				}
 
-			if childType.DbName != nil {
-				prop.Tags = append(prop.Tags, fmt.Sprintf("db:\"%s\"", *childType.DbName))
+				if len(childType.Transform) > 0 {
+					prop.Tags = append(prop.Tags, fmt.Sprintf("mod:\"%s\"", strings.Join(childType.Transform, ",")))
+				}
+
+				if childType.DbName != nil {
+					prop.Tags = append(prop.Tags, fmt.Sprintf("db:\"%s\"", *childType.DbName))
+				}
 			}
 
 			props[k] = prop

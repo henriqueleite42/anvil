@@ -70,6 +70,13 @@
 						"type": "string"
 					}
 				},
+				"Transform": {
+					"type": "array",
+					"description": "Array of transformation to be executed in the field. When the transform will be executed depends on the generator, but we advise to run them on the Delivery only. They can be in any format that your generator accepts.",
+					"items": {
+						"type": "string"
+					}
+				},
 				"AutoIncrement": {
 					"type": "boolean",
 					"description": "Only has effect if in Entities. Tells that the column should be auto increment."
@@ -859,6 +866,10 @@
 									"StatusCode": {
 										"type": "integer",
 										"description": "Response http status code. Default is `200`."
+									},
+									"ZipRes": {
+										"type": "boolean",
+										"description": "Flag to tell if the response will be zipped or not."
 									},
 									"Method": {
 										"type": "string",

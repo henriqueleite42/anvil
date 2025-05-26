@@ -14,3 +14,7 @@ func IsTypePointer(t *schemas.Type) bool {
 
 	return false
 }
+
+func IsTypeBool(t *schemas.Type) bool {
+	return t.Type == schemas.TypeType_Bool
+}

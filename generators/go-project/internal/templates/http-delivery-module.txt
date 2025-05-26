@@ -16,6 +16,7 @@ type {{ .DomainCamel }}Controller struct {
 }
 
 type Add{{ .DomainPascal }}ControllerInput struct {
+	Mux    *http.ServeMux
 	Logger *zerolog.Logger
 
 	Validator adapters.Validator
@@ -33,5 +34,5 @@ func Add{{ .DomainPascal }}Controller(i *Add{{ .DomainPascal }}ControllerInput) 
 	}
 
 	// Add routes here. Ex:
-	// http.HandleFunc("/", self.Handler)
+	// i.Mux.HandleFunc("/", {{ .DomainCamel }}Controller.Handler)
 }

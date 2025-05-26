@@ -12,6 +12,16 @@ import (
 	"github.com/henriqueleite42/anvil/language-helpers/golang/schemas"
 )
 
+func sanitizeAlphanumericAndDash(s string) string {
+	result := make([]rune, 0, len(s))
+	for _, r := range s {
+		if unicode.IsLetter(r) || unicode.IsDigit(r) || r == '-' {
+			result = append(result, r)
+		}
+	}
+	return string(result)
+}
+
 func pathToPascal(path string) string {
 	parsedURL, err := url.Parse(path)
 	if err != nil {
@@ -27,9 +37,9 @@ func pathToPascal(path string) string {
 			continue
 		}
 
-		runes := []rune(strings.ToLower(part))
-		runes[0] = unicode.ToUpper(runes[0])
-		pathPascal += string(runes)
+		sanitizedString := sanitizeAlphanumericAndDash(part)
+
+		pathPascal += strcase.ToPascal(sanitizedString)
 	}
 
 	return pathPascal
@@ -37,7 +47,7 @@ func pathToPascal(path string) string {
 
 func (self *Parser) resolveHttpDelivery(
 	dlv *schemas.DeliveryHttpRoute,
-	config *generator_config.GeneratorConfig,
+	_ *generator_config.GeneratorConfig,
 ) error {
 	if self.schema.Usecases == nil ||
 		self.schema.Usecases.Usecases == nil {

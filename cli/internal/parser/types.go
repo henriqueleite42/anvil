@@ -114,6 +114,24 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 		validate = validateArr
 	}
 
+	var transform []string = nil
+	transformAny, ok := vMap["Transform"]
+	if ok {
+		transformArrAny, ok := transformAny.([]any)
+		if !ok {
+			return "", fmt.Errorf("fail to parse \"%s.%s.Transform\" to `[]any`", i.path, i.k)
+		}
+		transformArr := []string{}
+		for kk, vv := range transformArrAny {
+			vString, ok := vv.(string)
+			if !ok {
+				return "", fmt.Errorf("fail to parse \"%s.%s.Transform.%d\" to `string`", i.path, i.k, kk)
+			}
+			transformArr = append(transformArr, vString)
+		}
+		transform = transformArr
+	}
+
 	var autoIncrement bool
 	autoIncrementAny, ok := vMap["AutoIncrement"]
 	if ok {
@@ -278,6 +296,7 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 		Optional:        optional,
 		Format:          format,
 		Validate:        validate,
+		Transform:       transform,
 		AutoIncrement:   autoIncrement,
 		Default:         defaultV,
 		Type:            typeType,

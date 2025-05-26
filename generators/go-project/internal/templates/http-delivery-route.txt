@@ -6,7 +6,7 @@ func (self *{{ .DomainCamel }}Controller) {{ .RouteNamePascal }}(w http.Response
 	reqId := self.idAdapter.GenReqId()
 
 	logger := self.logger.With().
-		Str("dmn", "Account").
+		Str("dmn", "{{ .DomainPascal }}").
 		Str("mtd", "{{ .RouteNamePascal }}").
 		Str("reqId", reqId).
 		Logger()
