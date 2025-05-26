@@ -179,16 +179,22 @@ func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
 				}
 			}
 
-			if len(childType.Validate) > 0 {
+			if len(childType.Validate) > 0 || len(childType.Transform) > 0 || childType.DbName != nil {
 				if prop.Tags == nil {
 					prop.Tags = []string{}
 				}
 
-				prop.Tags = append(prop.Tags, fmt.Sprintf("validate:\"%s\"", strings.Join(childType.Validate, ",")))
-			}
+				if len(childType.Validate) > 0 {
+					prop.Tags = append(prop.Tags, fmt.Sprintf("validate:\"%s\"", strings.Join(childType.Validate, ",")))
+				}
 
-			if childType.DbName != nil {
-				prop.Tags = append(prop.Tags, fmt.Sprintf("db:\"%s\"", *childType.DbName))
+				if len(childType.Transform) > 0 {
+					prop.Tags = append(prop.Tags, fmt.Sprintf("transform:\"%s\"", strings.Join(childType.Transform, ",")))
+				}
+
+				if childType.DbName != nil {
+					prop.Tags = append(prop.Tags, fmt.Sprintf("db:\"%s\"", *childType.DbName))
+				}
 			}
 
 			props[k] = prop

@@ -77,6 +77,7 @@ type Type struct {
 	Optional        bool                `yaml:"Optional"`
 	Format          *string             `yaml:"Format,omitempty" json:"Format,omitempty"`
 	Validate        []string            `yaml:"Validate,omitempty" json:"Validate,omitempty"`
+	Transform       []string            `yaml:"Transform,omitempty" json:"Transform,omitempty"`
 	AutoIncrement   bool                `yaml:"AutoIncrement"`
 	Default         *string             `yaml:"Default,omitempty" json:"Default,omitempty"`
 	Type            TypeType            `yaml:"Type"`
@@ -315,6 +316,7 @@ type DeliveryHttpRoute struct {
 	ReqHeadersTypeHash *string                              `yaml:"ReqHeadersTypesHashes,omitempty" json:"ReqHeadersTypesHashes,omitempty"`
 	ResHeadersTypeHash *string                              `yaml:"ResHeadersTypesHashes,omitempty" json:"ResHeadersTypesHashes,omitempty"`
 	Auth               *string                              `yaml:"Auth,omitempty" json:"Auth,omitempty"`
+	ZipRes             *bool                                `yaml:"ZipRes,omitempty" json:"ZipRes,omitempty"`
 	Examples           map[string]*DeliveryHttpRouteExample `yaml:"Examples,omitempty" json:"Examples,omitempty"`
 }
 
