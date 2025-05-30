@@ -106,6 +106,8 @@ type TemplType struct {
 }
 
 type TemplInput struct {
+	ProjectName string
+
 	DomainPascal                string
 	DomainCamel                 string
 	DomainSnake                 string

@@ -121,6 +121,7 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 		curDomain := scm.Domain
 
 		templInput := &templates.TemplInput{
+			ProjectName:                 config.ProjectName,
 			DomainPascal:                curDomain,
 			DomainSnake:                 strcase.ToSnake(curDomain),
 			DomainCamel:                 strcase.ToCamel(curDomain),
@@ -278,6 +279,7 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 				hasHttpDelivery = true
 				domainHasHttpDelivery = true
 
+				typeParser.ImportsHttpDelivery[curDomain].AddImport("net/http", nil)
 				typeParser.ImportsHttpDelivery[curDomain].AddImport("github.com/rs/zerolog", nil)
 				typeParser.ImportsHttpDelivery[curDomain].AddImport(config.ProjectName+"/internal/adapters", nil)
 				usecaseAlias := templInput.DomainSnake + "_usecase"
@@ -502,9 +504,8 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 		files = append(
 			files,
 			&File{
-				Name:      "internal/adapters/validator.go",
-				Content:   templates.ValidatorTempl,
-				Overwrite: true,
+				Name:    "internal/adapters/validator.go",
+				Content: templates.ValidatorTempl,
 			},
 			&File{
 				Name:    "internal/adapters/go-validator/go-validator.go",

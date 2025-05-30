@@ -20,7 +20,7 @@ func resolveEntities(schema *schemas.AnvpSchema) ([]*templates.HclTemplInputEnti
 		for _, vv := range v.Columns {
 			cType, ok := schema.Types.Types[vv.TypeHash]
 			if !ok {
-				return nil, fmt.Errorf("type \"%s\" not found", vv.TypeHash)
+				return nil, fmt.Errorf("[entity columns] type \"%s\" not found", vv.TypeHash)
 			}
 			if cType.DbName == nil {
 				return nil, fmt.Errorf("type \"%s\" must have \"DbName\"", cType.Name)
@@ -74,7 +74,7 @@ func resolveEntities(schema *schemas.AnvpSchema) ([]*templates.HclTemplInputEnti
 			}
 			cType, ok := schema.Types.Types[column.TypeHash]
 			if !ok {
-				return nil, fmt.Errorf("type \"%s\" not found", column.TypeHash)
+				return nil, fmt.Errorf("[entity primary key] type \"%s\" not found", column.TypeHash)
 			}
 			if cType.DbName == nil {
 				return nil, fmt.Errorf("type \"%s\" must have \"DbName\"", cType.Name)
@@ -97,7 +97,7 @@ func resolveEntities(schema *schemas.AnvpSchema) ([]*templates.HclTemplInputEnti
 				}
 				cType, ok := schema.Types.Types[column.TypeHash]
 				if !ok {
-					return nil, fmt.Errorf("type \"%s\" not found", column.TypeHash)
+					return nil, fmt.Errorf("[entity indexes] type \"%s\" not found", column.TypeHash)
 				}
 				if cType.DbName == nil {
 					return nil, fmt.Errorf("type \"%s\" must have \"DbName\"", cType.Name)
@@ -130,7 +130,7 @@ func resolveEntities(schema *schemas.AnvpSchema) ([]*templates.HclTemplInputEnti
 				}
 				cType, ok := schema.Types.Types[column.TypeHash]
 				if !ok {
-					return nil, fmt.Errorf("type \"%s\" not found", column.TypeHash)
+					return nil, fmt.Errorf("[entities fks columns] type \"%s\" not found", column.TypeHash)
 				}
 				if cType.DbName == nil {
 					return nil, fmt.Errorf("type \"%s\" must have \"DbName\"", cType.Name)
@@ -145,7 +145,7 @@ func resolveEntities(schema *schemas.AnvpSchema) ([]*templates.HclTemplInputEnti
 				}
 				cType, ok := schema.Types.Types[column.TypeHash]
 				if !ok {
-					return nil, fmt.Errorf("type \"%s\" not found", column.TypeHash)
+					return nil, fmt.Errorf("[entities fks ref columns] type \"%s\" not found", column.TypeHash)
 				}
 				if cType.DbName == nil {
 					return nil, fmt.Errorf("type \"%s\" must have \"DbName\"", cType.Name)

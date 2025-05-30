@@ -96,7 +96,7 @@ func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
 	if t.Type == schemas.TypeType_List {
 		childType, ok := self.schema.Types.Types[t.ChildTypes[0].TypeHash]
 		if !ok {
-			return nil, fmt.Errorf("type \"%s\" not found", t.ChildTypes[0].TypeHash)
+			return nil, fmt.Errorf("[types: type enum] type \"%s\" not found", t.ChildTypes[0].TypeHash)
 		}
 
 		resolvedChildType, err := self.ParseType(childType)
@@ -139,7 +139,7 @@ func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
 
 			childType, ok := self.schema.Types.Types[v.TypeHash]
 			if !ok {
-				return nil, fmt.Errorf("type \"%s\" not found", v.TypeHash)
+				return nil, fmt.Errorf("[types: type map] type \"%s\" not found", v.TypeHash)
 			}
 
 			propType, err := self.ParseType(childType)
