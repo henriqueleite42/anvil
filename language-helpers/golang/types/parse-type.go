@@ -68,6 +68,9 @@ func (self *typeParser) ParseType(t *schemas.Type) (*Type, error) {
 	if t.Type == schemas.TypeType_Bool {
 		result.GolangType = "bool"
 	}
+	if t.Type == schemas.TypeType_Bytes {
+		result.GolangType = "[]byte"
+	}
 	if t.Type == schemas.TypeType_Timestamp {
 		result.GolangType = "Time"
 		result.ModuleImport = imports.NewImport("time", nil)
