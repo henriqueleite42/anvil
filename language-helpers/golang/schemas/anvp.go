@@ -46,11 +46,13 @@ type Enum struct {
 	Domain       string `yaml:"Domain"`
 	StateHash    string `yaml:"StateHash"`
 
-	Name   string       `yaml:"Name"`
-	DbName string       `yaml:"DbName"`
-	DbType string       `yaml:"DbType"`
-	Type   EnumType     `yaml:"Type"`
-	Values []*EnumValue `yaml:"Values"`
+	Name        string       `yaml:"Name"`
+	DbName      string       `yaml:"DbName"`
+	DbType      string       `yaml:"DbType"`
+	Description *string      `yaml:"Description"`
+	Database    bool         `yaml:"Database"`
+	Type        EnumType     `yaml:"Type"`
+	Values      []*EnumValue `yaml:"Values"`
 }
 
 type Enums struct {
