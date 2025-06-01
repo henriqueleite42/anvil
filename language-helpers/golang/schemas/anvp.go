@@ -49,7 +49,7 @@ type Enum struct {
 	Name        string       `yaml:"Name"`
 	DbName      string       `yaml:"DbName"`
 	DbType      string       `yaml:"DbType"`
-	Description *string      `yaml:"Description"`
+	Description *string      `yaml:"Description,omitempty" json:"Database,omitempty"`
 	Database    bool         `yaml:"Database"`
 	Type        EnumType     `yaml:"Type"`
 	Values      []*EnumValue `yaml:"Values"`
