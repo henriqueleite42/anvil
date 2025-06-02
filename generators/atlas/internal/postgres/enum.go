@@ -14,7 +14,9 @@ func resolveEnums(schema *schemas.AnvpSchema) ([]*schemas.Enum, error) {
 	enums := make([]*schemas.Enum, 0, len(schema.Enums.Enums))
 
 	for _, v := range schema.Enums.Enums {
-		enums = append(enums, v)
+		if v.Database {
+			enums = append(enums, v)
+		}
 	}
 	sort.Slice(enums, func(i, j int) bool {
 		return enums[i].Name < enums[j].Name
