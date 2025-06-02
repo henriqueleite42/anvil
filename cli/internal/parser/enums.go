@@ -41,6 +41,26 @@ func (self *anvToAnvpParser) enums(curDomain string, file map[string]any) error 
 			return fmt.Errorf("fail to parse \"%s.%s\" to `map[string]any`", path, k)
 		}
 
+		var description *string
+		descriptionAny, ok := vMap["Description"]
+		if ok {
+			descriptionString, ok := descriptionAny.(string)
+			if !ok {
+				return fmt.Errorf("fail to parse \"%s.%s.Description\" to `string`", path, k)
+			}
+			description = &descriptionString
+		}
+
+		database := true
+		databaseAny, ok := vMap["Database"]
+		if ok {
+			databaseBoolean, ok := databaseAny.(bool)
+			if !ok {
+				return fmt.Errorf("fail to parse \"%s.%s.Database\" to `bool`", path, k)
+			}
+			database = databaseBoolean
+		}
+
 		typeAny, ok := vMap["Type"]
 		if !ok {
 			return fmt.Errorf("\"Type\" is a required property to \"%s.%s\"", path, k)
@@ -152,6 +172,8 @@ func (self *anvToAnvpParser) enums(curDomain string, file map[string]any) error 
 			DbName:       dbType,
 			DbType:       dbType,
 			RootNode:     rootNode,
+			Description:  description,
+			Database:     database,
 			Type:         schemas.EnumType(typeString),
 			Values:       values,
 		}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"log/slog"
 	"os"
@@ -72,14 +73,32 @@ func main() {
 		return
 	}
 
+	createdFilesList := []string{}
+	createdFilesCount := 0
+	notModifiedFilesCount := 0
+	errorFilesCount := 0
 	for _, v := range files {
 		err = internal.WriteFile(config.OutDir, v.Name, v.Content, v.Overwrite)
 		if err != nil {
-			if strings.Contains(err.Error(), "already exists") {
-				slog.Warn(err.Error())
+			if !strings.Contains(err.Error(), "already exists") {
+				errorFilesCount++
+				slog.Error(err.Error())
 			} else {
-				log.Fatal(err)
+				notModifiedFilesCount++
 			}
+		} else {
+			createdFilesCount++
+			createdFilesList = append(createdFilesList, v.Name)
 		}
 	}
+
+	msg := fmt.Sprintf(
+		"\nAnvil generation complete!\n\nCreated: %d\n%s\n\nNot modified: %d\n\nError: %d\n",
+		createdFilesCount,
+		strings.Join(createdFilesList, "\n"),
+		notModifiedFilesCount,
+		errorFilesCount,
+	)
+
+	slog.Info(msg)
 }

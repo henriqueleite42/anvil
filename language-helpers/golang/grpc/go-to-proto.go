@@ -261,7 +261,7 @@ func (self *goGrpcParser) goToProto(i *convertingInput) (*convertingValue, error
 
 		childType, ok := self.schema.Types.Types[t.ChildTypes[0].TypeHash]
 		if !ok {
-			return nil, fmt.Errorf("type \"%s\" not found", t.ChildTypes[0].TypeHash)
+			return nil, fmt.Errorf("[types: type list] type \"%s\" not found", t.ChildTypes[0].TypeHash)
 		}
 
 		if doestNeedConversion(childType.Type) {
@@ -340,7 +340,7 @@ func (self *goGrpcParser) goToProto(i *convertingInput) (*convertingValue, error
 		for _, v := range t.ChildTypes {
 			propType, ok := self.schema.Types.Types[v.TypeHash]
 			if !ok {
-				return nil, fmt.Errorf("type \"%s\" not found", v.TypeHash)
+				return nil, fmt.Errorf("[types: type map] type \"%s\" not found", v.TypeHash)
 			}
 
 			propNameWithPrefix := fmt.Sprintf("%s.%s", oi.VarToConvert, *v.PropName)

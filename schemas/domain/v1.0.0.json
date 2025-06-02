@@ -339,6 +339,10 @@
 								"Int"
 							]
 						},
+						"Database": {
+							"type": "boolean",
+							"description": "Flags if the enum should be created on the database or not. By default, it will be included."
+						},
 						"Values": {
 							"type": "object",
 							"description": "The key value pair of the enum, with additional config if necessary",

@@ -5,7 +5,7 @@ go 1.22.4
 require (
 	github.com/ettle/strcase v0.2.0
 	github.com/go-playground/validator/v10 v10.22.1
-	github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20250526122451-8966a61ab80f
+	github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20250601205934-668f44b4ca69
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 	gopkg.in/yaml.v3 v3.0.1

@@ -1,17 +1,36 @@
 package {{ .DomainSnake }}_repository
 
 import (
+	"context"
 	"errors"
 
+	"github.com/jackc/pgx/v5/pgxpool"
+	"{{ .ProjectName }}/internal/repository/queries"
 	"github.com/rs/zerolog"
 )
 
 type {{ .DomainCamel }}RepositoryImplementation struct {
-	logger *zerolog.Logger
+	logger  *zerolog.Logger
+	queries *queries.Queries
 }
 
 type New{{ .DomainPascal }}RepositoryInput struct {
-	Logger *zerolog.Logger
+	Logger  *zerolog.Logger
+	Queries *queries.Queries
+}
+
+// Applies the transaction if it's needed
+func (self *{{ .DomainCamel }}RepositoryImplementation) getSlcQueries(ctx context.Context) (*queries.Queries, error) {
+	txAny := ctx.Value("tx")
+	if txAny == nil {
+		return self.queries, nil
+	}
+	tx, ok := txAny.(*pgxpool.Tx)
+	if !ok {
+		return self.queries, nil
+	}
+
+	return self.queries.WithTx(tx), nil
 }
 
 func New{{ .DomainPascal }}Repository(i *New{{ .DomainPascal }}RepositoryInput) ({{ .DomainPascal }}Repository, error) {
@@ -20,6 +39,7 @@ func New{{ .DomainPascal }}Repository(i *New{{ .DomainPascal }}RepositoryInput) 
 	}
 
 	return &{{ .DomainCamel }}RepositoryImplementation{
-		logger: i.Logger,
+		logger:  i.Logger,
+		queries: i.Queries,
 	}, nil
 }
