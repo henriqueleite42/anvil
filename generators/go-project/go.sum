@@ -1,7 +1,5 @@
 github.com/ettle/strcase v0.2.0 h1:fGNiVF21fHXpX1niBgk0aROov1LagYsOwV/xqKDKR/Q=
 github.com/ettle/strcase v0.2.0/go.mod h1:DajmHElDSaX76ITe3/VHVyMin4LWSJN5Z909Wp+ED1A=
-github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20250526122451-8966a61ab80f h1:qoCCRy9StE3hdsBSBvdHTHpS80LNSm+BsWuyPPZRsvo=
-github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20250526122451-8966a61ab80f/go.mod h1:1aCAFI8VjcMPFPPx55qS1gV768EL24uu7veUx1SsPpE=
 github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20250531153701-784be4cbe9dd h1:RhgWCHIgjiU9+PRn9BQ13FqgmUG76NTIHhZheOiWxkM=
 github.com/henriqueleite42/anvil/language-helpers/golang v0.0.0-20250531153701-784be4cbe9dd/go.mod h1:1aCAFI8VjcMPFPPx55qS1gV768EL24uu7veUx1SsPpE=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
