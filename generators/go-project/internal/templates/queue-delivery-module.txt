@@ -10,10 +10,17 @@ import (
 
 {{ range .MethodsQueueDelivery }}
 func (self *queueDelivery) {{ .DomainPascal }}{{ .MethodName }}() {
+	logger := self.logger.With().
+		Str("dmn", "{{ .DomainPascal }}").
+		Str("mtd", "{{ .MethodName }}").
+		Logger()
+
+	logger.Trace().Msg("create queueCtx")
+	queueCtx := context.WithValue(self.ctx, "logger", logger)
+
 	go func() {
-		self.messagingAdapter.CreateListener(&adapters.CreateListenerInput{
+		self.messagingAdapter.CreateListener(queueCtx, &adapters.CreateListenerInput{
 			ListenerId: self.secretsAdapter.{{ .DomainPascal }}{{ .QueueIdPascal  }}QueueId,
-			Ctx:        self.ctx,
 			Wg:         self.wg,
 			Fn: func(i []adapters.JsonEvent) {
 				var events []*{{ .InputName }}
@@ -21,15 +28,14 @@ func (self *queueDelivery) {{ .DomainPascal }}{{ .MethodName }}() {
 					event := &{{ .InputName }}{}
 					err := json.Unmarshal(v, &event)
 					if err != nil {
-						self.logger.Error().Err(err).Msg(err.Error())
+						logger.Error().Err(err).Msg(err.Error())
 						continue
 					}
 
 					events = append(events, event)
 				}
 
-				self.logger.Debug().
-					Str("func", "{{ .MethodName }}").
+				logger.Debug().
 					Any("events", events).
 					Msg("processing events")
 

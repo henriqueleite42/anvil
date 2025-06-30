@@ -308,6 +308,7 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 					}
 				}
 
+				typeParser.ImportsQueueDelivery[curDomain].AddImport("context", nil)
 				typeParser.ImportsQueueDelivery[curDomain].AddImport("encoding/json", nil)
 				typeParser.ImportsQueueDelivery[curDomain].AddImport(config.ProjectName+"/internal/adapters", nil)
 
@@ -487,9 +488,8 @@ func Parse(schema *schemas.AnvpSchema, config *generator_config.GeneratorConfig)
 			files = append(
 				files,
 				&File{
-					Name:      fmt.Sprintf("internal/delivery/queue/%s.go", templInput.DomainSnake),
-					Content:   queueModule,
-					Overwrite: true,
+					Name:    fmt.Sprintf("internal/delivery/queue/%s.go", templInput.DomainSnake),
+					Content: queueModule,
 				},
 			)
 		}
