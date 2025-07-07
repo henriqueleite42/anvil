@@ -64,19 +64,20 @@ func WriteAnvpFile(config *schemas.Config, schema *schemas.AnvpSchema) (string, 
 	if err != nil {
 		return "", err
 	}
-	timestampedFilePath, err := GetTimestampedAnvpFilePath(config, true)
-	if err != nil {
-		return "", err
-	}
-
 	err = os.WriteFile(filePath, yamlData, 0644)
 	if err != nil {
 		return "", err
 	}
-	err = os.WriteFile(timestampedFilePath, yamlData, 0644)
-	if err != nil {
-		return "", err
-	}
+
+	// TODO Disabled for now, see if it's really necessary
+	// timestampedFilePath, err := GetTimestampedAnvpFilePath(config, true)
+	// if err != nil {
+	// 	return "", err
+	// }
+	// err = os.WriteFile(timestampedFilePath, yamlData, 0644)
+	// if err != nil {
+	// 	return "", err
+	// }
 
 	return filePath, nil
 }
