@@ -28,7 +28,7 @@ func (self *queueDelivery) {{ .DomainPascal }}{{ .MethodName }}() {
 					event := &{{ .InputName }}{}
 					err := json.Unmarshal(v, &event)
 					if err != nil {
-						logger.Error().Err(err).Msg(err.Error())
+						logger.Error().Err(err).Msg("error decoding json event")
 						continue
 					}
 
