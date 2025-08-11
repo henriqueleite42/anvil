@@ -11,6 +11,7 @@ type anvToAnvpParser struct {
 
 type resolveInput struct {
 	namePrefix string // Internal use. Correctly parse child map types with the prefix of their parent.
+	nameSuffix string // Internal use. Add suffix to certain types, like events
 
 	curDomain string
 	path      string // Original path

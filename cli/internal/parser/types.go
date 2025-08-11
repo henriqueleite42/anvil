@@ -169,11 +169,12 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 		for kk, vv := range propertiesMap {
 			typeHash, err := self.resolveType(&resolveInput{
 				curDomain:  i.curDomain,
-				namePrefix: i.namePrefix + i.k,
 				path:       fmt.Sprintf("%s.%s.Properties", i.path, i.k),
 				ref:        ref,
 				k:          kk,
 				v:          vv,
+				namePrefix: i.namePrefix + i.k,
+				// nameSuffix: "", nameSuffix must not be passed to the children, since it's only to the main type
 			})
 			if err != nil {
 				return "", err
@@ -204,11 +205,12 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 		kk := i.k + "Item"
 		typeHash, err := self.resolveType(&resolveInput{
 			curDomain:  i.curDomain,
-			namePrefix: i.namePrefix,
 			path:       fmt.Sprintf("%s.%s.Items", i.path, i.k),
 			ref:        ref,
 			k:          kk,
 			v:          itemsMap,
+			namePrefix: i.namePrefix,
+			// nameSuffix: "", nameSuffix must not be passed to the children, since it's only to the main type
 		})
 		if err != nil {
 			return "", err
@@ -284,6 +286,9 @@ func (self *anvToAnvpParser) resolveType(i *resolveInput) (string, error) {
 	name := i.k
 	if typeType == schemas.TypeType_Map {
 		name = i.namePrefix + i.k
+	}
+	if i.nameSuffix != "" {
+		name = name + i.nameSuffix
 	}
 
 	schemaTypes := &schemas.Type{
