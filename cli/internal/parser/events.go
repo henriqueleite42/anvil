@@ -64,11 +64,12 @@ func (self *anvToAnvpParser) resolveEvent(i *resolveInput) (string, error) {
 		return "", fmt.Errorf("\"Type\" is a required property to \"%s.%s\"", i.path, i.k)
 	}
 	eventTypeHash, err := self.resolveType(&resolveInput{
-		curDomain: i.curDomain,
-		path:      i.path,
-		ref:       "Events",
-		k:         i.k,
-		v:         eventTypeAny,
+		curDomain:  i.curDomain,
+		path:       i.path,
+		ref:        "Events",
+		k:          i.k,
+		v:          eventTypeAny,
+		nameSuffix: "Event",
 	})
 	if err != nil {
 		return "", err
@@ -83,7 +84,7 @@ func (self *anvToAnvpParser) resolveEvent(i *resolveInput) (string, error) {
 		Ref:          ref,
 		OriginalPath: fmt.Sprintf("%s.%s", i.path, i.k),
 		Domain:       i.curDomain,
-		Name:         i.k,
+		Name:         fmt.Sprintf("%sEvent", i.k),
 		RootNode:     rootNode,
 		Formats:      formats,
 		TypeHash:     eventTypeHash,
