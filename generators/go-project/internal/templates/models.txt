@@ -16,6 +16,12 @@ const (
 	{{ $enum.GolangName }}_{{ $enumVal.Name }}{{ $enumVal.Spacing }} {{ $enum.GolangName }} = {{ if eq $enum.GolangType "string" }}"{{ $enumVal.Value }}"{{ else }}{{ $enumVal.Value }}{{ end }}
 {{- end }}
 )
+
+var {{ $enum.GolangName }}Values = []{{ $enum.GolangType }}{
+{{- range $enumVal := $enum.Values }}
+	{{ if eq $enum.GolangType "string" }}"{{ $enumVal.Value }}"{{ else }}{{ $enumVal.Value }}{{ end }},
+{{- end }}
+}
 {{ end -}}
 
 {{ range $type := .Types }}
